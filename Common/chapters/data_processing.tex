@@ -98,7 +98,7 @@ Some datasets use a combination of RAW and MHD files. The latter contain metainf
 
 \section{Conversion}
 
-Medical data is often represented over 16 bits. However, exporting images to PNG require 8-bit images. To transpose a 16-bit image to an 8-bit one, the procedure described by \ref{alg:16_to_8_bits_conversion} was applied.
+Medical data is often represented over 16 bits. However, exporting images to PNG require 8-bit images. To transpose a 16-bit image to an 8-bit one, the procedure described by algorithm \ref{alg:16_to_8_bits_conversion} was applied.
 
 \begin{algorithm}
     \caption{16 to 8 bits conversion}
@@ -117,7 +117,12 @@ Medical data is often represented over 16 bits. However, exporting images to PNG
 \end{algorithm}
 
 
-\section{PROSTATEx: From DICOM to NumPy arrays}
+\section{Processing flow}
+
+Schema Datasets -> xxx\_preprocessing.py -> create\_dataset.py -> Train/Val
+
+
+\subsection{PROSTATEx: From DICOM to NumPy arrays}
 
 The PROSTATEx dataset comes with two CSV files for the training set. The first one, \textit{ProstateX-Findings-Train.csv}, lists all findings with their clinical significance. Multiple findings can be associated with the same patient (ProxID). The second one, \textit{ProstateX-Images-Train.csv}, gives information about where to find the right DICOM file for each patient and each finding. Important labels are "ProxID" (patient ID), "fid" (finding ID, from 1 to $\infty$), "ClinSig" (clinical significance, TRUE or FALSE), "DCMSerNumber" (digit before the dash in the folder name containing DICOM files) and "ijk" (position of the lesion: slice number $k$ at coordinates $(i,j)$, $i,j,k \in [0,\infty]$). Both CSV files are complementary to each other. Algorithm \ref{alg:PROSTATEx_preprocessing} describes the steps involved in converting PROSTATEx's DICOM files to NumPy arrays. 
 
@@ -156,7 +161,7 @@ The PROSTATEx dataset comes with two CSV files for the training set. The first o
 
 
 
-\section{Lung CT Challenge - From DICOM to NumPy arrays}
+\subsection{Lung CT Challenge - From DICOM to NumPy arrays}
 
 Lung CT Challenge is composed of two different subdatasets: one is considered as a calibration set (10 patients) and the other as a test set (60 patients). Since labels were provided for both sets and the amount of data is fairly low, they were merged and used as a training set. 
 
@@ -173,9 +178,9 @@ Contrary to PROSTATEx, more than two labels were used for this dataset. Both "ma
         		\State $csv\_test \gets read\_CSV(test\_CSV)$ \Comment{TestSet.csv}
             \State $csv\_concatenated \gets concat(csv\_training, csv\_test)$\Comment{Both CSV files contain similar information about different patients.}\\
             \For{$row$ in $csv\_concatenated$}
-            		\State $patient\_id \gets row["Scan Number"]$
-            		\State $slice\_number \gets row["Nodule Center Image"]$ \Comment{Value in $[1,\infty]$}
-            		\State $finding\_id \gets row["Nodule Number"]$
+            		\State $patient\_id \gets row["Scan\ Number"]$
+            		\State $slice\_number \gets row["Nodule\ Center\ Image"]$ \Comment{Value in $[1,\infty]$}
+            		\State $finding\_id \gets row["Nodule\ Number"]$
             		\State $clinical\_significance \gets row["Diagnosis"]$\\
             		\If{$clinical\_significance$ == $"malignant"$ or $"Primary\ lung\ cancer"$}
             			\State{$clinical\_significance \gets True$}
@@ -200,7 +205,7 @@ Contrary to PROSTATEx, more than two labels were used for this dataset. Both "ma
 \end{algorithm}
 
 
-\section{NumPy arrays to PNG files}
+\subsection{NumPy arrays to PNG files}
 Exporting to NumPy arrays instead of image files directly has multiple advantages. First of all, converting medical files to NumPy arrays or PNG files takes more time than converting NumPy arrays to image files. Reason for that is that the former requires a lot of operation as well as pixel normalization, whereas the latter is a mere conversion of one format to the other. This makes data more reusable. Then, it facilitates the debugging process by separating the conversion from medical files to PNG files into two different steps. Finally, the same processing script can be used to convert NumPy arrays from any dataset to PNG images, which eases operations such as generating different training-validation splits, augmenting data, etc.
 
 \begin{algorithm}
