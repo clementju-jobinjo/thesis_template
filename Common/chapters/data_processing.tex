@@ -1,0 +1,258 @@
+% !TEX root = ../main.tex
+
+\chapter{Data processing}
+\label{ch:data_processing}
+
+\section{DICOM file format}
+
+\subsection{Origin}
+
+The acronym DICOM stands for Digital Imaging and Communications in Medicine. Before the 1980’s, images resulting from CT scans and MRIs were only decodable by machine manufacturers, while the medical community needed to export and share them for other tasks. For that reason, the ACR (American College of Radiology) and the NEMA (National Electrical Manufacturers Association) created a committee to build a standard. After two iterations with other names, DICOM was created in 1993. It standardized the representation of medical images and their transmission since it provided a network protocol built on top of TCP/IP.
+
+
+\subsection{Data format}
+
+DICOM files can be viewed as containers of attributes, also called tags. The values of the pixels themselves are stored under the "Pixel Data" tag. Every single DICOM file usually represents a 2-dimensional image, which will form a 3-dimensional volume when put all together. 
+
+Other useful information such as the patient name and ID is directly stored within the DICOM files. This approach aims at linking each image to a specific person and event in order not to mix them up. Each DICOM file can be seen as part of a bigger dataset. 
+
+
+\subsection{Processing images}
+
+When manipulating DICOM files, multiple details must be taken into account. 
+
+\subsubsection{Order}
+First of all, the name of the files within datasets is a 6-digit number, from 000000 to the number of images minus one. However, this order doesn’t match the real order of the images. In fact, the correct order is given by the "Instance Number" tags contained in the various files. Therefore, converted images must be sorted by instance number. 
+
+\subsubsection{Data manipulation}
+\label{sec:data_manipulation}
+CT and MRI machines, as well as monitors, differ from one manufacturer to the other and even from one model to the other. DICOM takes this problematic into account by providing specific tags that allow to display the exact same representation of the data, no matter the hardware used. Otherwise, physicians may struggle to detect anomalies because of color and exposition-related variations. 
+Therefore, before displaying or converting an image to any format (such as png), pixel data must be normalized. 
+
+The procedure depends on the tags "Window Width" and "Window Center" (one always come with the other). These are used to represent a range of values corresponding to the pixel values in the data. For instance, a window center of 0 and a window width of 200 imply pixel values between -100 and 100. 
+
+If they are missing, a simple conversion is sufficient. The parameters to use to convert the data are given by two tags: 
+\begin{itemize}
+	\item Bits allocated: the number of bits used to represent a single pixel (value: 1 or a multiple of 8)
+	\item Samples per pixel: the number of channels for each pixel
+
+\end{itemize}
+
+\noindent Examples: 
+\begin{itemize}
+\item 1 bit, 1 sample: black and white
+\item 8 bits, 1 sample: grayscale
+\item 8 bits, 3 samples: RGB
+\item 16 bits, 1 sample: grayscale
+
+\end{itemize} 
+
+\noindent If they are included in the DICOM header, a linear transformation must be done to convert the stored representation of the pixels to the correct visualizable one. To do this, two steps are required: 
+
+\begin{enumerate}
+	\item \textbf{Apply the Hounsfield correction}\newline
+	Hounsfield Units (HU) are used in CT images it is a measure of radio-density, calibrated to distilled water and free air. Provided that the rescale slope and the rescale intercept are included in the DICOM header, the correction is applied thanks to the following formula:
+\begin{equation}
+	HU = m * P + b
+\end{equation}
+	where~$m$ is the rescale slope,~$P$ the pixel value, ~$b$ the rescale intercept.
+
+	\item \textbf{Apply a linear transformation}\newline
+	The result of the first operation then goes through a linear transformation based on the following conditions: 
+
+\begin{equation}\label{eq:dicom1}
+\textrm{if } (P \leq c - 0.5 - \frac{w-1}{2}) \textrm{, then }y = y_{min}
+\end{equation}
+
+\begin{equation}\label{eq:dicom2}
+\textrm{else if } (P > c - 0.5 + \frac{w-1}{2}) \textrm{, then }y = y_{max}
+\end{equation}
+
+\begin{equation}\label{eq:dicom3}
+\textrm{else } y = (\frac{P - (c - 0.5)}{w-1}) + 0.5) * (y_{max} - y_{min}) + y_{min}
+\end{equation}
+
+where~$c$ is the window center,~$w$ window width, ~$P$ the pixel input value, ~$y$ the pixel output value, ~$y_{min}$ the minimal value of the output range (usually 0), ~$y_{max}$ the maximal value of the output range (usually 255). Equations \ref{eq:dicom1}, \ref{eq:dicom2} and \ref{eq:dicom3} ensure that the pixel values are correctly distributed within the output range. 
+
+\end{enumerate}
+
+
+\section{NIfTI file format}
+
+\subsubsection{Origin}
+The Neuroimaging Informatics Technology Initiative (NIfTI) file format is the successor of the ANALYZE file format. The main problem of the latter was that it was lacking information about orientation in space. Therefore, the interpretation of stored data could be problematic and inconsistent. For instance, there was a real confusion to determine the left and right sides of brain images. Hence, the NIfTI file format was defined to overcome this major issue.
+
+
+\subsubsection{Data format}
+Unlike the ANALYZE format that used two files to store the metadata and the actual data, the NIfTI file format stores them in one single file “.nii” but keeps this split between the real data and the header for compatibility. This has the advantage to facilitate the use of the data and avoid storing the data without the meta-data. The NIfTI format can also be compressed/decompressed on-the-fly using the “deflate”  algorithm.
+
+
+\subsubsection{Overview of the header structure}
+With the goal of preserving the compatibility between the ANALYZE and the NIfTI formats, both headers have the same size of 348 bytes. “Some fields were reused, some were preserved, but ignored, and some were entirely overwritten”. Details about the different fields contained in the header can be found here: \url{https://brainder.org/2012/09/23/the-nifti-file-format/}
+
+
+\section{RAW and MHD file formats}
+
+Some datasets use a combination of RAW and MHD files. The latter contain metainformation about their corresponding RAW file(s) which contain the data. In most cases, each MHD file points to a unique RAW file whose name is the same as the MHD file name. A single RAW file can be used to represent three-dimensional data, i.e. the combination of multiple two-dimensional images. Libraries such as \mbox{SimpleITK} in Python allow to manipulate RAW images in an easy way. 
+
+
+\section{Conversion}
+
+Medical data is often represented over 16 bits. However, exporting images to PNG require 8-bit images. To transpose a 16-bit image to an 8-bit one, the procedure described by \ref{alg:16_to_8_bits_conversion} was applied.
+
+\begin{algorithm}
+    \caption{16 to 8 bits conversion}
+    \label{alg:16_to_8_bits_conversion}
+    \begin{algorithmic}[1] % The number tells where the line numbering should start
+        \Procedure{16\_to\_8\_bits\_conversion}{$pixel\_array$}
+        		\State{$Pixel_{min} \gets$ minimal pixel value in $pixel\_array$}
+        		\State{$Pixel_{max} \gets$ maximal pixel value in $pixel\_array$}
+        		\For{$pixel\_value$ in $pixel\_array$}
+        			\State $pixel\_value \gets \frac{(pixel\_value - Pixel_{min}) * 255.0}{Pixel_{max} - Pixel_{min}}$
+        		\EndFor
+        		\State Modify object type to 8 bits
+        		\State Export $pixel\_array$ to PNG
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+
+\section{PROSTATEx: From DICOM to NumPy arrays}
+
+The PROSTATEx dataset comes with two CSV files for the training set. The first one, \textit{ProstateX-Findings-Train.csv}, lists all findings with their clinical significance. Multiple findings can be associated with the same patient (ProxID). The second one, \textit{ProstateX-Images-Train.csv}, gives information about where to find the right DICOM file for each patient and each finding. Important labels are "ProxID" (patient ID), "fid" (finding ID, from 1 to $\infty$), "ClinSig" (clinical significance, TRUE or FALSE), "DCMSerNumber" (digit before the dash in the folder name containing DICOM files) and "ijk" (position of the lesion: slice number $k$ at coordinates $(i,j)$, $i,j,k \in [0,\infty]$). Both CSV files are complementary to each other. Algorithm \ref{alg:PROSTATEx_preprocessing} describes the steps involved in converting PROSTATEx's DICOM files to NumPy arrays. 
+
+\begin{algorithm}
+    \caption{PROSTATEx preprocessing}
+    \label{alg:PROSTATEx_preprocessing}
+    \begin{algorithmic}[1] % The number tells where the line numbering should start
+        \Procedure{main}{$dataset\_folder, findings\_CSV, slices\_CSV, output\_folder$}
+        		\State Create output directories: $"output\_folder/True", "output\_folder/False"$\\
+        		\State $findings \gets read\_CSV(findings\_CSV)$ \Comment{ProstateX-Findings-Train.csv}
+        		\State $slices \gets read\_CSV(slices\_CSV)$ \Comment{ProstateX-Images-Train.csv}
+            \State $meta \gets merge(findings, slices)$\Comment{Both CSV files are complementary to each other.}\\
+            \For{$row$ in $meta$}
+            		\State $patient\_id \gets row["ProxID"]$
+            		\State $finding\_id \gets row["fid"]$
+            		\State $mri\_type\_number \gets row["DCMSerNumber"]$
+            		\State $clinical\_significance \gets row["ClinSig"]$
+            		\State $img\_i, img\_j, img\_k \gets row["ijk"]$
+            		\State $slice\_number \gets img\_k + 1$ \Comment{CSV indexing in $[0,\infty]$, DICOM in $[1,\infty]$}\\
+                \For{$visit\ in\ patient\_id$'s folder}
+                		\For{$mri\_type$ in $visit$}
+                			\If {$mri\_type$ starts with "$mri\_type\_number$-"}
+                				\For{$dicom\_file$ in $mri\_type$}
+                					\If {$slice\_number == dicom\_file.InstanceNumber$}
+                						\State{$slice \gets normalize\_dicom(dicom\_file)$} \Comment{see section \ref{sec:data_manipulation}}
+                						\State{Save $slice$ in $"output\_folder/clinical\_significance"$}
+                					\EndIf
+                				\EndFor
+                			\EndIf
+            			\EndFor
+            		\EndFor
+            \EndFor
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+
+
+\section{Lung CT Challenge - From DICOM to NumPy arrays}
+
+Lung CT Challenge is composed of two different subdatasets: one is considered as a calibration set (10 patients) and the other as a test set (60 patients). Since labels were provided for both sets and the amount of data is fairly low, they were merged and used as a training set. 
+
+Regarding labelling, two Excel files, \textit{TestSet\_NoduleData\_PublicRelease\_wTruth} and \textit{CalibrationSet\_NoduleData}, contain labels for these images. In order to facilitate label managing, two CSV files were manually created: \textit{TestSet.csv} and \textit{CalibrationSet.csv}.
+Contrary to PROSTATEx, more than two labels were used for this dataset. Both "malignant" and "Primary lung cancer" were considered as positive, whereas "benign" and "Benign nodule" as negative. A third label called "Suspicious malignant nodule" appeared two times. Since the diagnosis was not clearly defined for those images, they were not treated and included in the training data in order to avoid any noise. Algorithm \ref{alg:LungCTChallenge_preprocessing} shows the various processing steps.
+
+\begin{algorithm}
+    \caption{Lung CT Challenge preprocessing}
+    \label{alg:LungCTChallenge_preprocessing}
+    \begin{algorithmic}[1] % The number tells where the line numbering should start
+        \Procedure{main}{$dataset\_folder, train\_CSV, test\_CSV, output\_folder$}
+        		\State Create output directories: $"output\_folder/True", "output\_folder/False"$\\
+        		\State $csv\_training \gets read\_CSV(train\_CSV)$ \Comment{CalibrationSet.csv}
+        		\State $csv\_test \gets read\_CSV(test\_CSV)$ \Comment{TestSet.csv}
+            \State $csv\_concatenated \gets concat(csv\_training, csv\_test)$\Comment{Both CSV files contain similar information about different patients.}\\
+            \For{$row$ in $csv\_concatenated$}
+            		\State $patient\_id \gets row["Scan Number"]$
+            		\State $slice\_number \gets row["Nodule Center Image"]$ \Comment{Value in $[1,\infty]$}
+            		\State $finding\_id \gets row["Nodule Number"]$
+            		\State $clinical\_significance \gets row["Diagnosis"]$\\
+            		\If{$clinical\_significance$ == $"malignant"$ or $"Primary\ lung\ cancer"$}
+            			\State{$clinical\_significance \gets True$}
+            		\ElsIf{$clinical\_significance$ == $"benign"$ or $"Benign\ nodule"$}
+            			\State{$clinical\_significance \gets False$}
+            		\ElsIf {$"clinical\_significance$ == $"Suspicious\ malignant\ nodule"$}
+            			\State{Continue}
+            		\EndIf\\
+                \For{$visit\ in\ patient\_id$'s folder}
+                		\For{$mri\_type$ in $visit$}
+                			\For{$dicom\_file$ in $mri\_type$}
+                				\If {$slice\_number == dicom\_file.InstanceNumber$}
+                					\State{$slice \gets normalize\_dicom(dicom\_file)$} \Comment{see section \ref{sec:data_manipulation}}
+                					\State{Save $slice$ in $"output\_folder/clinical\_significance"$}
+                				\EndIf
+                			\EndFor
+            			\EndFor
+            		\EndFor
+            \EndFor
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+
+\section{NumPy arrays to PNG files}
+Exporting to NumPy arrays instead of image files directly has multiple advantages. First of all, converting medical files to NumPy arrays or PNG files takes more time than converting NumPy arrays to image files. Reason for that is that the former requires a lot of operation as well as pixel normalization, whereas the latter is a mere conversion of one format to the other. This makes data more reusable. Then, it facilitates the debugging process by separating the conversion from medical files to PNG files into two different steps. Finally, the same processing script can be used to convert NumPy arrays from any dataset to PNG images, which eases operations such as generating different training-validation splits, augmenting data, etc.
+
+\begin{algorithm}
+    \caption{Create dataset - NumPy arrays to PNG conversion, organizing data into training and validation data}
+    \label{alg:create_dataset}
+    \begin{algorithmic}[1] % The number tells where the line numbering should start
+        \Procedure{create\_pngs}{$dataset\_folder, output\_folder, split$}
+        		\State Create output directories: $"output\_folder/[Train|Val]/[0|1]"$\\
+        		\State $true\_nparrays\_dict \gets \{"patient\_id" : [file\_name\_1, ...]\}$
+        		\State $number\_of\_patients\_true \gets len(true\_nparrays\_dict)$
+        		\State $number\_of\_training\_patients\_true \gets \lfloor number\_of\_patients\_true * split \rfloor$
+        		\State $false\_nparrays\_dict \gets \{"patient\_id" : [file\_name\_1, ...]\}$\\
+        		\State $index \gets 0$
+        		\For{$patient\_id, file\_names$ in $true\_nparrays\_dict$}
+        			\If{$index < number\_of\_training\_patients\_true$} \Comment{Training set, True}
+        				\For{$file\_name$ in $file\_names$}
+        					\State $image\_array \gets load(file\_name)$
+        					\State $image \gets convertArrayToGrayscaleImage(image\_array)$
+        					\State Save image to $"output\_folder/Train/1"$
+        				\EndFor
+        			\Else \Comment{Validation set, True}
+        				\For{$file\_name$ in $file\_names$}
+        					\State $image\_array \gets load(file\_name)$
+        					\State $image \gets convertArrayToGrayscaleImage(image\_array)$
+        					\State Save image to $"output\_folder/Val/1"$
+        				\EndFor
+        			\EndIf
+        			\State{$index \gets index + 1$}
+        		\EndFor\\
+        		\State $number\_of\_training\_patients\_false \gets \lfloor number\_of\_patients\_false * split \rfloor$
+        		\State $false\_nparrays\_dict \gets \{"patient\_id" : [file\_name\_1, ...]\}$
+        		\State $number\_of\_patients\_false \gets len(false\_nparrays\_dict)$
+        		\State $false\_nparrays\_dict \gets \{"patient\_id" : [file\_name\_1, ...]\}$\\
+        		\State $index \gets 0$
+        		\For{$patient\_id, file\_names$ in $false\_nparrays\_dict$}
+        			\If{$index < number\_of\_training\_patients\_false$} \Comment{Training set, False}
+        				\For{$file\_name$ in $file\_names$}
+        					\State $image\_array \gets load(file\_name)$
+        					\State $image \gets convertArrayToGrayscaleImage(image\_array)$
+        					\State Save image to $"output\_folder/Train/0"$
+        				\EndFor
+        			\Else \Comment{Validation set, False}
+        				\For{$file\_name$ in $file\_names$}
+        					\State $image\_array \gets load(file\_name)$
+        					\State $image \gets convertArrayToGrayscaleImage(image\_array)$
+        					\State Save image to $"output\_folder/Val/0"$
+        				\EndFor
+        			\EndIf
+        			\State{$index \gets index + 1$}
+        		\EndFor
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+Algorithm \ref{alg:create_dataset} describes how data was split and organized in order for PyTorch to make use of it. To do so, they were split by class (True $\equiv$ 1, False $\equiv$ 0) and role (training or validation). Furthermore, data are split by patients and not by slices. In fact, multiple slices are usually assigned to each patient. Instead of considering each slice separately, which allows to divide a single patient's slices into the training and validation folders, they were treated as a whole. To sum up, an 80-20 split between the training and validation data (split argument set to $0.8$) will use 80\% of the patients as training data and 20\% of the patients as validation data, regardless of the number of slices.
