@@ -25,7 +25,7 @@ When manipulating DICOM files, multiple details must be taken into account.
 First of all, the name of the files within datasets is a 6-digit number, from 000000 to the number of images minus one. However, this order doesn’t match the real order of the images. In fact, the correct order is given by the "Instance Number" tags contained in the various files. Therefore, converted images must be sorted by instance number. 
 
 \subsubsection{Data manipulation}
-\label{sec:data_manipulation}
+\label{sec:dicom_data_manipulation}
 CT and MRI machines, as well as monitors, differ from one manufacturer to the other and even from one model to the other. DICOM takes this problematic into account by providing specific tags that allow to display the exact same representation of the data, no matter the hardware used. Otherwise, physicians may struggle to detect anomalies because of color and exposition-related variations. 
 Therefore, before displaying or converting an image to any format (such as png), pixel data must be normalized. 
 
@@ -147,7 +147,7 @@ The PROSTATEx dataset comes with two CSV files for the training set. The first o
                 			\If {$mri\_type$ starts with "$mri\_type\_number$-"}
                 				\For{$dicom\_file$ in $mri\_type$}
                 					\If {$slice\_number == dicom\_file.InstanceNumber$}
-                						\State{$slice \gets normalize\_dicom(dicom\_file)$} \Comment{see section \ref{sec:data_manipulation}}
+                						\State{$slice \gets normalize\_dicom(dicom\_file)$} \Comment{see section \ref{sec:dicom_data_manipulation}}
                 						\State{Save $slice$ in $"output\_folder/clinical\_significance"$}
                 					\EndIf
                 				\EndFor
@@ -193,7 +193,7 @@ Contrary to PROSTATEx, more than two labels were used for this dataset. Both "ma
                 		\For{$mri\_type$ in $visit$}
                 			\For{$dicom\_file$ in $mri\_type$}
                 				\If {$slice\_number == dicom\_file.InstanceNumber$}
-                					\State{$slice \gets normalize\_dicom(dicom\_file)$} \Comment{see section \ref{sec:data_manipulation}}
+                					\State{$slice \gets normalize\_dicom(dicom\_file)$} \Comment{see section \ref{sec:dicom_data_manipulation}}
                 					\State{Save $slice$ in $"output\_folder/clinical\_significance"$}
                 				\EndIf
                 			\EndFor
@@ -261,3 +261,56 @@ Exporting to NumPy arrays instead of image files directly has multiple advantage
 \end{algorithm}
 
 Algorithm \ref{alg:create_dataset} describes how data was split and organized in order for PyTorch to make use of it. To do so, they were split by class (True $\equiv$ 1, False $\equiv$ 0) and role (training or validation). Furthermore, data are split by patients and not by slices. In fact, multiple slices are usually assigned to each patient. Instead of considering each slice separately, which allows to divide a single patient's slices into the training and validation folders, they were treated as a whole. To sum up, an 80-20 split between the training and validation data (split argument set to $0.8$) will use 80\% of the patients as training data and 20\% of the patients as validation data, regardless of the number of slices.
+
+
+\subsection{Data augmentation}
+
+The amount of publicly available data is relatively limited. However, deep learning models require a lot of training data to be able to learn and generalize well. Therefore, augmenting data allows to create more training examples from the ones available. To achieve this, multiple techniques such as rotation, flipping, cropping and shifting can be used. Algorithm \ref{alg:augment} describes how data was augmented. Given an MR image, a large patch centered on the lesion was cropped first, which makes the rotation process easier. In fact, rotating the image without cropping it first also moves the region of interest. In this case, finding the exact coordinates becomes more complicated. Therefore, a first large patch was created and then rotated. Afterwards, a smaller patch around the region of interest was extracted because of the potential padding induced by the rotation. This guarantees the addition of the minimal amount of padding pixels around the image to plug the holes, which decreases the probability of adding artificial information to the image.
+
+\begin{algorithm}
+    \caption{Create augmented dataset - Augmentation method}
+    \label{alg:augment}
+    \begin{algorithmic}[1] % The number tells where the line numbering should start
+        \Procedure{augment}{$image, img\_i, img\_j, available\_combinations\_list$}
+        		%\Comment{image: Pillow image, img\_[i,j]: position of the lesion, available\_combinations\_list: tuples (degree, prob\_flipping)}\\
+        		\State{$index \gets$ random index in $[0, $len(available\_combinations\_list)$ - 1]$}
+        		\State{$degree, prob\_flipping = available\_combinations\_list[index]$}
+        		\State{Delete element $available\_combinations\_list[index]$} \Comment{Avoid duplication}\\
+        		\State{$temp\_image \gets$ $image$.crop(64x64, center=$(img\_i, img\_j)$)} \Comment{$1^{st}$ crop}
+        		\State{$temp\_image \gets\ temp\_image$.rotate(degree)} \Comment{Rotate $1^{st}$ crop}\\
+        		\State{$width, height \gets$ $temp\_image$.size}
+        		\State{$x\_center \gets \lfloor \frac{width}{2} \rfloor, y\_center \gets \lfloor \frac{height}{2} \rfloor$}\Comment{Find center pixel of $1^{st}$ crop}
+        		\State{$temp\_image \gets$ $image$.crop(32x32, center=$(x\_center, y\_center)$)}\Comment{$2^{nd}$ crop}\\
+        		\If{$prob\_flipping > 0.5$}
+        			\State{$temp\_image \gets temp\_image.horizontal\_flip()$}
+        		\EndIf\\
+        		\Return $temp\_image$
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Data visualization and verification}
+
+Processing data manually increases the probability of making mistakes. For that matter, visualization tools relying on the same processing code as the ones used to generate training images were developped. Their goal was to compare our visual representation of an image to the one obtained in professional pieces of software. Also, PNG conversion was meticulously tested by comparing the pixel values from the original NumPy arrays with the PNG pixel values. 
+
+
+\subsubsection{DICOM}
+
+Visualizing DICOM files is pretty straightforward since each file represent a single two-dimensional image. However, the way this standard works require a lot of pixel transformation and normalization to obtain the desired result (see section \ref{sec:dicom_data_manipulation}), which may cause errors. Our tools allows to display a single DICOM file as well as a sequence of files if the function is feeded with a directory. Users can then scroll through the Z-axis, displaying the next or previous slice. 
+
+\textbf{SCREENSHOT}
+
+
+\subsubsection{NIfTI}
+
+As NIfTI files can be three or four-dimensional (the fourth dimension being time), our visualization tool takes this aspect into consideration by allowing to scroll through them: scrolling with the mouse goes through slices belonging to a specific timestamp over a specific axis, while the left and right arrows allows to jump to the corresponding slice with respect to another timestamp. When reaching the end of a timestamp with the mouse, the first slice of the next timestamp is displayed. Furthermore, the three-dimensionality implies that the volume is viewable under three different perspectives. For example, a three-dimensional brain volume can display it from the top of the head to the bottom, from one ear to the other and from the back of the head to the person's face. Therefore, the user can choose a specific axis to navigate through. If no axis is chosen, all three perspectives are shown one after the other.
+
+\textbf{SCREENSHOT}
+
+
+\subsubsection{RAW}
+
+Medical RAW files are three-dimensional. Scrolling with the mouse goes through slices over a specific axis. Like NIfTI, the user can profit from the three-dimensionality by navigating through slices under three different perspectives.
+
+\textbf{SCREENSHOT}
