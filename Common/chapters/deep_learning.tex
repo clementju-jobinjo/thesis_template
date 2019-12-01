@@ -34,14 +34,58 @@ From a mathematical point of view, a neural network can be defined as a non line
 y = f(x,\theta)
 \end{equation}
 The parameters $\theta$ are estimated from the training samples.
+%\begin{figure}[!h]
+%\centering
+%\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/neural_network.png}
+%\caption{Neural Network example}
+%\label{neural_network}
+%\end{figure}
+
 \begin{figure}[!h]
 \centering
-\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/neural_network.png}
+	\begin{tikzpicture}[x=1.5cm, y=1.5cm, >=stealth]
+	
+	\foreach \m/\l [count=\y] in {1,2,3,4}
+	  \node [every neuron/.try, neuron \m/.try] (input-\m) at (0,2.5-\y) {};
+	
+	\foreach \m [count=\y] in {1,2}
+	  \node [every neuron/.try, neuron \m/.try ] (hidden-\m) at (2,2-\y*1.25) {};
+	
+	\foreach \m [count=\y] in {1}
+	  \node [every neuron/.try, neuron \m/.try ] (output-\m) at (4,0.15) {};
+	
+	% input layer
+	\foreach \l [count=\i] in {1,2,3,4}
+	  \draw [<-] (input-\i) -- ++(-1,0)
+	    node [above, midway] {$I_\l$};
+	
+	% hidden layer
+	\foreach \l [count=\i] in {1,2}
+	  \node [above] at (hidden-\i.north) {$H_\l$};
+	
+	% output neurons
+	\foreach \l [count=\i] in {1}
+	  \draw [->] (output-\i) -- ++(1,0)
+	    node [above, midway] {$O_\l$};
+	
+	% input -> hidden
+	\foreach \i in {1,...,4}
+	  \foreach \j in {1,...,2}
+	    \draw [->] (input-\i) -- (hidden-\j);
+	
+	% hidden -> output
+	\foreach \i in {1,...,2}
+	  \foreach \j in {1}
+	    \draw [->] (hidden-\i) -- (output-\j);
+	
+	% labels above layers
+	\foreach \l [count=\x from 0] in {Input, Hidden, Ouput}
+	  \node [align=center, above] at (\x*2,2) {\l \\ layer};
+	
+	\end{tikzpicture}
 \caption{Neural Network example}
 \label{neural_network}
 \end{figure}
-
-
 
 
 
