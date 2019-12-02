@@ -243,7 +243,7 @@ Once the computation of the weighted sum of all inputs for a specific neuron is 
         \addlegendentry{$ReLU(x)$}
         \addplot[domain=-20:0,red] {0};
 		\addplot[domain=0:20, red] {1};
-        \addlegendentry{ReLU'(x)}
+        \addlegendentry{$ReLU'(x)$}
       \end{axis}
     \end{tikzpicture}
     \caption{The ReLU function and its derivative(not defined when x=0)}
@@ -292,10 +292,14 @@ g'(x) =
           domain=-10:10,
 		legend style={at={(0,1)},anchor=north west}
         ]
-        \addplot+[no marks] {5};
+        \addplot[domain=0:20, blue] {x};
         \addlegendentry{$ELU(x)$}
-        \addplot+[no marks] {6};
+        \addplot[domain=0:20,red] {1};
         \addlegendentry{$ELU'(x)$}
+          
+        \addplot[domain=-20:0,red] {exp(x)};
+        \addplot[domain=-20:0,blue] {exp(x)-1};
+        
       \end{axis}
     \end{tikzpicture}
     \caption{The ELU function and its derivative}
