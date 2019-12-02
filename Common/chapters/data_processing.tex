@@ -299,18 +299,35 @@ Processing data manually increases the probability of making mistakes. For that 
 
 Visualizing DICOM files is pretty straightforward since each file represent a single two-dimensional image. However, the way this standard works require a lot of pixel transformation and normalization to obtain the desired result (see section \ref{sec:dicom_data_manipulation}), which may cause errors. Our tools allows to display a single DICOM file as well as a sequence of files if the function is feeded with a directory. Users can then scroll through the Z-axis, displaying the next or previous slice. 
 
-\textbf{SCREENSHOT}
+\begin{figure}[!h]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio=true]{./figures/visualize_lung_dcm.png}
+\caption{Visualization of a folder of DICOM files}
+\label{fig:visualize_lung_dcm}
+\end{figure}
 
 
 \subsubsection{NIfTI}
 
 As NIfTI files can be three or four-dimensional (the fourth dimension being time), our visualization tool takes this aspect into consideration by allowing to scroll through them: scrolling with the mouse goes through slices belonging to a specific timestamp over a specific axis, while the left and right arrows allows to jump to the corresponding slice with respect to another timestamp. When reaching the end of a timestamp with the mouse, the first slice of the next timestamp is displayed. Furthermore, the three-dimensionality implies that the volume is viewable under three different perspectives. For example, a three-dimensional brain volume can display it from the top of the head to the bottom, from one ear to the other and from the back of the head to the person's face. Therefore, the user can choose a specific axis to navigate through. If no axis is chosen, all three perspectives are shown one after the other.
 
-\textbf{SCREENSHOT}
+\begin{figure}[!h]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio=true]{./figures/visualize_brain_nii.png}
+\caption{Four-dimensional NIfTI visualization}
+\label{fig:visualize_brain_nii}
+\end{figure}
+
 
 
 \subsubsection{RAW}
 
 Medical RAW files are three-dimensional. Scrolling with the mouse goes through slices over a specific axis. Like NIfTI, the user can profit from the three-dimensionality by navigating through slices under three different perspectives.
 
-\textbf{SCREENSHOT}
+\begin{figure}[!h]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio=true]{./figures/visualize_liver_raw.png}
+\caption{Three-dimensional RAW visualization}
+\label{fig:visualize_liver_raw}
+\end{figure}
+
