@@ -276,6 +276,10 @@ g'(x) =
   \begin{figure}[h!]
   \begin{center}
     \begin{tikzpicture}[
+    declare function={
+    func(\x)= (\x>=0) * (x) +and (\x<0) * 4;
+  }
+    ]
       \begin{axis}[
       	  width=0.55\linewidth, % Scale the plot to 0.7 \linewidth
           xlabel={$x$}, 
