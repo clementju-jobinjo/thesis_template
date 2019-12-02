@@ -5,13 +5,12 @@
 
 \section{Introduction to deep learning}
 Deep learning is currently one of the trendiest topics in machine learning, a subset of artificial intelligence. Machine learning refers to statistical models that allow computers to perform specific tasks without having been explicitly programmed to solve them. In fact, these models try to find structural patterns within data in order to understand new incoming situations and react in the best possible way accordingly. There exist various techniques in machine learning such as k-NN, SVM, k-means, decision trees, association rules, etc. What mainly differentiates deep learning from these algorithms is the concept of neural networks (see section  \ref{what_is_a_neural_network}), that are combined to form deep neural networks.\\
-Neural networks are inspired from the biological neural networks of the brain. These systems try to learn how to solve a problem based on the data they receive as input. Many concrete applications make use of neural networks: autonomous vehicles, smarter translators, personal assistants, art creation, robotics, etc. The presence of deep learning techniques in all mentioned use cases clearly attests that this technology is a real breakthrough. Furthermore, since this field has recently gained interest   (see section \ref{historical_background}), multiple researches are still ongoing, which suggests that many exciting new applications will certainly be discovered.
+Neural networks are inspired from the biological neural networks of the brain. These systems try to learn how to solve a problem based on the data they receive as input. Many concrete applications make use of neural networks: autonomous vehicles, smarter translators, computer-aided diagnoses, personal assistants, art creation, robotics, etc. The presence of deep learning techniques in all mentioned use cases clearly attests that this technology is a real breakthrough. Furthermore, since this field has recently gained interest   (see section \ref{historical_background}), multiple researches are still ongoing, which suggests that many exciting new applications will certainly be discovered.
 
 \subsection{Historical background}
 \label{historical_background}
 As described in figure \ref{history} from article \cite{14}, the theoretical foundations of deep learning appeared long before the invention of the computers. From the first attempts to understand the human brain until today, a long way has been made to establish the basic components of modern neural networks. One could ask: why did deep learning take off recently if the theory has been around for a long time?\\
-First part of the answer is about the computational power. Indeed, deep learning algorithms need a lot of data to work properly and this requires powerful CPU/GPU that either didn't exist or were only available to a minority of people. \\
-One other main reason concerns the lack of data. Since deep learning algorithms "learn" from data, if not data is available, no learning is possible. Consequently, the era of Big Data has enhanced the deep learning possibilities.\\
+First part of the answer is about the computational power. Indeed, deep learning algorithms need a lot of data to work properly and this requires powerful CPU/GPU that either didn't exist or were only available to a minority of people. One other main reason concerns the lack of data. Since deep learning algorithms "learn" from data, if not data is available, no learning is possible. Consequently, the era of Big Data has enhanced the deep learning possibilities. These two points are summarised: "The increase in model size overtime, due to the availability of faster CPUs, the advent of general purpose GPUs, fasternetwork, connectivity and better software infrastructure for distributed computing, is one of the most important trends in the history of deep learning. This trend is generally expected to continue well into the future"\cite{15}.\\
 Finally, before the year 2012, the abilities of neural networks had not been publicly proven. This changed with the ImageNet Large Scale Visual Recognition Challenge (a competition where researchers evaluate their algorithms on several visual recognition tasks). In fact, the deep convolutional neural network called "AlexNet" achieved 16\% of classification error rate, whereas the previous best scores were around 25\%. This victory marked the beginning of a new craze for these types of algorithms.
 
 
@@ -93,12 +92,114 @@ The parameters $\theta$ are estimated from the training samples.
 
 \subsection{Perceptrons}
 \label{perceptron}
+Perceptrons are the main components of neural networks. They were "developed in the 1950s and 1960s by the scientist Frank Rosenblatt, inspired by earlier work by Warren McCulloch and Walter Pitts"\cite{13}. Today, they are called "artificial neurons" or simply "neurons".\\
+A perceptron $j$ is a function $f$ of the input $x=(x_{1}, ..., x_{n})$ weighted by a vector of weights $w_{}=(w_{1}, ..., w_{n})$, completed by a bias $b_{j}$ and associated to a non linear activation function $\sigma$:
+\begin{equation}
+y_{j} = f_{j}(x) = \sigma((\sum_{k=1}^{n} x_{k} * w_{k}) + b_{})
+\end{equation}
 
+Schematically, a perceptron can be represented as shown in figure \ref{perceptron_model}. Each input is multiplied with its corresponding weight and the sum of this result is then passed through a non linear function, called an "activation function". This activation function acts like a threshold that decides if the sum can be given to the next perceptron or not. There exist multiple activation functions (see \ref{activation_functions}). It is extremely important to use a non linear functions instead of a linear function. Indeed, in a neural network where perceptrons are assembled together, the output of a perceptron is given as input to the others. Consequently, if linear functions are used, a linear output would be given as input to another linear function. Since the composition of two linear functions is itself a linear function, there would be no sense to assemble perceptrons to create big neural networks.
+
+
+\tikzset{basic/.style={draw,fill=white!20,text width=1em,text badly centered}}
+\tikzset{input/.style={basic,circle}}
+\tikzset{weights/.style={basic,rectangle}}
+\tikzset{functions/.style={basic,circle,fill=white!10}}
+
+
+
+\begin{figure}[!h]
+\centering
+	\begin{tikzpicture}
+	
+	\node[functions] (center) {};
+        \node[below of=center,font=\scriptsize,text width=4em] {Activation function};
+        \draw[thick] (0.5em,0.5em) -- (0,0.5em) -- (0,-0.5em) -- (-0.5em,-0.5em);
+        \draw (0em,0.75em) -- (0em,-0.75em);
+        \draw (0.75em,0em) -- (-0.75em,0em);
+        \node[right of=center] (right) {};
+            \path[draw,->] (center) -- (right);
+        \node[functions,left=5em] (left) {$\sum$};
+            \path[draw,->] (left) -- (center);
+        \node[weights,left=15em] (2) {$w_2$} -- (2) node[input,left of=2] (l2) {$x_2$};
+            \path[draw,->] (l2) -- (2);
+            \path[draw,->] (2) -- (left);
+        \node[below of=2] (dots) {$\vdots$} -- (dots) node[left of=dots] (ldots) {$\vdots$};
+        \node[weights,below of=dots] (n) {$w_n$} -- (n) node[input,left of=n] (ln) {$x_n$};
+            \path[draw,->] (ln) -- (n);
+            \path[draw,->] (n) -- (left);
+        \node[weights,above of=2] (1) {$w_1$} -- (1) node[input,left of=1] (l1) {$x_1$};
+            \path[draw,->] (l1) -- (1);
+            \path[draw,->] (1) -- (left);
+        \node[weights,above of=1] (0) {$w_0$} -- (0) node[input,left of=0] (l0) {$1$};
+            \path[draw,->] (l0) -- (0);
+            \path[draw,->] (0) -- (left);
+        \node[below of=ln,font=\scriptsize] {inputs};
+        \node[below of=n,font=\scriptsize] {weights};
+	
+	\end{tikzpicture}
+\caption{The perceptron model}
+\label{perceptron_model}
+\end{figure}
 
 \subsection{Multilayer perceptron}
 
+\subsection{Notation}
+In order to respect a consistent mathematical notation to describe neural networks, this work will use the notation of Andrew Y. Ng, one of the pioneers of deep learning, that can be found in \cite{16}.\\
+
+\noindent \textbf{General comment}
+\begin{itemize}
+\item Superscript (i) will denote the $i^{th}$ training example.
+\item Superscript [l] will denote the $l^{th}$ layer of the neural network.
+\end{itemize}
+
+\noindent \textbf{Sizes}
+\begin{itemize}
+\item $m$: number of examples in the dataset.
+\item $n_{x}$: input size.
+\item $n_{y}$: output size (or number of classes).
+\item $n_{h}^{[l]}$: number of hidden units (i.e neurons) of the $l^{th}$ layer. 
+\item $L$: number of layers in the network.
+\end{itemize}
+
+\noindent \textbf{Neural networks components}
+\begin{itemize}
+\item $X\in \R$ is the input matrix matrix of a neural network.
+\item $x^{(i)} \in \R^{n_{x}}$ is the $i^{th}$ example (sample) represented as a column vector.
+\item $Y \in \R^{n_{y} \times m}$ is the label matrix.
+\item $y^{(i) \in \R^{n_{y}}}$ is the output label for the $i^{th}$ example.
+\item $W^{[l]} \in \R$ \textsuperscript{\# of neurons in the next layer = j  x \# of neurons in the previous layer = k} is the weight matrix at layer $[l]$. Unformally, a weight matrix has this form:\\\\
+
+
+
+\item $b^{[l]} \in R$\textsuperscript{\# of units in next layer} is the bias vector in the $l^{th}$ layer.
+\item $\hat{y} \in R^{n_{y}}$ is the predicted output vector. It can also be denoted $a^{[L]}$ where $L$ is the number of layers in the network.
+\item $g^{[l]}(x)$ is the $l^{th}$ activation function.  
+\item $z^{[l]} = W_{x}x^{(i)} + b^{[l]}$ denotes the weighted sum of the input given to the $l^{th}$ layer before passing through the activation function.\\
+\end{itemize}
+
+\noindent \textbf{Forward propagation equations}
+\begin{itemize}
+\item $a = g^{[l]}(W_{x}x^{(i)} + b^{[l]}) = g^{[l]}(z^{[l]})$ where $g^{[l]}$ denotes the $l^{th}$ layer activation function.
+\item $a_{j}^{[l]} = g^{[l]} (\sum_{k} w_{jk}^{[l]}a_{k}^{[l-1]} + b_{j}^{[l]}) = g^{[l]} (z_{j}^{[l]}) $ is the general activation formula at $l^{th}$ layer, 
+\end{itemize}
+
+
+\subsection{Activation functions}
+\label{activation_functions}
+Activation functions are used to bring non-linearity in neural networks. There exist 
+
+
+
 
 \subsection{Forward propagation}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/forward_propagation.png}
+\caption{Forward propagation }
+\label{forward_propagation}
+\end{figure}
 
 
 \subsection{Backpropagation}
