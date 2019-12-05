@@ -39,6 +39,9 @@ The parameters $\theta$ are estimated from the training samples.
 %\label{neural_network}
 %\end{figure}
 
+\subsection{Supervised learning and Unsupervised learning}
+In machine learning, there mainly exists two different kinds of task. The first one is "supervised learning". It includes all learning algorithms, whose training samples contains labels in order to find the optimal mapping between the input and the output.  The second one is "unsupervised learning". In contrast to supervised algorithms, the latter use non labeled data and its main goal is to infer the natural structure  present in the data. Since the model presented in this work belongs to the "supervised learning" category, all notions explained below refer to this kind of algorithms.
+
 
 
 
@@ -88,6 +91,7 @@ In order to respect a consistent mathematical notation to describe neural networ
 Perceptrons are the main components of neural networks. They were "developed in the 1950s and 1960s by the scientist Frank Rosenblatt, inspired by earlier work by Warren McCulloch and Walter Pitts"\cite{13}. Today, they are called "artificial neurons" or simply "neurons".\\
 A perceptron $j$ is a function $f$ of the input $x=(x_{1}, ..., x_{n})$ weighted by a vector of weights $w_{}=(w_{1}, ..., w_{n})$, completed by a bias $b_{j}$ and associated to a non linear activation function $g$:
 \begin{equation}
+\label{perceptron_equation}
 y_{j} = f_{j}(x) = g((\sum_{k=1}^{n} x_{k} * w_{k}) + b_{})
 \end{equation}
 
@@ -137,7 +141,7 @@ Schematically, a perceptron can be represented as shown in figure \ref{perceptro
 
 \subsection{Activation functions}
 \label{activation_functions}
-Once the computation of the weighted sum of all inputs for a specific neuron is done, the latter has to be pass the sum through an activation function that will decide the proportion of the result to send further. Activation functions have to be non-linear in order to approximate extremely complex functions. In fact, neural networks are considered as universal approximators. Article \cite{17} claims that "multilayer feedforward networks are capable of approximating any measurable function to any desired degree of accuracy, in a very specific and satisfying sense."According to \cite{18} the most commonly used activation functions are:\\\\
+Once the computation of the weighted sum of all inputs for a specific neuron is done, the latter has to pass the sum through an activation function that will decide the proportion of the result to send further. Activation functions have to be non-linear in order to approximate extremely complex functions. In fact, neural networks are considered as universal approximators. Article \cite{17} claims that "multilayer feedforward networks are capable of approximating any measurable function to any desired degree of accuracy, in a very specific and satisfying sense."According to \cite{18} the most commonly used activation functions are:\\\\
  \noindent \textbf{Sigmoid function}\\
  The sigmoid function is defined as:
  \begin{equation}
@@ -180,7 +184,6 @@ Once the computation of the weighted sum of all inputs for a specific neuron is 
  \begin{equation}
  g(x) = tanh(x) = \frac{1-e^{-2x}}{1+e^{-2x}}
  \end{equation}
-  
  Its derivative is:
  \begin{equation}
  g'(x) = tanh'(x) = 1-tanh^{2}(x)
@@ -261,7 +264,6 @@ Once the computation of the weighted sum of all inputs for a specific neuron is 
     e^{x}-1 & \text{otherwise }
 \end{cases}
  \end{equation}
-  
  Its derivative is:
  \begin{equation}
 g'(x) = 
@@ -308,7 +310,17 @@ g'(x) =
 
 \subsection{Multilayer perceptrons}
 \label{multilayer_perceptron}
-The figure \ref{multilayer_perceptrons_figure} globally illustrates the concept of a multilayer perceptrons: all inputs are given to all neurons of the first layer. Each neuron sums the incoming inputs, passes the result through a non linear function and sends it to all neuron of the next layer along an edge. Each edge between two neurons (i.e perceptrons) has a certain weight (a numerical value) that weights the importance of the output of the previous neuron.\\
+A multilayer perceptron is an artifical neural network type. Article \cite{23} defines the multilayer perceptrons as "feedforward networks with one or more layers of units between the
+input and output layers. The output units represent a hyperplane in the space
+of the input patterns."\\
+A multilayer perceptrons is composed of $L$ layers each of them having $n^{l}_{h}$ perceptrons. The layers are organized in the following way:
+\begin{itemize}
+\item The input layer: it is the neural network entry point for the data. Generally, the data is provided to the network in the form of a matrix $X \in \R$ of size $(n_{x} \times batch\_size)$ with their corresponding labels $Y \in \R$ of size $n_{y} \times batch\_size$. The batch size defines the number of samples that will be given at the same time to the network and $n_{x}$ is their dimension. Moreover, $x^{(i)}$ is the $i^{th}$ sample represented as a column vector. Finally, $y^{(i)}$ is the output label for the $i^{th}$ example. For instance, under the assumption that the number of samples is 100 and that the batch size is 32, 4 batches in total will be given as input to the network.
+\item The hidden layer(s): hidden layers stand for all layers that are between the input layer and the output layer. For each of them are associated weights and biases (W, b), respectively denoted by $W^{[l]} \in \R $ and $b^{[l]}$, where $W_{ij}^{l}$ correspond to the weights associated with the connection between perceptron $j$ in layer $l$ and perceptron $i$ in layer $l+1$. By analogy, $b_{i}^{[l]}$ is the bias associated with perceptron $i$ in layer $l+1$. The weights and the biases of the network are the parameters that have to be optimized in order to have the best mapping between the inputs and the output of the network (see section \ref{training_a_neural_network} ).
+\item The output layer: it is the last layer of the neural network. Its role is essential since it produces the prediction of the network for a given input. The prediction of a neural network is given by $\hat{y} \in R^{n_{y}}$ with $n_{y}$ beeing the number of different labels. In a classification task, whose goal is to assign to each input a specific class, the $\hat{y}$ could be the probability of belonging to each class. In that case, the \textit{softmax} activation function would be used.
+\end{itemize}
+The figure \ref{multilayer_perceptrons_figure} globally illustrates the concept of a multilayer perceptrons. In this example, the total number of layers $L$ is equal to 3, the input size $n_{x}$ is equal to 4 and the number of units in in each layer is $n_{h}^{1}= 4$, $n_{h}^{2}=2$, $n_{h}^{3}=1$. The network has the weights  $W^{(1)} \in \R^{2x3}$, $W^{(2)} \in \R^{1x2}$  and the biases  $b^{[1]}=2$, $b^{[2]}=1$.
+
 
 \begin{figure}[!h]
 \centering
@@ -352,15 +364,13 @@ The figure \ref{multilayer_perceptrons_figure} globally illustrates the concept 
 	  \node [align=center, above] at (\x*2,2) {\l \\ layer};
 	
 	\end{tikzpicture}
-\caption{Neural Network example}
+\caption{Multilayer perceptrons}
 \label{multilayer_perceptrons_figure}
 \end{figure}
 
-
-A multilayer perceptron is an artifical neural network type. Article \cite{23} defines the multilayer perceptrons in the following way: "Multilayer perceptron are feedforward networks with one or more layers of units between the
-input and output layers. The output units represent a hyperplane in the space
-of the input patterns."\\
-A multilayer perceptrons is composed of multiple perceptrons that are arranged into multiple layers. When the input layer receives the signal, transmits it to the hidden layer
+\section{Training a neural network}
+\label{training_a_neural_network}
+Training a neural network is composed of multiple steps. The first one is the "forward propagation step". This step consists in giving to the untrained neural network examples that need to be classified (or segmented, depending on the task) and to transmit them through all layers of the network. Passing all batches as input the network is called an "epoch". At the end of each batch the loss is computed using a "loss function". The latter is used to evaluate the predictions of the neural network in comparison to their ground-truth. Then, the weights and biases of the networks are updated during a process called "back propagation" in order find the global minima of the loss function. This process is repeated a for a defined number of epochs.
 
 
 
@@ -373,17 +383,18 @@ A multilayer perceptrons is composed of multiple perceptrons that are arranged i
 \label{forward_propagation}
 \end{figure}
 
+\subsubsection{Loss computation}
 
 \subsection{Backpropagation}
 
-\subsubsection{Loss function}
+
 
 \subsubsection{Weight update}
 
 
 
 
-\section{Training a neural network}
+
 
 \subsection{Data}
 Training set, validation set, test set, supervised learning, unsupervised learning,
@@ -391,9 +402,20 @@ Training set, validation set, test set, supervised learning, unsupervised learni
 \subsection{Weight initialization}
 
 \subsection{Hyperparameters}
+
+
 lr, batch size, epochs, optimizer, learning rate decay, ...
 
 
+From: https://stats.stackexchange.com/questions/153531/what-is-batch-size-in-neural-network
+Batch size: 
+Advantages of using a batch size < number of all samples:
+It requires less memory. Since you train the network using fewer samples, the overall training procedure requires less memory. That's especially important if you are not able to fit the whole dataset in your machine's memory.
+
+Typically networks train faster with mini-batches. That's because we update the weights after each propagation. In our example we've propagated 11 batches (10 of them had 100 samples and 1 had 50 samples) and after each of them we've updated our network's parameters. If we used all samples during propagation we would make only 1 update for the network's parameter
+
+
+The smaller the batch the less accurate the estimate of the gradient will be. In the figure below, you can see that the direction of the mini-batch gradient (green color) fluctuates much more in comparison to the direction of the full batch gradient (blue color).
 
 
 \section{Deep learning models}
