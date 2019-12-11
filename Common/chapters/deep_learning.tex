@@ -95,7 +95,7 @@ A perceptron $j$ is a function $f$ of the input $x=(x_{1}, ..., x_{n})$ weighted
 a_{j} = f_{j}(x) = g((\sum_{k=1}^{n} x_{k} * w_{k}) + b_{})
 \end{equation}
 
-Schematically, a perceptron can be represented as shown in figure \ref{perceptron_model}. Each input is multiplied with its corresponding weight and the sum of this result is then passed through a non linear function, called an "activation function". This activation function acts like a threshold that decides the proportion of the result that has to be given further. There exist multiple activation functions (see \ref{activation_functions}). It is extremely important to use a non linear functions instead of a linear function. Indeed, in a neural network the output of a perceptron is given as input to the others (see \ref{multilayer_perceptron}). Consequently, if only linear functions are used, linear outputs would be given as inputs to other linear functions. Since the composition of two linear functions is itself a linear function, there would be no sense to assemble perceptrons to create neural networks of multiple layers.
+Schematically, a perceptron can be represented as shown in figure \ref{perceptron_model}. Each input is multiplied with its corresponding weight and the sum of this result is then passed through a non linear function, called an "activation function". This activation function acts like a threshold that decides the proportion of the result that has to be given further. There exist multiple activation functions (see \ref{activation_functions}). It is extremely important to use a non linear functions instead of a linear function. Indeed, in a neural network the output of a perceptron is given as input to the others (see \ref{multilayer_perceptron}). Consequently, if only linear functions are used, linear outputs are given as inputs to other linear functions. Since the composition of two linear functions is itself a linear function, there would be no sense to assemble perceptrons to create neural networks of multiple layers.
 
 
 \tikzset{basic/.style={draw,fill=white!20,text width=1em,text badly centered}}
@@ -384,7 +384,7 @@ This first equation denotes the weighted sum of the input given to the $l^{th}$ 
 \begin{equation}
 a^{[l+1]} = g^{[l]}(z^{[l]})
 \end{equation}
-Since the output of the activation function is then given as input to the neuron of the next layer, the forward propagation step can be generally defined as:
+Since the output of the activation function is then given as input to all neurons of the next layer, the forward propagation step can be generally defined as:
 \begin{equation}
 a_{j}^{[l]} = g^{[l]} (\sum_{k} w_{jk}^{[l]}a_{k}^{[l-1]} + b_{j}^{[l]}) = g^{[l]} (z_{j}^{[l]}) 
 \end{equation}
@@ -417,19 +417,86 @@ In multiclass classification, the categorical crossentropy is:
 J(\hat{y}, y) = - \sum_{i=1}^{n_{y}} \sum_{j=1}^{m} (y_{ij}*log(\hat{y}_{ij}))
 \end{equation}
 
-Since the cost function gives an estimation of the overall error of the network, the main objective of training a neural network is to update its weight in order to approach the minimum of the function. Therefore, deep learning problems can be considered as optimization problems. Solutions to these problems can be found using the gradient descent during the backpropagation.
+Since the cost function gives an estimation of the overall error of the network, the main objective of training a neural network is to update its weight in order to approach the minimum of the function. Therefore, deep learning problems can be considered as optimization problems. Solutions to these problems can be found using the gradient descent algorithm during backpropagation.
 \subsection{Backpropagation}
-The backpropagation relies on a technique called "gradient descent" to minimize the cost function $J(W, b)$. Globally, "the intuition behind the backpropagation algorithm is as follows. Given a training example $(x^{(i)}, y^{(i)})$, we will first run a forward pass to compute all the activations throughout the network, including the output value of the network. Then, for each node $i$ in layer $l$, we would like to compute an "error term" $\partial^{(l)}_{i}$ that measures how much that node was "responsible" for any errors in our output. For an output node, we can directly measure the difference between the network’s activation and the true target value, and use that to define $\partial^{(n_{l})}_{i}$(where layer $n_{l}$ is the output layer). How about hidden units? For those, we will compute $\delta^{(l)}_{i}$ based on a weighted average of the error terms of the nodes that uses $a^{(l)}_{i}$ as an input"\cite{24}.
+Backpropagation relies on a technique called "gradient descent" to minimize the cost function $J(W, b)$. Globally, "the intuition behind the backpropagation algorithm is as follows. Given a training example $(x^{(i)}, y^{(i)})$, we will first run a forward pass to compute all the activations throughout the network, including the output value of the network. Then, for each node $i$ in layer $l$, we would like to compute an "error term" $\partial^{(l)}_{i}$ that measures how much that node was "responsible" for any errors in our output. For an output node, we can directly measure the difference between the network’s activation and the true target value, and use that to define $\partial^{(n_{l})}_{i}$(where layer $n_{l}$ is the output layer). How about hidden units? For those, we will compute $\delta^{(l)}_{i}$ based on a weighted average of the error terms of the nodes that uses $a^{(l)}_{i}$ as an input"\cite{24}.\\
+In other words, after each forward pass through the entire network, backpropagation performs a backward pass with the goal of minimizing the cost function by adjusting model's parameters. The way parameters are updated is defined by the gradients of the cost function with respect to each parameter of the network. The gradient of the cost function $J(x_{1}, x_{2}, ..., x_{m})$ in point $x$ is given by:
+\begin{equation}
+\frac{\partial J}{\partial x} = [\frac{\partial J}{\partial x_{1}}, \frac{\partial J}{\partial x_{2}}, ..., \frac{\partial J}{\partial x_{1}}]
+\end{equation}
+The gradient shows how much all parameters that constitute x need to change to minimize the function. In neural networks, the parameters of the cost function are all weight matrices $W^{[l]}$ and biases $b^{[l]}$ The computation of all these gradients relies on the "chain rule". For weights parameters, the chain rule is:
+\begin{equation}
+\frac{\partial J}{\partial w_{jk}^{l}} = \frac{\partial J}{\partial z_{j}^{l}} * \frac{\partial z_{j}^{l}}{\partial w_{jk}^{l}}
+\end{equation}
+Similarly, the chain rules has to be applied to biases since they are also parameters of the cost function:
+\begin{equation}
+\frac{\partial J}{\partial b_{j}^{l}} = \frac{\partial J}{\partial z_{j}^{l}} * \frac{\partial z_{j}^{l}}{\partial b_{j}^{l}}
+\end{equation}
+Once the gradients of each parameters of the neural network are computed, they have to be updated. The weights update is described by the following equation:
+\begin{equation}
+W^{[l]} = W^{[l]} - \alpha * \frac{\partial J}{\partial W^{[l]}}
+\end{equation}
+The biases update corresponds to:
+\begin{equation}
+b^{[l]} = b^{[l]} - \alpha * \frac{\partial J}{\partial b^{[l]}}
+\end{equation}
+The hyperparameter $\alpha$ of these two equations is named "learning rate". It determines the gradient's influence at each epoch and has to be manually tuned.
 
+\subsection{Metrics}
+In classification tasks, four separate output labels can occur:
+\begin{itemize}
+\item True Positive (TP):  an output belongs to this class if the prediction that the latter \textbf{contains} a certain feature is \textbf{correct}.
+\item True Negative (TN): an output belongs to this class if the prediction that the latter does \textbf{not contain} a certain feature is \textbf{correct}.
+\item False Positive (FP): an output belongs to this class if the prediction that the latter \textbf{contains} a certain feature is \textbf{incorrect}.
+\item False Negative (FN): an output belongs to this class if the prediction that the latter does \textbf{not contain} a certain feature is \textbf{incorrect}.
+\end{itemize}
+From these four categories, multiple metrics with their own specificities can be established \cite{25}:
+\begin{itemize}
+\item Accuracy: it is defined as the ratio of the correctly labeled subjects to the whole pool of subjects.
+\begin{equation}
+Accuracy = \frac{(TP+TN)}{TP+FP+FN+TN}
+\end{equation}
+Accuracy is a great measure in the case of symmetric data (i.e the number of FN $\approx$ FP and their cost is similar). When this condition is not fulfilled, accuracy can lead to bad models. For instance, let's define a binary classification model that always outputs class 0. If the data is composed of 99 samples from class 0 and 1 from class 1, the accuracy is equal to 99\% but the model is not smart. Consequently, this metric has to be used in addition to other metrics.
 
-\subsubsection{Weight update}
+\item Precision: it is the ratio of the correctly positive labeled subjects by the model to all positive labeled subjects.
+\begin{equation}
+Precision = \frac{TP}{(TP + FP)}
+\end{equation}
+This metric is recommended when the confidence of the true positives predicted by the model is important. For instance, this happens in spam blockers where it is preferable to have a spam in mailbox rather than a regular mail in the spam box.
 
+\item Recall (sensitivity):
+\begin{equation}
+Recall = \frac{TP}{(TP + FN)}
+\end{equation}
+This metric is recommended when the occurence of false negatives is intolerable and false positives are preferred. This makes perfect sense for disease detection models: labeling an healthy person as unhealthy is better than labeling an unhealthy person as healthy.
 
+\item F1-score:
+\begin{equation}
+F1-score = \frac{2* recall * precision}{(recall + precision)}
+\end{equation}
+F1-score considers both precision and recall and is the highest if these two metrics are balanced. This metric is perfectly suitable when the cost of false positives and false negatives is not the same.
+
+\item Specificity:
+\begin{equation}
+Specificity = \frac{TN}{(TN + FP)}
+\end{equation}
+This metric is recommended when the occurence of false positives is intolerable whereas true negatives are desired. For instance drug tests can not indicate false positives but they have to cover all true negatives.
+\item AUC-ROC:
+"The ROC curve is plotted with recall against the false positive rate (1-specificity) where recall is on y-axis and the false positive rate is on the x-axis. AUC - ROC curve is a performance measurement for classification problem at various thresholds settings. ROC is a probability curve and AUC represents degree or measure of separability. It tells how much model is capable of distinguishing between classes. Higher the AUC, better the model is at predicting 0s as 0s and 1s as 1s\cite{26}."
+
+\end{itemize}
 
 
 
 
 \subsection{Data}
+In deep learning, data is essential. As seen previously, neural networks learn features from it. Therefore, data has to be handled carefully and in the right way. Usually, it is split into three different sets:
+\begin{itemize}
+\item The training set: this is the dataset that is used to train the neural network (the weights and biases).
+\item The validation set: this the dataset that is used to evaluate a trained model.  Usually, the evaluation on the validation set is made every $x$ (a fixed number) epochs. The validation set has to come from the same distribution as the training set but should contain exclusively unseen data. This last point is crucial since the validation set shows how well the neural network can generalize on unknown data. The validation set can also be used as indicator to decide when the training should be stopped in order to prevent overfitting. This technique is called "early stopping".
+\item The test set: this last dataset is used to establish the final evaluation of the model.
+
+\end{itemize}
 Training set, validation set, test set, supervised learning, unsupervised learning,
 
 \subsection{Weight initialization}
