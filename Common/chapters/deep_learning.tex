@@ -316,7 +316,7 @@ of the input patterns."\\
 A multilayer perceptrons is composed of $L$ layers each of them having $n^{l}_{h}$ perceptrons. The layers are organized in the following way:
 \begin{itemize}
 \item The input layer: it is the neural network entry point for the data. Generally, the data is provided to the network in the form of a matrix $X \in \R$ of size $(n_{x} \times batch\_size)$ with their corresponding labels $Y \in \R$ of size $(n_{y} \times batch\_size)$. The batch size defines the number of samples that will be given at the same time to the network and $n_{x}$ is their dimension. Moreover, $x^{(i)}$ is the $i^{th}$ sample represented as a column vector. The total number of training samples is given by $m$. Finally, $y^{(i)}$ is the output label for the $i^{th}$ example. For instance, under the assumption that the number of samples is 100 and that the batch size is 32, 4 batches in total will be given as input to the network.
-\item The hidden layer(s): hidden layers stand for all layers that are between the input layer and the output layer. For each of them are associated weights and biases (W, b), respectively denoted by $W^{[l]} \in \R $ and $b^{[l]}$, where $W_{ij}^{l}$ correspond to the weights associated with the connection between perceptron $j$ in layer $l$ and perceptron $i$ in layer $l+1$. By analogy, $b_{i}^{[l]}$ is the bias associated with perceptron $i$ in layer $l+1$. The weights and the biases of the network are the parameters that have to be optimized in order to have the best mapping between the inputs and the output of the network (see section \ref{training_a_neural_network} ). Before training the neural network, the weights can be randomly initialized or initialized with more sophisticated methods such as "Xavier initialization" or "Kaiming initialization"(see section \ref{weight_optimization}).
+\item The hidden layer(s): hidden layers stand for all layers that are between the input layer and the output layer. For each of them are associated weights and biases (W, b), respectively denoted by $W^{[l]} \in \R $ and $b^{[l]}$, where $W_{ij}^{l}$ correspond to the weights associated with the connection between perceptron $j$ in layer $l$ and perceptron $i$ in layer $l+1$. By analogy, $b_{i}^{[l]}$ is the bias associated with perceptron $i$ in layer $l+1$. The weights and the biases of the network are the parameters that have to be optimized in order to have the best mapping between the inputs and the output of the network (see section \ref{training_a_neural_network} ). Before training the neural network, the weights can be randomly initialized or initialized with more sophisticated methods such as "Xavier initialization" or "Kaiming initialization"(see section \ref{weight_initialization}).
 \item The output layer: it is the last layer of the neural network. Its role is essential since it produces the prediction of the network for a given input. The prediction of a neural network is given by $\hat{y} \in R^{n_{y}}$ with $n_{y}$ beeing the number of different labels. In a classification task, whose goal is to assign to each input a specific class, the $\hat{y}$ could be the probability of belonging to each class. In that case, the \textit{softmax} activation function would be used.
 \end{itemize}
 The advantage of organizing the weights, biases and inputs in matrices is due to the ability of modern CPU/GPU to quickly perform linear algebra computations. This way of structuring the network component is called "vectorization" and avoids at most using loops in the code, which could considerably slow down the computations.
@@ -371,7 +371,7 @@ The figure \ref{multilayer_perceptrons_figure} globally illustrates the concept 
 
 \section{Training a neural network}
 \label{training_a_neural_network}
-Training a neural network is composed of multiple steps. The first one is the "forward propagation step". This step consists in giving to the untrained neural network examples that need to be classified (or segmented, depending on the task) and to transmit them through all layers of the network. Passing all batches as input to a network is called an "epoch". At the end of each batch the loss is computed using a "loss function". The latter is used to evaluate the predictions of the neural network in comparison to their ground-truth. Then, the weights and biases of the networks are updated during a process called "back propagation" in order find the global minima of the loss function. This process is repeated for a defined number of epochs.
+Training a neural network is composed of multiple steps. The first one is the "forward propagation step". It consists in giving to the untrained neural network examples that need to be classified (or segmented, depending on the task) and to transmit them through all layers of the network. Passing all batches as input to a network is called an "epoch". At the end of each batch the loss is computed using a "loss function". The latter is used to evaluate the predictions of the neural network in comparison to their ground-truth. Then, the weights and biases of the networks are updated during a process called "backpropagation" in order find the global minima of the loss function. This process is repeated for a defined number of epochs.
 
 
 
@@ -382,7 +382,7 @@ z^{[l]} = W_{x}^{[l]}x^{(i)} + b^{[l]}
 \end{equation}
 This first equation denotes the weighted sum of the input given to the $l^{th}$ layer before passing through the activation function $g$. The second equation describes the effect of the activation function:
 \begin{equation}
-a^{[l+1]} = g^{[l]}(z^{[l]})
+a^{[l]} = g^{[l]}(z^{[l]})
 \end{equation}
 Since the output of the activation function is then given as input to all neurons of the next layer, the forward propagation step can be generally defined as:
 \begin{equation}
@@ -399,12 +399,8 @@ The figure \ref{forward_propagation} illustrates the computation of the forward 
 
 \subsubsection{Loss computation}
 "The loss function evaluates the error performed by the neural network when it tries
-to estimate the data to be predicted"\cite{18}. It is therefore useful to measure the penalty for a single input. On the contrary, when the goal is to have a more general overview of the error on the entire batch or on the entire dataset, the cost function $J$ is used. The latter is given by the equation:
-\begin{equation}
-J(\hat{y}, y)
-\end{equation}
-where $\hat{y}$ is the prediction of the neural network and $y$ the real label.\\
-There exist multiple cost functions. For a regression problem, a commonly used loss function is the mean square error:
+to estimate the data to be predicted"\cite{18}. It is therefore useful to measure the penalty for a single input. On the contrary, when the goal is to have a more general overview of the error on the entire batch or on the entire dataset, the cost function $J$ is used. The latter is given by $J(\hat{y}, y)$ where $\hat{y}$ is the prediction of the neural network and $y$ the real label. There exist multiple cost functions.\\
+For a regression problem, a commonly used loss function is the mean square error:
 \begin{equation}
 J(\hat{y}, y) = \frac{1}{m}[\sum_{i=1}^{m} (\hat{y}^{(i)} - y^{(i)})^{2}]
 \end{equation}
@@ -493,17 +489,36 @@ This metric is recommended when the occurence of false positives is intolerable 
 In deep learning, data is essential. As seen previously, neural networks learn features from it. Therefore, data has to be handled carefully and in the right way. Usually, it is split into three different sets:
 \begin{itemize}
 \item The training set: this is the dataset that is used to train the neural network (the weights and biases).
-\item The validation set: this the dataset that is used to evaluate a trained model.  Usually, the evaluation on the validation set is made every $x$ (a fixed number) epochs. The validation set has to come from the same distribution as the training set but should contain exclusively unseen data. This last point is crucial since the validation set shows how well the neural network can generalize on unknown data. The validation set can also be used as indicator to decide when the training should be stopped in order to prevent overfitting. This technique is called "early stopping".
-\item The test set: this last dataset is used to establish the final evaluation of the model.
-
+\item The validation set: this the dataset that is used to evaluate a trained model.  Usually, the evaluation on the validation set is made every $x$ (a fixed number) epochs. The validation set needs to come from the same distribution as the training set but should contain exclusively unseen data. This last point is crucial since the validation set shows how well the neural network can generalize on unknown data. The validation set can also be used as indicator to decide when the training should be stopped in order to prevent "overfitting" (overfitting describes the behaviour of a model that too closely fits to the training set and don't generalize well). Indeed, if the validation loss continually increases for a certain number of epochs, going on with the training will increase the overfitting. This technique is called "early stopping".
+\item The test set: this last dataset is used to establish the final evaluation of the model and also contains unseen data. 
 \end{itemize}
-Training set, validation set, test set, supervised learning, unsupervised learning,
+Regarding the way these three sets are split, it mostly depends on the number of samples available. If the latter is big, the data is split into training and testing using the ratio 80/20. Then the remaining training samples are also split into training and validation using the ratio 80/20. On the contrary, if there are few data available, K-folds cross-validation is a good practice. This technique consists in splitting the entire dataset into k-folds. One fold is picked as test set and the others are considered as training sets. The model is trained on training folds and tested on the test set. Then, another test set is picked and the same process is repeated until all possible tests set are picked. At the end of the process, all results of all test sets are averaged, which provides a good estimation of the model performances. This technique is summarized on figure \ref{cross_validation}.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/cross_validation.png}
+\caption{5-folds cross-validation }
+\label{cross_validation}
+\end{figure}
+
 
 \subsection{Weight initialization}
-\label{weight_optimization}
+\label{weight_initialization}
+Before training a neural network, the weights have to be initialized in order to proceed to the first forward propagation. The initialization of the neural network weights is crucial since it will determine how quickly the network converges. The idea behind weight initialization is to generate an initialization that "prevents layer activation outputs from exploding or vanishing during the course of a forward pass through a deep neural network. If either occurs, loss gradients will either be too large or too small to flow backwards beneficially, and the network will take longer to converge, if it is even able to do so at all"\cite{27}.\\
+The simplest and least efficient technique to initialize neural network weights is to randomly generate them. The major problem of this technique comes from the fact that some initializations can lead to extremely small or big values, which lead to value near 0 or 1 for most activation functions. Consequently, the slope of the gradient changes slowly and the learning takes a lot of time.\\
+To prevent this effect when the tanh activation function is used, "Xavier initialization" multiplies the random initialization by the fraction:
+\begin{equation}
+\frac{\sqrt{6}}{\sqrt{n_{h}^{[l]}+n_{h}^{[l+1]}}}
+\end{equation}
+where $n_{h}^{[l]}$ is the number of incoming network connection to the layer and $n_{h}^{[l+1]}$ is the number of outgoing network connections from that layer.\\
+For activation functions that are not symmetric about zero and don't have outputs inside [-1,1] such as ReLU or ELU, Kaiming initialization is an alternative. It consists in multiplying the random initialized matrix weight by:
+\begin{equation}
+\frac{\sqrt{2}}{\sqrt{n_{h}^{[l]}}}
+\end{equation} 
+where $n_{h}^{[l]}$ is the number of incoming connections coming into a given layer from the previous layer's output.
 
 \subsection{Hyperparameters}
-
+Hyperparameters denotes parameters that cannot be directly learned from the data. In deep learning,
 
 lr, batch size, epochs, optimizer, learning rate decay, ...
 
