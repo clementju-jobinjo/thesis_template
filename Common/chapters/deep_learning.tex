@@ -424,7 +424,7 @@ The gradient shows how much all parameters that constitute x need to change to m
 \begin{equation}
 \frac{\partial J}{\partial w_{jk}^{l}} = \frac{\partial J}{\partial z_{j}^{l}} * \frac{\partial z_{j}^{l}}{\partial w_{jk}^{l}}
 \end{equation}
-Similarly, the chain rules has to be applied to biases since they are also parameters of the cost function:
+Similarly, the chain rules has to be applied to the biases:
 \begin{equation}
 \frac{\partial J}{\partial b_{j}^{l}} = \frac{\partial J}{\partial z_{j}^{l}} * \frac{\partial z_{j}^{l}}{\partial b_{j}^{l}}
 \end{equation}
@@ -452,7 +452,7 @@ From these four categories, multiple metrics with their own specificities can be
 \begin{equation}
 Accuracy = \frac{(TP+TN)}{TP+FP+FN+TN}
 \end{equation}
-Accuracy is a great measure in the case of symmetric data (i.e the number of FN $\approx$ FP and their cost is similar). When this condition is not fulfilled, accuracy can lead to bad models. For instance, let's define a binary classification model that always outputs class 0. If the data is composed of 99 samples from class 0 and 1 from class 1, the accuracy is equal to 99\% but the model is not smart. Consequently, this metric has to be used in addition to other metrics.
+Accuracy is a great measure in the case of symmetric data (i.e the number of FN $\approx$ FP and their cost is similar). When this condition is not fulfilled, accuracy can lead to bad models. For instance, let's define a binary classification model that always outputs class 0. If the data is composed of 99 samples from class 0 and 1 sample from class 1, the accuracy is equal to 99\% but the model is not smart. Consequently, this metric has to be used in addition to other metrics.
 
 \item Precision: it is the ratio of the correctly positive labeled subjects by the model to all positive labeled subjects.
 \begin{equation}
@@ -517,37 +517,29 @@ For activation functions that are not symmetric about zero and don't have output
 \end{equation} 
 where $n_{h}^{[l]}$ is the number of incoming connections coming into a given layer from the previous layer's output.
 
-\subsection{Hyperparameters}
-Hyperparameters denotes parameters that cannot be directly learned from the data. In deep learning,
-
-lr, batch size, epochs, optimizer, learning rate decay, ...
-
-
-From: https://stats.stackexchange.com/questions/153531/what-is-batch-size-in-neural-network
-Batch size: 
-Advantages of using a batch size < number of all samples:
-It requires less memory. Since you train the network using fewer samples, the overall training procedure requires less memory. That's especially important if you are not able to fit the whole dataset in your machine's memory.
-
-Typically networks train faster with mini-batches. That's because we update the weights after each propagation. In our example we've propagated 11 batches (10 of them had 100 samples and 1 had 50 samples) and after each of them we've updated our network's parameters. If we used all samples during propagation we would make only 1 update for the network's parameter
+\subsection{Hyperparameters tuning}
+Hyperparameters denotes parameters that cannot be directly learned from the data. That is the case for the learning rate, the batch size and the number of epochs that were described in previous sections. So, these parameters have to be manually tuned in order to find the best configuration (i.e the one that minimizes at most the cost function keeping a good level of generalization).\\
+Regarding the learning rate $\alpha$, its value has to be neither too large or too small. A too large learning rate is recognizable analyzing the training loss curve: if "the loss is exploding or fluctuating" or if "it has stopped improving and it is wandering around a suboptimal local optima"\cite{28} the learning rate is too high and should be decreased. On the contrary, if "the learning is very slow and the loss is decreasing consistently" or if "the model is overfitting"\cite{28}, it is a clear sign that it should be increased.
+The learning rate can take a wide range of values. Consequently, the most used technique to find the optimal learning rate is simply the "trial and error", which consists in "trying widely different learning rates to determine the range of learning rates that need to be explored"\cite{28}. There also exists methods that, instead of keeping a fixed learning rate for the entire training, reduce it at each epoch (learning rate decay) or each time the loss on the validation set does not decrease (learning rate schedulers).\\
+Batch size is another important hyperparameter to tune. Training a network with a small batch size "requires less memory, since the latter is trained using fewer samples"\cite{29}. Furthermore, "networks train faster because the weights update is done after each propagation"\cite{29}. Nevertheless, "the smaller the batch the less accurate the estimate of the gradient will be"\cite{29}. Indeed, due to the high weights update frequency, the gradient fluctuates much more than if was computed after a bigger number of samples.\\
+Finally, the number of epochs during which the network is trained has to be carefully chosen. In fact, from a certain point in the training, neural network don't learn anymore useful features in the data and start overfitting. This point corresponds to the moment where, the validation loss does not decrease anymore and starts to continually increase. It is exactly at this moment that the training should be stopped. To achieve this goal, it is possible either to directly choose the right number of epochs or to use "early stopping", which stops the training as soon as the validation loss does not decrease for $x$ epochs.
 
 
-The smaller the batch the less accurate the estimate of the gradient will be. In the figure below, you can see that the direction of the mini-batch gradient (green color) fluctuates much more in comparison to the direction of the full batch gradient (blue color).
 
+\section{Convolutional Neural Networks}
 
-\section{Deep learning models}
-xxx
-
-\subsubsection{Convolutional Neural Networks}
-
-
-\subsubsection{Recurrent Neural Networks}
 
 
 
 
 \section{Transfer learning}
 
+"Transfer learning is a machine learning method where a model developed for a task is reused as the starting point for a model on a second task.\cite{30}". The model dedicated to the second task uses all or parts of the first model (i.e. keeps the same weights and architecture or a part of them) and is then retrained on data available for this task. The first model can either be implemented from scratch if enough data is available or can simply be downloaded from institutions that release large and trained models for similar tasks.\\
+It mainly provides three benefits \cite{30}:
+\begin{itemize}
+\item Higher start: the initial skill (before refining the model) on the source model is higher than it otherwise would be.
+\item Higher slope: the rate of improvement of skill during training of the source model is steeper than it otherwise would be.
+\item Higher asymptote: the converged skill of the trained model is better than it otherwise would be.
+\end{itemize}
+Nevertheless, "in general, it is not obvious that there will be a benefit to using transfer learning in the domain until after the model has been developed and evaluated"\cite{30}.
 
-
-
-\section{Deep learning frameworks}
