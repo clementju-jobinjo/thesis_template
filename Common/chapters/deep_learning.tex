@@ -4,21 +4,22 @@
 \label{ch:deep_learning}
 
 \section{Introduction to deep learning}
-Deep learning is currently one of the trendiest topics in machine learning, a subset of artificial intelligence. Machine learning refers to statistical models that allow computers to perform specific tasks without having been explicitly programmed to solve them. In fact, these models try to find structural patterns within data in order to understand new incoming situations and react in the best possible way accordingly. There exist various techniques in machine learning such as k-NN, SVM, k-means, decision trees, association rules, etc. What mainly differentiates deep learning from these algorithms is the concept of neural networks (see section  \ref{what_is_a_neural_network}), that are combined to form deep neural networks.\\
-Neural networks are inspired from the biological neural networks of the brain. These systems try to learn how to solve a problem based on the data they receive as input. Many concrete applications make use of neural networks: autonomous vehicles, smarter translators, computer-aided diagnoses, personal assistants, art creation, robotics, etc. The presence of deep learning techniques in all mentioned use cases clearly attests that this technology is a real breakthrough. Furthermore, since this field has recently gained interest   (see section \ref{historical_background}), multiple researches are still ongoing, which suggests that many exciting new applications will certainly be discovered.
+Deep learning is currently one of the trendiest topics in machine learning, a subset of artificial intelligence. Machine learning refers to statistical models that allow computers to perform specific tasks without having been explicitly programmed to solve them. In fact, these models try to find structural patterns within data in order to understand new incoming situations and react in the best possible way. There exist various techniques in machine learning such as k-NN, SVM, k-means, decision trees, association rules, etc. What mainly differentiates deep learning from these algorithms is the concept of neural networks (see section  \ref{what_is_a_neural_network}) that are combined to form deep neural networks.\\
+Neural networks are inspired from the biological neural networks of the brain. These systems try to learn how to solve a problem based on the data they receive as input. Many concrete applications make use of neural networks: autonomous vehicles, smarter translators, computer-aided diagnoses, personal assistants, art creation, robotics, etc. The presence of deep learning techniques in these use cases clearly attests that this technology is a breakthrough. Furthermore, since this field has recently gained interest (see section \ref{historical_background}), a lot of research is still ongoing, which suggests that many exciting new applications will certainly be discovered in the near future.
 
 \subsection{Historical background}
 \label{historical_background}
-As described in figure \ref{history} from article \cite{14}, the theoretical foundations of deep learning appeared long before the invention of computers. From the first attempts to understand the human brain until today, a long way has been made to establish the basic components of modern neural networks. One could ask: why did deep learning take off recently if the theory has been around for a long time?\\
-First part of the answer is about the computational power. Indeed, deep learning algorithms need a lot of data to work properly and this requires powerful CPU/GPU that either didn't exist or were only available to a minority of people. One other main reason concerns the lack of data. Since deep learning algorithms "learn" from data, if not data is available, no learning is possible. Consequently, the era of Big Data has enhanced the deep learning possibilities. These two points are summarised: "The increase in model size overtime, due to the availability of faster CPUs, the advent of general purpose GPUs, fasternetwork, connectivity and better software infrastructure for distributed computing, is one of the most important trends in the history of deep learning. This trend is generally expected to continue well into the future"\cite{15}.\\
-Finally, before the year 2012, the abilities of neural networks had not been publicly proven. This changed with the ImageNet Large Scale Visual Recognition Challenge (a competition where researchers evaluate their algorithms on several visual recognition tasks). In fact, the deep convolutional neural network called "AlexNet" achieved 16\% of classification error rate, whereas the previous best scores were around 25\%. This victory marked the beginning of a new craze for these types of algorithms.
-
+As described on figure \ref{history}, the theoretical foundations of deep learning appeared long before the invention of computers. From the first attempts to understand the human brain until today, huge progres was made to be establish the basic components of modern neural networks. One could ask why deep learning took off recently if the theory was around for a long time.\\
+As stated by Goodfellow et al. \cite{15}, the first part of the answer is computing power. In fact, deep learning algorithms need a lot of data to work properly, which requires powerful CPUs/GPUs that either didn't exist or were only within few people's reach. One other main reason concerns the lack of data. Since deep learning algorithms "learn" from data, learning is impossible if good-quality data are not available. The era of Big Data enhanced deep learning possibilities. 
+%%%% Je mettrais soit l'un soit l'autre. Le paragraphe du dessus c'est le paragraphe du dessous avec des autres mots :)
+% These two points are summarised: "The increase in model size overtime, due to the availability of faster CPUs, the advent of general purpose GPUs, fasternetwork, connectivity and better software infrastructure for distributed computing, is one of the most important trends in the history of deep learning. This trend is generally expected to continue well into the future".\\
+Finally, before the year 2012, the abilities of neural networks were still to be proven. This changed with the ImageNet Large Scale Visual Recognition Challenge (a competition where researchers evaluate their algorithms on several visual recognition tasks). In fact, the deep convolutional neural network called "AlexNet" achieved 16\% of classification error rate, whereas the previous best scores were around 25\%. This victory marked the beginning of a new craze for these types of algorithms.
 
 
 \begin{figure}[!h]
 \centering
 \includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/history.png}
-\caption{Milestones }
+\caption{Milestones - Wang et al. \cite{14}}
 \label{history}
 \end{figure}
 
@@ -26,8 +27,8 @@ Finally, before the year 2012, the abilities of neural networks had not been pub
 \subsection{What is a neural network?}
 \label{what_is_a_neural_network}
 
-From a descriptive point of view, neural networks can simply be seen as a non linear applications that associate an input to an output with respect to certain parameters. The input can be images, sounds or whatever features that is numerical. The output of a neural network depends on the problem it tries to solve. In computer vision, the most common types of outputs  are classes (for classification problems) and pixel coordinates (for segmentation problems).\\
-From a mathematical point of view, a neural network can be defined as a non linear function $f$ that associates to an input $x$ an output $y$ with respect to parameters $\theta$.
+From a descriptive point of view, neural networks can simply be seen as a non-linear applications that associate an input to an output with respect to certain parameters. The input can be an image, a sound or any input that can be converted into numerical features. The output of a neural network depends on the problem it tries to solve. In computer vision, the most common types of outputs are classes (for classification problems) and pixel coordinates (for segmentation problems).\\
+From a mathematical standpoint, a neural network can be defined as a non-linear function $f$ that associates to an input $x$ an output $y$ with respect to parameters $\theta$.
 \begin{equation}
 y = f(x,\theta)
 \end{equation}
@@ -39,31 +40,28 @@ The parameters $\theta$ are estimated from the training samples.
 %\label{neural_network}
 %\end{figure}
 
-\subsection{Supervised learning and Unsupervised learning}
-In machine learning, there mainly exists two different kinds of task. The first one is "supervised learning". It includes all learning algorithms, whose training samples contains labels in order to find the optimal mapping between the input and the output.  The second one is "unsupervised learning". In contrast to supervised algorithms, the latter use non labeled data and its main goal is to infer the natural structure  present in the data. Since the model presented in this work belongs to the "supervised learning" category, all notions explained below refer to this kind of algorithms.
-
-
-
+\subsection{Supervised and unsupervised learning}
+In machine learning, two different kinds of tasks exist. The first one is "supervised learning". It includes learning algorithms whose training samples are associtted to their labels in order to find the optimal mapping between the input and the output. The second one is "unsupervised learning". In contrast to supervised algorithms, the latter rely on unlabeled data. Its main goal is to infer the natural structure  present in the data. Since the models presented in this work belong to the "supervised learning" category, notions explained below refer to this kind of algorithms.
 
 
 \section{Neural networks basics}
 
 \subsection{Notation}
-In order to respect a consistent mathematical notation to describe neural networks, this work will use the notation of Andrew Y. Ng, one of the pioneers of deep learning, that can be found in \cite{16}.\\
+In order to keep the mathematical description of neural network consistent, this work will use Andrew Y. Ng's notation \cite{16}, who was a pioneer in deep learning.\\
 
 \noindent \textbf{General comment}
 \begin{itemize}
-\item Superscript (i) will denote the $i^{th}$ training example.
-\item Superscript [l] will denote the $l^{th}$ layer of the neural network.
+\item Superscript (i) denotes the $i^{th}$ training example.
+\item Superscript [l] denotes the $l^{th}$ layer of the neural network.
 \end{itemize}
 
 \noindent \textbf{Sizes}
 \begin{itemize}
-\item $m$: number of examples in the dataset.
-\item $n_{x}$: input size.
-\item $n_{y}$: output size (or number of classes).
-\item $n_{h}^{[l]}$: number of hidden units (i.e neurons) of the $l^{th}$ layer. 
-\item $L$: number of layers in the network.
+\item $m$: number of examples in the dataset
+\item $n_{x}$: input size
+\item $n_{y}$: output size (or number of classes)
+\item $n_{h}^{[l]}$: number of hidden units (i.e neurons) of the $l^{th}$ layer
+\item $L$: number of layers in the network
 \end{itemize}
 
 \noindent \textbf{Neural networks components}
@@ -74,7 +72,7 @@ In order to respect a consistent mathematical notation to describe neural networ
 \item $y^{(i) \in \R^{n_{y}}}$ is the output label for the $i^{th}$ example.
 \item $W^{[l]} \in \R$ \textsuperscript{\# of neurons in the next layer = j  x \# of neurons in the previous layer = k} is the weight matrix at layer $[l]$.
 \item $b^{[l]} \in R$\textsuperscript{\# of units in next layer} is the bias vector in the $l^{th}$ layer.
-\item $\hat{y} \in R^{n_{y}}$ is the predicted output vector. It can also be denoted $a^{[L]}$ where $L$ is the number of layers in the network.
+\item $\hat{y} \in R^{n_{y}}$ is the predicted output vector. It can also be denoted $a^{[L]}$ where $L$ is the number of layers in the whole network.
 \item $g^{[l]}(x)$ is the $l^{th}$ activation function.  
 \item $z^{[l]} = W_{x}x^{(i)} + b^{[l]}$ denotes the weighted sum of the input given to the $l^{th}$ layer before passing through the activation function.\\
 \end{itemize}
@@ -83,19 +81,19 @@ In order to respect a consistent mathematical notation to describe neural networ
 \begin{itemize}
 \item $a = g^{[l]}(W_{x}x^{(i)} + b^{[l]}) = g^{[l]}(z^{[l]})$ where $g^{[l]}$ denotes the $l^{th}$ layer activation function.
 \item $a_{j}^{[l]} = g^{[l]} (\sum_{k} w_{jk}^{[l]}a_{k}^{[l-1]} + b_{j}^{[l]}) = g^{[l]} (z_{j}^{[l]}) $ is the general activation formula at $l^{th}$ layer.
-\item $J(x, W, b, y) or J(\hat{y}, y)$ denote the cost function.
+\item $J(x, W, b, y)$ and $J(\hat{y}, y)$ denote the cost function.
 \end{itemize}
 
 \subsection{Perceptrons}
 \label{perceptron}
-Perceptrons are the main components of neural networks. They were "developed in the 1950s and 1960s by the scientist Frank Rosenblatt, inspired by earlier work by Warren McCulloch and Walter Pitts"\cite{13}. Today, they are called "artificial neurons" or simply "neurons".\\
-A perceptron $j$ is a function $f$ of the input $x=(x_{1}, ..., x_{n})$ weighted by a vector of weights $w_{}=(w_{1}, ..., w_{n})$, completed by a bias $b_{j}$ and associated to a non linear activation function $g$:
+Perceptrons are the main components of neural networks. They were "developed in the 1950s and 1960s by the scientist Frank Rosenblatt, inspired by earlier work by Warren McCulloch and Walter Pitts" \cite{13}. Today, they are called "artificial neurons" or simply "neurons".\\
+A perceptron $j$ is a function $f$ of input $x=(x_{1}, ..., x_{n})$ weighted by a vector of weights $w_{}=(w_{1}, ..., w_{n})$, completed by a bias $b_{j}$ and associated to a non-linear activation function $g$:
 \begin{equation}
 \label{perceptron_equation}
 a_{j} = f_{j}(x) = g((\sum_{k=1}^{n} x_{k} * w_{k}) + b_{})
 \end{equation}
 
-Schematically, a perceptron can be represented as shown in figure \ref{perceptron_model}. Each input is multiplied with its corresponding weight and the sum of this result is then passed through a non linear function, called an "activation function". This activation function acts like a threshold that decides the proportion of the result that has to be given further. There exist multiple activation functions (see \ref{activation_functions}). It is extremely important to use a non linear functions instead of a linear function. Indeed, in a neural network the output of a perceptron is given as input to the others (see \ref{multilayer_perceptron}). Consequently, if only linear functions are used, linear outputs are given as inputs to other linear functions. Since the composition of two linear functions is itself a linear function, there would be no sense to assemble perceptrons to create neural networks of multiple layers.
+Schematically speaking, a perceptron can be represented as on figure \ref{perceptron_model}. Each input is multiplied with its corresponding weight. The sum of this result then goes through a non-linear function, called "activation function". This activation function acts like a threshold that determines the proportion of the result that goes further in the network. There exist multiple activation functions (see \ref{activation_functions}). It is extremely important to use non-linear functions instead of a linear functions. In fact, the output of a perceptron is given as input to the others (see \ref{multilayer_perceptron}). Consequently, if linear functions only are used throughout the network, linear outputs are given as inputs to other linear functions. Since the composition of two linear functions is itself a linear function, assembling perceptrons to create neural networks of multiple layers would not make sense anymore.
 
 
 \tikzset{basic/.style={draw,fill=white!20,text width=1em,text badly centered}}
@@ -141,7 +139,7 @@ Schematically, a perceptron can be represented as shown in figure \ref{perceptro
 
 \subsection{Activation functions}
 \label{activation_functions}
-Once the computation of the weighted sum of all inputs for a specific neuron is done, the latter has to pass the sum through an activation function that will decide the proportion of the result to send further. Activation functions have to be non-linear in order to approximate extremely complex functions. In fact, neural networks are considered as universal approximators. Article \cite{17} claims that "multilayer feedforward networks are capable of approximating any measurable function to any desired degree of accuracy, in a very specific and satisfying sense."According to \cite{18} the most commonly used activation functions are:\\\\
+Once the computation of the weighted sum of all inputs for a specific neuron is done, the latter has to pass the sum through an activation function that will decide the proportion of the result that will be sent to the next layer. Activation functions must be non-linear in order to approximate extremely complex functions. In fact, neural networks are considered as universal approximators. Hornik et al. claim that "multilayer feedforward networks are capable of approximating any measurable function to any desired degree of accuracy, in a very specific and satisfying sense" \cite{17}. According to Thomas Epelbaum \cite{18}, the most commonly used activation functions are:\\\\
  \noindent \textbf{Sigmoid function}\\
  The sigmoid function is defined as:
  \begin{equation}
@@ -249,7 +247,7 @@ Once the computation of the weighted sum of all inputs for a specific neuron is 
         \addlegendentry{$ReLU'(x)$}
       \end{axis}
     \end{tikzpicture}
-    \caption{The ReLU function and its derivative(not defined when x=0)}
+    \caption{The ReLU function and its derivative (undefined when $x=0$)}
   \end{center}
 \end{figure} 
  
@@ -310,17 +308,19 @@ g'(x) =
 
 \subsection{Multilayer perceptrons}
 \label{multilayer_perceptron}
-A multilayer perceptron is an artifical neural network type. Article \cite{23} defines the multilayer perceptrons as "feedforward networks with one or more layers of units between the
-input and output layers. The output units represent a hyperplane in the space
+A multilayer perceptron is a type of artifical neural networks. Du et al. \cite{23} define multilayer perceptrons as "feedforward networks with one or more layers of units between the
+input and output layers" where "the output units represent a hyperplane in the space
 of the input patterns."\\
-A multilayer perceptrons is composed of $L$ layers each of them having $n^{l}_{h}$ perceptrons. The layers are organized in the following way:
+A multilayer perceptron is composed of $L$ layers, each of them composed of $n^{l}_{h}$ perceptrons. The layers are organized in the following way:
 \begin{itemize}
-\item The input layer: it is the neural network entry point for the data. Generally, the data is provided to the network in the form of a matrix $X \in \R$ of size $(n_{x} \times batch\_size)$ with their corresponding labels $Y \in \R$ of size $(n_{y} \times batch\_size)$. The batch size defines the number of samples that will be given at the same time to the network and $n_{x}$ is their dimension. Moreover, $x^{(i)}$ is the $i^{th}$ sample represented as a column vector. The total number of training samples is given by $m$. Finally, $y^{(i)}$ is the output label for the $i^{th}$ example. For instance, under the assumption that the number of samples is 100 and that the batch size is 32, 4 batches in total will be given as input to the network.
-\item The hidden layer(s): hidden layers stand for all layers that are between the input layer and the output layer. For each of them are associated weights and biases (W, b), respectively denoted by $W^{[l]} \in \R $ and $b^{[l]}$, where $W_{ij}^{l}$ correspond to the weights associated with the connection between perceptron $j$ in layer $l$ and perceptron $i$ in layer $l+1$. By analogy, $b_{i}^{[l]}$ is the bias associated with perceptron $i$ in layer $l+1$. The weights and the biases of the network are the parameters that have to be optimized in order to have the best mapping between the inputs and the output of the network (see section \ref{training_a_neural_network} ). Before training the neural network, the weights can be randomly initialized or initialized with more sophisticated methods such as "Xavier initialization" or "Kaiming initialization"(see section \ref{weight_initialization}).
-\item The output layer: it is the last layer of the neural network. Its role is essential since it produces the prediction of the network for a given input. The prediction of a neural network is given by $\hat{y} \in R^{n_{y}}$ with $n_{y}$ beeing the number of different labels. In a classification task, whose goal is to assign to each input a specific class, the $\hat{y}$ could be the probability of belonging to each class. In that case, the \textit{softmax} activation function would be used.
+\item The input layer: it is the neural network entry point for the data. Generally speaking, the data is provided in the form of a matrix $X \in \R$ of size $(n_{x} \times batch\_size)$ with their corresponding labels $Y \in \R$ of size $(n_{y} \times batch\_size)$. The batch size defines the number of samples that will be given at the same time to the network and $n_{x}$ is the dimension of each sample. Moreover, $x^{(i)}$ is the $i^{th}$ sample represented as a column vector. The total number of training samples is given by $m$. Finally, $y^{(i)}$ is the output label for the $i^{th}$ example. For instance, suppose the number of samples is 100 and the batch size 32. In this situation, the network will be feeded with 4 batches of sizes [32, 32, 32, 4] respectively. 
+
+\item The hidden layer(s): hidden layers stand for all layers that are between the input layer and the output layer. Each of them has its own weights and biases (W, b), denoted by $W^{[l]} \in \R $ and $b^{[l]}$ respectively, where $W_{ij}^{l}$ corresponds to the weights associated with the connection between perceptron $j$ in layer $l$ and perceptron $i$ in layer $l+1$. By analogy, $b_{i}^{[l]}$ is the bias associated with perceptron $i$ in layer $l$. Weights and biases are the parameters to optimize in order to obtain the best mapping between the input and the output of the network (see section \ref{training_a_neural_network} ). Before training the neural network, the weights can be randomly initialized or initialized with more sophisticated methods such as "Xavier initialization" or "Kaiming initialization"(see section \ref{weight_initialization}).
+
+\item The output layer: it is the last layer of the neural network. Its role is essential since it produces the prediction of the network for a given input. The prediction of a neural network is given by $\hat{y} \in R^{n_{y}}$ with $n_{y}$ beeing the number of different labels. In a classification task, whose goal is to assign to each input a specific class, the $\hat{y}$ is usually the probability that the input belongs to each class. In that case, the \textit{softmax} activation function would be used at the end.
 \end{itemize}
-The advantage of organizing the weights, biases and inputs in matrices is due to the ability of modern CPU/GPU to quickly perform linear algebra computations. This way of structuring the network component is called "vectorization" and avoids at most using loops in the code, which could considerably slow down the computations.
-The figure \ref{multilayer_perceptrons_figure} globally illustrates the concept of a multilayer perceptrons. In this example, the total number of layers $L$ is equal to 3, the input size $n_{x}$ is equal to 4 and the number of units in in each layer is $n_{h}^{1}= 4$, $n_{h}^{2}=2$, $n_{h}^{3}=1$. The network has the weights  $W^{(1)} \in \R^{2x3}$, $W^{(2)} \in \R^{1x2}$  and the biases  $b^{[1]}=2$, $b^{[2]}=1$.
+The advantage of organizing the weights, biases and inputs in matrices is due to the ability of modern CPUs/GPUs to quickly perform linear algebra computations. This way of structuring the network component is called "vectorization" which avoids using loops in the code, which would considerably slow down the computations.
+Figure \ref{multilayer_perceptrons_figure} illustrates the concept of multilayer perceptrons. In this example, the total number of layers $L$ is equal to 3, the input size $n_{x}$ is equal to 4 and the number of units in in each layer is $n_{h}^{1}= 4$, $n_{h}^{2}=2$, $n_{h}^{3}=1$. The network contains the weights  $W^{(1)} \in \R^{2x3}$, $W^{(2)} \in \R^{1x2}$ and the biases  $b^{[1]}=2$, $b^{[2]}=1$.
 
 
 \begin{figure}[!h]
@@ -371,24 +371,24 @@ The figure \ref{multilayer_perceptrons_figure} globally illustrates the concept 
 
 \section{Training a neural network}
 \label{training_a_neural_network}
-Training a neural network is composed of multiple steps. The first one is the "forward propagation step". It consists in giving to the untrained neural network examples that need to be classified (or segmented, depending on the task) and to transmit them through all layers of the network. Passing all batches as input to a network is called an "epoch". At the end of each batch the loss is computed using a "loss function". The latter is used to evaluate the predictions of the neural network in comparison to their ground-truth. Then, the weights and biases of the networks are updated during a process called "backpropagation" in order find the global minima of the loss function. This process is repeated for a defined number of epochs.
-
+Training a neural network can be broken down into multiple steps. The first one is the "forward propagation" step. It consists in giving examples that need to be classified (or segmented, depending on the task) to the untrained neural network and to spread intermediate results through all layers of the network. %Passing all batches as input to a network is called an "epoch". 
+After seeing every single batch, the loss is computed using a "loss function". The latter is used to evaluate the predictions of the neural network in comparison to their ground-truth. Then, the weights and biases of the networks are updated during a process called "backpropagation" in order find the global minimum of the loss function. As soon as the neural network has seen every single batch, the end of an "epoch" is reached. This process is repeated for a defined number of epochs.
 
 
 \subsection{Forward propagation}
-The forward propagation is used to transmit the input through the entire neural network. Mathematically, the forward propagation for a given layer $l$ is given by two equations:
+The forward propagation is used to transmit the input through the entire neural network. Mathematically speaking, the forward propagation step for a specific layer $l$ is represented by two equations. The first equation denotes the weighted sum of the input given to the $l^{th}$ layer before passing through the activation function $g$: 
 \begin{equation}
 z^{[l]} = W_{x}^{[l]}x^{(i)} + b^{[l]}
 \end{equation}
-This first equation denotes the weighted sum of the input given to the $l^{th}$ layer before passing through the activation function $g$. The second equation describes the effect of the activation function:
+The second equation describes the effect of the activation function:
 \begin{equation}
 a^{[l]} = g^{[l]}(z^{[l]})
 \end{equation}
-Since the output of the activation function is then given as input to all neurons of the next layer, the forward propagation step can be generally defined as:
+Since the output of the activation function is then given as input to all the neurons of the next layer, the whole forward propagation step can be defined as:
 \begin{equation}
 a_{j}^{[l]} = g^{[l]} (\sum_{k} w_{jk}^{[l]}a_{k}^{[l-1]} + b_{j}^{[l]}) = g^{[l]} (z_{j}^{[l]}) 
 \end{equation}
-The figure \ref{forward_propagation} illustrates the computation of the forward propagation for the $l^{th}$ layer. The matrix of weight $W_{jk}^{l}$ correspond to the weights associated with the connection between perceptron $k$ in layer $l$ and perceptron $j$ in layer $l+1$. The latter is multiplied by the output of previous layer $a_{j}^{[l-1]}$, the biased $b^{[l]}$ is added and the entire result is given as input to the activation function.
+Figure \ref{forward_propagation} illustrates the computation of the forward propagation pass for the $l^{th}$ layer. The weight natrix $W_{jk}^{l}$ represents the weights associated with the connection between perceptron $k$ in layer $l$ and perceptron $j$ in layer $l+1$. This matrix is multiplied by the output of the previous layer $a_{j}^{[l-1]}$ before adding the bias $b^{[l]}$. The result is given as input to the activation function.
 
 \begin{figure}[!h]
 \centering
@@ -398,29 +398,31 @@ The figure \ref{forward_propagation} illustrates the computation of the forward 
 \end{figure}
 
 \subsubsection{Loss computation}
-"The loss function evaluates the error performed by the neural network when it tries
-to estimate the data to be predicted"\cite{18}. It is therefore useful to measure the penalty for a single input. On the contrary, when the goal is to have a more general overview of the error on the entire batch or on the entire dataset, the cost function $J$ is used. The latter is given by $J(\hat{y}, y)$ where $\hat{y}$ is the prediction of the neural network and $y$ the real label. There exist multiple cost functions.\\
-For a regression problem, a commonly used loss function is the mean square error:
+As stated by Thomas Epelbaum, "the loss function evaluates the error performed by the neural network when it tries to estimate the data to be predicted" \cite{18}. It is therefore useful to measure the penalty for a single input. On the contrary, when the goal is to get a more general overview of the error on the entire batch or on the entire dataset, the cost function $J$ is used. The latter is represented by $J(\hat{y}, y)$ where $\hat{y}$ is the prediction of the neural network and $y$ the real label. 
+
+There exist multiple cost functions. For a regression problem, a commonly used loss function is the mean square error:
 \begin{equation}
 J(\hat{y}, y) = \frac{1}{m}[\sum_{i=1}^{m} (\hat{y}^{(i)} - y^{(i)})^{2}]
 \end{equation}
-For classification problems, the cross entropy function is regularly used. We distinguish the binary classification where the number of classes $n_{y}$ = 2 and the multiclass classification where $n_{y}$ > 2. In binary classification, the cross entropy is:
+For classification problems, the cross entropy function is regularly used. We distinguish the binary classification where the number of classes $n_{y}$ = 2 from the multiclass classification where $n_{y}$ > 2. In the case of binary classification, the cross entropy is:
 \begin{equation}
 J(\hat{y}, y) = -\frac{1}{m}\sum_{i=1}^{m} [y_{i}*log(\hat{y}_{i}) + (1-y_{i})*log(1-\hat{y_i})]
 \end{equation}
-In multiclass classification, the categorical crossentropy is:
+In the case of multiclass classification, the categorical crossentropy is:
 \begin{equation}
 J(\hat{y}, y) = - \sum_{i=1}^{n_{y}} \sum_{j=1}^{m} (y_{ij}*log(\hat{y}_{ij}))
 \end{equation}
 
-Since the cost function gives an estimation of the overall error of the network, the main objective of training a neural network is to update its weight in order to approach the minimum of the function. Therefore, deep learning problems can be considered as optimization problems. Solutions to these problems can be found using the gradient descent algorithm during backpropagation.
+Since the cost function gives an estimation of the overall error of the network, the main objective of training a neural network is to update its weights in order to approach the minimum of the function. Therefore, deep learning problems can be considered as optimization problems. Solutions to these problems can be found using the gradient descent algorithm during backpropagation.
+
 \subsection{Backpropagation}
-Backpropagation relies on a technique called "gradient descent" to minimize the cost function $J(W, b)$. Globally, "the intuition behind the backpropagation algorithm is as follows. Given a training example $(x^{(i)}, y^{(i)})$, we will first run a forward pass to compute all the activations throughout the network, including the output value of the network. Then, for each node $i$ in layer $l$, we would like to compute an "error term" $\partial^{(l)}_{i}$ that measures how much that node was "responsible" for any errors in our output. For an output node, we can directly measure the difference between the network’s activation and the true target value, and use that to define $\partial^{(n_{l})}_{i}$(where layer $n_{l}$ is the output layer). How about hidden units? For those, we will compute $\delta^{(l)}_{i}$ based on a weighted average of the error terms of the nodes that uses $a^{(l)}_{i}$ as an input"\cite{24}.\\
-In other words, after each forward pass through the entire network, backpropagation performs a backward pass with the goal of minimizing the cost function by adjusting model's parameters. The way parameters are updated is defined by the gradients of the cost function with respect to each parameter of the network. The gradient of the cost function $J(x_{1}, x_{2}, ..., x_{m})$ in point $x$ is given by:
+Backpropagation relies on a technique called "gradient descent" to minimize the cost function $J(W, b)$. Generally speaking, "the intuition behind the backpropagation algorithm is as follows. Given a training example $(x^{(i)}, y^{(i)})$, we will first run a forward pass to compute all the activations throughout the network, including the output value of the network. Then, for each node $i$ in layer $l$, we would like to compute an "error term" $\partial^{(l)}_{i}$ that measures how much that node was "responsible" for any errors in our output. For an output node, we can directly measure the difference between the network’s activation and the true target value, and use that to define $\partial^{(n_{l})}_{i}$(where layer $n_{l}$ is the output layer). How about hidden units? For those, we will compute $\delta^{(l)}_{i}$ based on a weighted average of the error terms of the nodes that uses $a^{(l)}_{i}$ as an input" \cite{24}.
+
+In other words, after each forward pass through the entire network, backpropagation performs a backward pass which aims at minimizing the cost function by adjusting parameters of the model. The way parameters are updated is defined by the gradients of the cost function with respect to each parameter of the network. The gradient of the cost function $J(x_{1}, x_{2}, ..., x_{m})$ at point $x$ is given by:
 \begin{equation}
 \frac{\partial J}{\partial x} = [\frac{\partial J}{\partial x_{1}}, \frac{\partial J}{\partial x_{2}}, ..., \frac{\partial J}{\partial x_{1}}]
 \end{equation}
-The gradient shows how much all parameters that constitute x need to change to minimize the function. In neural networks, the parameters of the cost function are all weight matrices $W^{[l]}$ and biases $b^{[l]}$ The computation of all these gradients relies on the "chain rule". For weights parameters, the chain rule is:
+The gradient shows how much all parameters that constitute x need to change to minimize the function. In neural networks, the parameters of the cost function are all weight matrices $W^{[l]}$ and biases $b^{[l]}$. The computation of all these gradients relies on the "chain rule". Inthe case of weights, the chain rule is:
 \begin{equation}
 \frac{\partial J}{\partial w_{jk}^{l}} = \frac{\partial J}{\partial z_{j}^{l}} * \frac{\partial z_{j}^{l}}{\partial w_{jk}^{l}}
 \end{equation}
@@ -428,7 +430,7 @@ Similarly, the chain rules has to be applied to the biases:
 \begin{equation}
 \frac{\partial J}{\partial b_{j}^{l}} = \frac{\partial J}{\partial z_{j}^{l}} * \frac{\partial z_{j}^{l}}{\partial b_{j}^{l}}
 \end{equation}
-Once the gradients of each parameters of the neural network are computed, they have to be updated. The weights update is described by the following equation:
+Once the gradients of each parameter are computed, these parameters are updated. The weights update is described by the following equation:
 \begin{equation}
 W^{[l]} = W^{[l]} - \alpha * \frac{\partial J}{\partial W^{[l]}}
 \end{equation}
@@ -436,7 +438,9 @@ The biases update corresponds to:
 \begin{equation}
 b^{[l]} = b^{[l]} - \alpha * \frac{\partial J}{\partial b^{[l]}}
 \end{equation}
-The hyperparameter $\alpha$ of these two equations is named "learning rate". It determines the gradient's influence at each epoch and has to be manually tuned.
+%The hyperparameter $\alpha$ of these two equations is called "learning rate". It determines the gradient's influence at each epoch and has to be manually tuned.
+The "learning rate" $\alpha$ determines the influence that the gradient has at each epoch. It is an hyperparameter and has to be tuned manually.
+
 
 \subsection{Metrics}
 In classification tasks, four separate output labels can occur:
@@ -446,15 +450,15 @@ In classification tasks, four separate output labels can occur:
 \item False Positive (FP): an output belongs to this class if the prediction that the latter \textbf{contains} a certain feature is \textbf{incorrect}.
 \item False Negative (FN): an output belongs to this class if the prediction that the latter does \textbf{not contain} a certain feature is \textbf{incorrect}.
 \end{itemize}
-From these four categories, multiple metrics with their own specificities can be established \cite{25}:
+From these four categories, multiple metrics with their own specificities can be computed \cite{25}:
 \begin{itemize}
-\item Accuracy: it is defined as the ratio of the correctly labeled subjects to the whole pool of subjects.
+\item Accuracy: ratio of the correctly labeled subjects to the whole pool of subjects.
 \begin{equation}
 Accuracy = \frac{(TP+TN)}{TP+FP+FN+TN}
 \end{equation}
 Accuracy is a great measure in the case of symmetric data (i.e the number of FN $\approx$ FP and their cost is similar). When this condition is not fulfilled, accuracy can lead to bad models. For instance, let's define a binary classification model that always outputs class 0. If the data is composed of 99 samples from class 0 and 1 sample from class 1, the accuracy is equal to 99\% but the model is not smart. Consequently, this metric has to be used in addition to other metrics.
 
-\item Precision: it is the ratio of the correctly positive labeled subjects by the model to all positive labeled subjects.
+\item Precision: ratio of the correctly positive labeled subjects by the model to all positive labeled subjects.
 \begin{equation}
 Precision = \frac{TP}{(TP + FP)}
 \end{equation}
@@ -477,8 +481,8 @@ F1-score considers both precision and recall and is the highest if these two met
 Specificity = \frac{TN}{(TN + FP)}
 \end{equation}
 This metric is recommended when the occurence of false positives is intolerable whereas true negatives are desired. For instance drug tests can not indicate false positives but they have to cover all true negatives.
-\item AUC-ROC:
-"The ROC curve is plotted with recall against the false positive rate (1-specificity) where recall is on y-axis and the false positive rate is on the x-axis. AUC - ROC curve is a performance measurement for classification problem at various thresholds settings. ROC is a probability curve and AUC represents degree or measure of separability. It tells how much model is capable of distinguishing between classes. Higher the AUC, better the model is at predicting 0s as 0s and 1s as 1s\cite{26}."
+\item ROC curve and AUC:
+As explained by Sarang Narkhede, "The ROC curve is plotted with recall against the false positive rate (1-specificity) where recall is on y-axis and the false positive rate is on the x-axis. AUC - ROC curve is a performance measurement for classification problem at various thresholds settings. ROC is a probability curve and AUC represents degree or measure of separability. It tells how much model is capable of distinguishing between classes. Higher the AUC, better the model is at predicting 0s as 0s and 1s as 1s" \cite{26}.
 
 \end{itemize}
 
@@ -488,11 +492,11 @@ This metric is recommended when the occurence of false positives is intolerable 
 \subsection{Data}
 In deep learning, data is essential. As seen previously, neural networks learn features from it. Therefore, data has to be handled carefully and in the right way. Usually, it is split into three different sets:
 \begin{itemize}
-\item The training set: this is the dataset that is used to train the neural network (the weights and biases).
-\item The validation set: this the dataset that is used to evaluate a trained model.  Usually, the evaluation on the validation set is made every $x$ (a fixed number) epochs. The validation set needs to come from the same distribution as the training set but should contain exclusively unseen data. This last point is crucial since the validation set shows how well the neural network can generalize on unknown data. The validation set can also be used as indicator to decide when the training should be stopped in order to prevent "overfitting" (overfitting describes the behaviour of a model that too closely fits to the training set and don't generalize well). Indeed, if the validation loss continually increases for a certain number of epochs, going on with the training will increase the overfitting. This technique is called "early stopping".
-\item The test set: this last dataset is used to establish the final evaluation of the model and also contains unseen data. 
+\item The training set: this is the part of the dataset that is used to train the neural network (the weights and biases).
+\item The validation set: this the dataset that is used to evaluate a trained model. Usually, the evaluation on the validation set is performed every $N$ epochs, where $N$ is a fixed number. The validation set needs to come from the same distribution as the training set but should contain exclusively unseen data. This last point is crucial since the validation set shows how well the neural network generalizes on unknown data. The validation set can also be used as indicator to decide when the training should be stopped in order to prevent "overfitting" which is the behaviour of a model that fits to the training set too closely and don't generalize well. In fact, if the validation loss continuously increases for a certain number of epochs, going on with the training will increase the overfit. This fact of interrupting the training earlier is called "early stopping".
+\item The test set: this last part of the dataset is used to establish the final evaluation of the model. It also contains unseen data exclusively. 
 \end{itemize}
-Regarding the way these three sets are split, it mostly depends on the number of samples available. If the latter is big, the data is split into training and testing using the ratio 80/20. Then the remaining training samples are also split into training and validation using the ratio 80/20. On the contrary, if there are few data available, K-folds cross-validation is a good practice. This technique consists in splitting the entire dataset into k-folds. One fold is picked as test set and the others are considered as training sets. The model is trained on training folds and tested on the test set. Then, another test set is picked and the same process is repeated until all possible tests set are picked. At the end of the process, all results of all test sets are averaged, which provides a good estimation of the model performances. This technique is summarized on figure \ref{cross_validation}.
+Regarding the way these three sets are split, it mostly depends on the number of samples available. If the latter is big, the data is split into training and testing using the ratio 80/20. Then the remaining training samples are also split into training and validation using the ratio 80/20. On the contrary, if there are few data available, k-fold cross-validation is a good practice. This technique consists in splitting the entire dataset into k folds. One fold is picked as test set and the others are considered as training sets. The model is trained on training folds and tested on the test set. Then, another test set is picked and the same process is repeated until all possible tests set are picked. At the end of the process, the results of all test sets are averaged, which provides a good estimation of the model's performance. This technique is summarized on figure \ref{cross_validation}.
 
 \begin{figure}[!h]
 \centering
@@ -504,25 +508,25 @@ Regarding the way these three sets are split, it mostly depends on the number of
 
 \subsection{Weight initialization}
 \label{weight_initialization}
-Before training a neural network, the weights have to be initialized in order to proceed to the first forward propagation. The initialization of the neural network weights is crucial since it will determine how quickly the network converges. The idea behind weight initialization is to generate an initialization that "prevents layer activation outputs from exploding or vanishing during the course of a forward pass through a deep neural network. If either occurs, loss gradients will either be too large or too small to flow backwards beneficially, and the network will take longer to converge, if it is even able to do so at all"\cite{27}.\\
+Before training a neural network, the weights have to be initialized in order to proceed to the first forward propagation. The initialization of the neural network weights is crucial since it will determine how quickly the network converges to an optimum. The idea behind weight initialization is to generate an initialization that "prevents layer activation outputs from exploding or vanishing during the course of a forward pass through a deep neural network. If either occurs, loss gradients will either be too large or too small to flow backwards beneficially, and the network will take longer to converge, if it is even able to do so at all" \cite{27}.\\
 The simplest and least efficient technique to initialize neural network weights is to randomly generate them. The major problem of this technique comes from the fact that some initializations can lead to extremely small or big values, which lead to value near 0 or 1 for most activation functions. Consequently, the slope of the gradient changes slowly and the learning takes a lot of time.\\
 To prevent this effect when the tanh activation function is used, "Xavier initialization" multiplies the random initialization by the fraction:
 \begin{equation}
 \frac{\sqrt{6}}{\sqrt{n_{h}^{[l]}+n_{h}^{[l+1]}}}
 \end{equation}
-where $n_{h}^{[l]}$ is the number of incoming network connection to the layer and $n_{h}^{[l+1]}$ is the number of outgoing network connections from that layer.\\
-For activation functions that are not symmetric about zero and don't have outputs inside [-1,1] such as ReLU or ELU, Kaiming initialization is an alternative. It consists in multiplying the random initialized matrix weight by:
+where $n_{h}^{[l]}$ is the number of incoming network connections to the layer and $n_{h}^{[l+1]}$ is the number of outgoing network connections from that layer.\\
+For activation functions that are not symmetric around zero and don't have outputs inside [-1,1] such as ReLU or ELU, Kaiming initialization is an alternative. It consists in multiplying the randomly initialized  weight matrix by:
 \begin{equation}
 \frac{\sqrt{2}}{\sqrt{n_{h}^{[l]}}}
 \end{equation} 
 where $n_{h}^{[l]}$ is the number of incoming connections coming into a given layer from the previous layer's output.
 
 \subsection{Hyperparameters tuning}
-Hyperparameters denotes parameters that cannot be directly learned from the data. That is the case for the learning rate, the batch size and the number of epochs that were described in previous sections. So, these parameters have to be manually tuned in order to find the best configuration (i.e the one that minimizes at most the cost function keeping a good level of generalization).\\
-Regarding the learning rate $\alpha$, its value has to be neither too large or too small. A too large learning rate is recognizable analyzing the training loss curve: if "the loss is exploding or fluctuating" or if "it has stopped improving and it is wandering around a suboptimal local optima"\cite{28} the learning rate is too high and should be decreased. On the contrary, if "the learning is very slow and the loss is decreasing consistently" or if "the model is overfitting"\cite{28}, it is a clear sign that it should be increased.
-The learning rate can take a wide range of values. Consequently, the most used technique to find the optimal learning rate is simply the "trial and error", which consists in "trying widely different learning rates to determine the range of learning rates that need to be explored"\cite{28}. There also exists methods that, instead of keeping a fixed learning rate for the entire training, reduce it at each epoch (learning rate decay) or each time the loss on the validation set does not decrease (learning rate schedulers).\\
-Batch size is another important hyperparameter to tune. Training a network with a small batch size "requires less memory, since the latter is trained using fewer samples"\cite{29}. Furthermore, "networks train faster because the weights update is done after each propagation"\cite{29}. Nevertheless, "the smaller the batch the less accurate the estimate of the gradient will be"\cite{29}. Indeed, due to the high weights update frequency, the gradient fluctuates much more than if was computed after a bigger number of samples.\\
-Finally, the number of epochs during which the network is trained has to be carefully chosen. In fact, from a certain point in the training, neural network don't learn anymore useful features in the data and start overfitting. This point corresponds to the moment where, the validation loss does not decrease anymore and starts to continually increase. It is exactly at this moment that the training should be stopped. To achieve this goal, it is possible either to directly choose the right number of epochs or to use "early stopping", which stops the training as soon as the validation loss does not decrease for $x$ epochs.
+Hyperparameters denote parameters that cannot be directly learned from the data. That is the case for the learning rate, the batch size and the number of epochs that were described in previous sections. So, these parameters have to be manually tuned in order to find the best configuration (i.e the one that minimizes the cost function and that keeps a acceptable level of generalization).\\
+Regarding the learning rate $\alpha$, its value has to be neither too large or too small. A too large learning rate is recognizable by analyzing the training loss curve: if "the loss is exploding or fluctuating" or if "it has stopped improving and it is wandering around a suboptimal local optima" \cite{28}, the learning rate is too high and should be decreased. On the contrary, if "the learning is very slow and the loss is decreasing consistently" or if "the model is overfitting" \cite{28}, it is a clear sign that it should be increased.
+The learning rate can take a wide range of values. Consequently, the most used technique to find the optimal learning rate is simply the "trial and error", which consists in "trying widely different learning rates to determine the range of learning rates that need to be explored" \cite{28}. There also exists methods that, instead of keeping a fixed learning rate for the entire training, reduce it after each epoch (learning rate decay) or each time the loss on the validation set does not decrease (learning rate scheduling).\\
+Batch size is another important hyperparameter to tune. Training a network with a small batch size "requires less memory, since the latter is trained using fewer samples" \cite{29}. Furthermore, "networks train faster because the weights update is done after each propagation" \cite{29}. Nevertheless, "the smaller the batch the less accurate the estimate of the gradient will be" \cite{29}. Indeed, due to the high weights update frequency, the gradient fluctuates much more than if was computed after a bigger number of samples.\\
+Finally, the number of epochs during which the network is trained has to be carefully chosen. In fact, from a certain point in the training, neural networks don't learn anymore useful features in the data and start overfitting. This point corresponds to the moment where, the validation loss does not decrease anymore and starts to increase continuously. It is exactly at this moment that the training should stop. To achieve this goal, it is possible either to directly choose the right number of epochs or to use "early stopping", which stops the training as soon as the validation loss does not decrease for $N$ epochs.
 
 
 
@@ -534,12 +538,12 @@ Finally, the number of epochs during which the network is trained has to be care
 
 \section{Transfer learning}
 
-"Transfer learning is a machine learning method where a model developed for a task is reused as the starting point for a model on a second task.\cite{30}". The model dedicated to the second task uses all or parts of the first model (i.e. keeps the same weights and architecture or a part of them) and is then retrained on data available for this task. The first model can either be implemented from scratch if enough data is available or can simply be downloaded from institutions that release large and trained models for similar tasks.\\
+"Transfer learning is a machine learning method where a model developed for a task is reused as the starting point for a model on a second task. \cite{30}". The model dedicated to the second task uses all or parts of the first model (i.e. keeps the same weights and architecture or a part of them) and is then retrained on data available for this task. The first model can either be implemented from scratch if enough data is available or can simply be downloaded from institutions that release large and trained models for similar tasks.\\
 It mainly provides three benefits \cite{30}:
 \begin{itemize}
 \item Higher start: the initial skill (before refining the model) on the source model is higher than it otherwise would be.
 \item Higher slope: the rate of improvement of skill during training of the source model is steeper than it otherwise would be.
 \item Higher asymptote: the converged skill of the trained model is better than it otherwise would be.
 \end{itemize}
-Nevertheless, "in general, it is not obvious that there will be a benefit to using transfer learning in the domain until after the model has been developed and evaluated"\cite{30}.
+Nevertheless, "in general, it is not obvious that there will be a benefit to using transfer learning in the domain until after the model has been developed and evaluated" \cite{30}.
 
