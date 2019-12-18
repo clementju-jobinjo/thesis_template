@@ -532,17 +532,54 @@ Finally, the number of epochs during which the network is trained has to be care
 
 \section{Convolutional Neural Networks}
 
+Convolutional Neural Networks (CNN) are a specific type of deep neural networks. They are particular in that they contain layers which perform a mathematical operation named convolution on the input data. CNNs are mostly used in image and video analysis. 
 
+To perform a convolution, numerical input data and a "filter". A filter can be seen as a an $fxf$ numerical patch that moves across the entire input. It first moves horizontally until reaching the right-most border of the image. Then, it goes down a cell and starts from the border on the left-hand side. This process is repeated until the filter reaches the bottom-right corner of the image, which marks the end of the convolution. At each step, the dot product between the filter and the part of the input covered by the filter is computed. Figure \ref{fig:convolution} showcases a simple convolution which aims at finding vertical lines in a black and white image. For example, the output of the first step of the convolution (in red) is computed by evaluating the dot product between the blue filter and the red part of the input image: 
+\begin{equation}
+\begin{gathered}
+\color{blue}(-1) \color{black}* \color{red}0 \color{black}+ \color{blue}2 \color{black}* \color{red}0 \color{black}+ \color{blue}(-1) \color{black}* \color{red}0
+\\ \color{black}+ \\ 
+\color{blue}(-1) \color{black}* \color{red}0 \color{black}+ \color{blue}2 \color{black}* \color{red}0 \color{black}+ \color{blue}(-1) \color{black}* \color{red}1 
+\\ \color{black}+ \\ 
+\color{blue}(-1) \color{black}* \color{red}0 \color{black}+ \color{blue}2 \color{black}* \color{red}0 \color{black}+ \color{blue}(-1) \color{black}* \color{red}1 
+\\ \color{black}= -2
+\end{gathered}
+\end{equation}
+
+\noindent The output of the entire convolution shows negative values in the outside parts and large positive values in the center. This means that the $3x3$ filter detected a vertical line in the center of the input image. 
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/convolution.png}
+\caption{Convolutions - Basic convolution in a CNN}
+\label{fig:convolution}
+\end{figure}
+
+Different parameters can change the way a convolution behaves. First of all, the previous example relied on a filter moving by respectively one cell to the right and to the bottom. In this case, the "stride" is equal to 1. Other applications could rely on a bigger stride. Furthermore, the previous example reduced the output size of $3x3$ in proportion to the initial input size $5x5$. To influence the output size, a padding can be added to the outside of the input image, usually filled with 0s. Three ways of padding images are commonly used as shown on figure \ref{fig:convolution_padding}:
+\begin{itemize}
+	\item \textbf{Valid:} the input image is not padded. This means that the filter only goes through existing pixel values, which makes the output size smaller than the input size. 
+	
+	\item \textbf{Same:} the input image is padded in a way that makes the output size the same as the input size.
+	
+	\item \textbf{Full:} the input image is padded so that, in the first step of the convolution, only the bottom-right cell of the filter overlays the pixel value of the image, the rest overlaying padding cells. This makes the output size larger than the input size. 
+\end{itemize}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/convolution_padding.png}
+\caption{Convolutions - Different padding methods}
+\label{fig:convolution_padding}
+\end{figure}
 
 
 
 \section{Transfer learning}
 
-"Transfer learning is a machine learning method where a model developed for a task is reused as the starting point for a model on a second task. \cite{30}". The model dedicated to the second task uses all or parts of the first model (i.e. keeps the same weights and architecture or a part of them) and is then retrained on data available for this task. The first model can either be implemented from scratch if enough data is available or can simply be downloaded from institutions that release large and trained models for similar tasks.\\
-It mainly provides three benefits \cite{30}:
+According to Jason Brownlee, "transfer learning is a machine learning method where a model developed for a task is reused as the starting point for a model on a second task" \cite{30}. The model dedicated to the second task uses some or all parts of the first model (i.e. keeps the same weights and architecture or a part of them) and is then retrained on data available for this task. The first model can either be implemented from scratch if enough data is available or it can simply be downloaded from institutions that release large pretrained models for similar tasks.\\
+There are three major benefits \cite{30}:
 \begin{itemize}
 \item Higher start: the initial skill (before refining the model) on the source model is higher than it otherwise would be.
-\item Higher slope: the rate of improvement of skill during training of the source model is steeper than it otherwise would be.
+\item Higher slope: the rate of skill improvement during training of the source model is steeper than it otherwise would be.
 \item Higher asymptote: the converged skill of the trained model is better than it otherwise would be.
 \end{itemize}
 Nevertheless, "in general, it is not obvious that there will be a benefit to using transfer learning in the domain until after the model has been developed and evaluated" \cite{30}.
