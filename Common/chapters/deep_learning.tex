@@ -397,7 +397,7 @@ Figure \ref{forward_propagation} illustrates the computation of the forward prop
 \label{forward_propagation}
 \end{figure}
 
-\subsubsection{Loss computation}
+\subsection{Loss computation}
 As stated by Thomas Epelbaum, "the loss function evaluates the error performed by the neural network when it tries to estimate the data to be predicted" \cite{18}. It is therefore useful to measure the penalty for a single input. On the contrary, when the goal is to get a more general overview of the error on the entire batch or on the entire dataset, the cost function $J$ is used. The latter is represented by $J(\hat{y}, y)$ where $\hat{y}$ is the prediction of the neural network and $y$ the real label. 
 
 There exist multiple cost functions. For a regression problem, a commonly used loss function is the mean square error:
