@@ -41,6 +41,16 @@ In comparison to the original VGG, this model keeps the small filter size of 3x3
 \end{figure}
 \subsection{Criterion to save the best model}
 \subsection{Tensorboard}
+During the experiment the following metrics are registered: loss, accuracy, precision, recall, F1-score, specificity and AUC. These metrics are computed separately on the training and on the validation sets at the end of each epoch. They are then stored across all epochs and plotted on the same figure thanks to Tensorboard at the end of the process. Subsequently, this is also the case for the metrics measured on the test set.\\
+"Tensorboard provides the visualization and tooling needed for machine learning experimentation:
+\begin{itemize}
+\item Tracking and visualizing metrics.
+\item Visualizing the model graph (ops and layers).
+\item Viewing histograms of weights, biases, or other tensors as they change over time.
+\item Projecting embeddings to a lower dimensional space.
+\item Displaying images, text, and audio data"\cite{39}.
+\end{itemize}
+In this experiment, Tensorboard is mainly used to plot the Matplotlib figures of the model performance. In addition to this, written reports regarding which model was the best and the results it reached are also added on the dashboard.
 \label{paper_tensorboard}
 \subsection{Script options}
 \subsection{Experimental setup}
