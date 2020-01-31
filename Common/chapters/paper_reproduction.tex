@@ -30,6 +30,15 @@ Schematically, the entire experiment process can be represented as shown in figu
 
 \section{Training the neural network}
 \subsection{Architecture}
+The model architecture used in the paper is a modified version of the VGG network from the Oxford's Visual Geometry Group (VGG). This model was initially designed as part of the Large Scale Visual Recognition Challenge 2014 that used the ImageNet dataset of 14 millions images belonging to 1000 classes. The figure \ref{fig:paper_model} illustrates its structure and its corresponding implementation in Python with the PyTorch Framework.\\
+It is first composed by three convolution-dropout-max-pooling blocks followed by three fully connected-dropout blocks. Each convolutional box (in blue) in the figure represents in reality three layers: the convolutional layer, the batch normalization layer and the exponential linear unit activation function. The same principle is used for the fully connected layer box (in orange) that is divided into a fully connected layer followed by the exponential linear unit. The last fully connected box (in purple) has the same structure except that the exponential linear unit is replaced by a softmax  function for classification.\\
+In comparison to the original VGG, this model keeps the small filter size of 3x3 or 1x1,  also doubles the number of filters after each convolution-dropout-max-pooling block and has a stride of 1 for all convolutions. It differs from the traditional VGG in that it makes use of a smaller number of layer since the task is simpler than the original one, it uses exponential linear units instead of rectified linear units as activation functions and adds dropout and batch normalization layers.
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/model_paper_manual.png}
+\caption{Model architecture with the corresponding PyTorch code}
+\label{fig:paper_model}
+\end{figure}
 \subsection{Criterion to save the best model}
 \subsection{Tensorboard}
 \label{paper_tensorboard}
