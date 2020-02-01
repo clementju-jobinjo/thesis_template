@@ -53,6 +53,34 @@ During the experiment the following metrics are registered: loss, accuracy, prec
 In this experiment, Tensorboard is mainly used to plot the Matplotlib figures of the model performance. In addition to this, written reports regarding which model was the best and the results it reached are also added on the dashboard.
 \label{paper_tensorboard}
 \subsection{Script options}
+Since training a neural network requires datasets, hyperparameters and many more configuration choices, the creation of a generic script that accepts multiple options is necessary. In order to achieve this goal, the Python module "argparse" is extremely useful. The latter automatically generates help/usage messages and displays errors when the argument given by the user are invalid. The table shows all options accepted by the script.
+
+
+% Please add the following required packages to your document preamble:
+% \usepackage{graphicx}
+% \usepackage[table,xcdraw]{xcolor}
+% If you use beamer only pass "xcolor=table" option, i.e. \documentclass[xcolor=table]{beamer}
+\begin{table}[]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|llll|}
+\hline
+\rowcolor[HTML]{DAE8FC} 
+\textbf{Command}            & \textbf{Description}                                                                                                                                                                                                & \textbf{Required}                                                           & \textbf{Type} \\ \hline
+\textbf{--trainingSet1}     & Training set  path                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
+\textbf{--validationSet1}   & Validation set path                                                                                                                                                                                                 & True                                                                        & String        \\ \hline
+\textbf{--batchsize}        & Number of samples per batch                                                                                                                                                                                         & True                                                                        & Int           \\ \hline
+\textbf{--nbepochs}         & Number of epochs the training phase has to last                                                                                                                                                                     & True                                                                        & Int           \\ \hline
+\textbf{--lr}               & Learning rate used in the optimizer                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}False\\ Default: 1e-3\end{tabular}               & Float         \\ \hline
+\textbf{--lossfunction}     & \begin{tabular}[c]{@{}l@{}}Loss function name\\{[}CrossEntropyLoss, L1Loss, MSELoss{]}\end{tabular}                                                                                                            & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'CrossEntropyLoss'\end{tabular} & String        \\ \hline
+\textbf{--cuda-device}      & GPU name to run the experiment                                                                                                                                                                                      & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'cuda'\end{tabular}             & String        \\ \hline
+\textbf{--modeltoload}      & \begin{tabular}[c]{@{}l@{}}Pretrained model name \\If given, load it, otherwise randomly initialize it\end{tabular}                                                                                     & \begin{tabular}[c]{@{}l@{}}False\\ Default: ""\end{tabular}                 & String        \\ \hline
+\textbf{--dropout}          & Dropout probability                                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}False\\ Default: 0.3\end{tabular}                & Float         \\ \hline
+\textbf{--optimized-metric} & \begin{tabular}[c]{@{}l@{}}Metric to optimize\\ The best model during the training will be saved according to it\\{[}'auc', 'accuracy', 'precision', 'recall', 'f1score', 'specificity'{]}\end{tabular} & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'auc'\end{tabular}              & String        \\ \hline
+\textbf{--outputdirectory}  & Root of the output directory used by Tensorboard to save the models                                                                                                                                                 & True                                                                        & String        \\ \hline
+\end{tabular}%
+}
+\end{table}
+
 \subsection{Experimental setup}
 \subsection{Training verification}
 \subsubsection{Gradient flow visualization}
