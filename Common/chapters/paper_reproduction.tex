@@ -82,6 +82,9 @@ Since training a neural network requires datasets, hyperparameters and many more
 \end{table}
 
 \subsection{Experimental setup}
+The best performing model was implemented with PyTorch using the ADAM optimizer to update its weights, a learning rate of 1e-8 and the cross-entropy as loss function. The data was organized in batches of 128 samples and the experiment ran for 1300 epochs. The best model was selected with respect to the area under curve. Regarding the weights initialization, the best model from the roulette that maximized the F1-score was chosen as initial model.\\
+The model was trained on a Nvidia GeForce GTX Titan X graphic card during approximately 15 hours.
+
 \subsection{Training verification}
 \subsubsection{Gradient flow visualization}
 
