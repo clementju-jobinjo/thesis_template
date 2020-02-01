@@ -13,21 +13,85 @@ How we do it: transfer learning
 
 \section{Data processing}
 \subsection{PROSTATEx}
-\subsubsection{From DICOM to augmented DWI NumPy arrays}
-Keep only the DWI because white lesion, crop the lesion etc
+As the other datasets used in this work don't contain multi-sequence exams (single-sequence MRIs and CT scans), it was required to extract single channel images from the PROSTATEx dataset. DWI images were selected because lesions are white on this sequence, as well as on CT scans. Hence, choosing DWI images ensured a consistent representation of tumors from one dataset to the other, which helps the cancer detection.
+
+The overall process is the same as the one described in section \ref{sec:numpyToAugmentedStacked}, apart from the alignment and the stacking. A T2-weighted image was still used to align, crop and resize the corresponding DWI image but was not exported at the end, resulting in a single channel image (NumPy array).
+
+Ideally, transfer learning should rely on multi-sequence MRIs only. In fact, the extra information provided by different sequences increases the performance a lot. However, publicly available datasets either don't contain the clinical significance of the samples or were purely made for segmentation purposes (where labels are also images). 
+
 
 \subsection{LungCTChallenge}
 \subsubsection{Dataset description}
+Lung CT Challenge is composed of two different subdatasets of CT scans: one is called "calibration set" (10 patients) and the other "test set" (60 patients). Each patient can have 1 or multiple findings. Since labels were provided for both sets and the amount of data is fairly low, they were merged and used as a global training set. For each finding, an abnormal mass is visible in the lungs, which means that the classification is going to differentiate malignant from benign tumors. 
+
+Regarding labelling, two Excel files, \textit{TestSet\_NoduleData\_PublicRelease\_wTruth} and \textit{CalibrationSet\_NoduleData}, contain labels for these images. In order to facilitate the handling of information in the code, two CSV files were manually created: \mbox{\textit{TestSet.csv}} and \textit{CalibrationSet.csv}.
+Contrary to PROSTATEx, more than two labels were used in this dataset. Both "malignant" and "Primary lung cancer" were considered as positive, whereas "benign" and "Benign nodule" were treated as negative. A third label called "Suspicious malignant nodule" appeared two times. Since the diagnosis was not clearly defined for those images, they were not included in the training data to avoid any noise. 
+
+
 \subsubsection{From DICOM to augmented NumPy arrays}
+As PROSTATEx, the processing was split into two parts: preprocessing (DICOM to NumPy arrays) and augmentation (NumPy arrays to cropped augmented NumPy arrays.) Algorithm \ref{alg:LungCTChallenge_preprocessing} shows the various preprocessing steps. 
+
+\begin{algorithm}
+    \caption{Lung CT Challenge preprocessing}
+    \label{alg:LungCTChallenge_preprocessing}
+    \begin{algorithmic}[1] % The number tells where the line numbering should start
+        \Procedure{main}{$dataset\_folder, train\_CSV, test\_CSV, output\_folder$}
+        		\State Create output directories: $"output\_folder/True", "output\_folder/False"$\\
+        		\State $csv\_training \gets read\_CSV(train\_CSV)$ \Comment{CalibrationSet.csv}
+        		\State $csv\_test \gets read\_CSV(test\_CSV)$ \Comment{TestSet.csv}
+            \State $csv\_concatenated \gets concat(csv\_training, csv\_test)$\Comment{Both CSV files contain similar information about different patients.}\\
+            \For{$row$ in $csv\_concatenated$}
+            		\State $patient\_id \gets row["Scan\ Number"]$
+            		\State $slice\_number \gets row["Nodule\ Center\ Image"]$ \Comment{Value in $[1,\infty]$}
+            		\State $finding\_id \gets row["Nodule\ Number"]$
+            		\State $clinical\_significance \gets row["Diagnosis"]$\\
+            		\If{$clinical\_significance$ == $"malignant"$ or $"Primary\ lung\ cancer"$}
+            			\State{$clinical\_significance \gets True$}
+            		\ElsIf{$clinical\_significance$ == $"benign"$ or $"Benign\ nodule"$}
+            			\State{$clinical\_significance \gets False$}
+            		\ElsIf {$clinical\_significance$ == $"Suspicious\ malignant\ nodule"$}
+            			\State{Continue}
+            		\EndIf\\
+                \For{$visit\ in\ patient\_id$'s folder}
+                		\For{$mri\_type$ in $visit$}
+                			\For{$dicom\_file$ in $mri\_type$}
+                				\If {$slice\_number == dicom\_file.InstanceNumber$}
+                					\State{$slice \gets normalize\_dicom(dicom\_file)$} \Comment{see section \ref{sec:dicom_data_manipulation}}
+                					\State{Save $slice$ in $"output\_folder/clinical\_significance"$}
+                				\EndIf
+                			\EndFor
+            			\EndFor
+            		\EndFor
+            \EndFor
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
+
+The augmentation process is close to the one applied to PROSTATEx. An advantage Lung CT Challenge has it that all images have the same resolution (512x512 pixels), making the alignment process used for PROSTATEx useless. Nevertheless, lung tumors are particular. What differentiates them from the others is their look. In fact, lung tumors usually look like spider webs with a central nodule and branches coming out of it, whereas brain and prostate tumors tend to have well-defined boundaries. Therefore, a larger patch size was chosen in order to keep the extra information provided by the branches in the peripheral tissue. Furthermore, a perfect cropping method would only crop the interesting part of the tissue and a margin around it. However, tumor size varies a lot. It can either be extremely small (a dot) or large (massive nodule with long branches). Consequently, the selected patch size makes the largest tumors fit perfectly in the cropped area, inducing more tissue for smaller tumors. Naturally, there were few outliers whose size was a lot larger than the chosen patch size. If the patch size was set accordingly, entire lungs were sometimes visible in other patients' case. For this reason, these large tumors were treated as outliers. Lastly, and contrary to PROSTATEx, the dataset was more or less balanced (39 positives and 42 negatives). Therefore, each class was augmented the same amount of times (240x). 
+
+Images were normalized with respect to equation \ref{eq:normalization}. The mean and standard deviation were computed over the whole dataset. 
+
 
 \subsection{Kaggle Brain}
 \subsubsection{Dataset description}
+This dataset is publicly available on Kaggle. All images come from single-sequence MRIs. It is composed of two folders: one containing images with cancerous tumors and another one containing images either without tumor or with a non-cancerous tumor. Images whose quality was extremely low (resolution, picture of a screen, artefacts, etc.) were manually removed. In other cases, the image quality was good but disturbing objects such as left/right markers, arrows pointing the tumor, etc. were visible. These objects were manually removed using the object removal tool in Photoshop. File names and file formats were heterogeneous.
+
+
 \subsubsection{Ground truth creation}
-\subsubsection{From PNG to NumPy arrays}
-Manually create the csv file from scratch, crop the lesion etc
+\label{sec:braingroundtruth}
+The particularity of this dataset is that no information apart from the clinical significance is provided. Therefore, it was necessary to create a ground truth CSV file from scratch so that the same processing methods as the other datasets could be applied on this one. 
+
+The first step was to standardize the file names and formats. The chosen convention is "$[yes|no]{index}.jpg$". The vast majority of the files were in the JPG file format, so the few PNG images were converted. Then, a CSV file containing the following columns was created: "PatientID", "Nodule Center Position", "fid", "Diagnosis". The "PatientID" is the filename without extension that was set during the first step (for example "$yes99$" or "$no3$"). The "Nodule Center Position" is the pixel coordinate of the lesion. Fortunately, brain tumors are clearly visible on brain MRIs, which eased the process. To find the coordinates, every single image was opened at its original size in an image visualization software. A rectangle selection tool was used to draw a rectangle from the top left corner of the image (because the top left pixel corresponds to the pixel at the coordinates $(0,0)$ in NumPy arrays) to the center of the lesion. The pixel width and height of this rectangle gave the "i,j" coordinates of the lesion. These coordinates were reported manually. Then, the "fid" corresponds to the Finding ID. This parameter would be more pertinent if the same "PatientID" could have multiple findings, i.e. if the same patient could have multiple tumors. Since this information is made use of during the image processing of the other datasets, it was also added here. In this particular case, the "fid" was always set to "1". Finally, the "Diagnosis" was defined as "False" or "True" according to the folder which the image was in. 
+
+
+\subsubsection{From JPG to NumPy arrays}
+Images had to be converted to single-channel NumPy arrays (grayscale) so that the values could be normalized further on. First, a mere conversion involving no content modification apart from going from three to one channel was performed. Second, images were normalized according to equation \ref{eq:normalization}. The mean and standard deviation were computed over the whole dataset. Both classes were augmented by a common factor (200x) since both class contain a relatively close number number of instances (133 positives and 96 negatives). Similarly to Lung CT Challenge, tumor sizes vary substantially. The same methodology was applied regarding the patch size, i.e. choosing a size which fits the majority of large tumors perfectly. Even though the images all show the head under the same perspective (same height/width ratio, visible skull, black margin around the skull), images were probably collected from different sources, which explains the heterogeneity of resolutions. As a consequence, the patch size could not be a fixed number of pixels for all images because the cropped area would be the entire head on one image and a small portion of the tumor on another. The trick consisted in finding the horizontal and vertical portions of the image occupied by the tumor. In fact, cropping an area centered on the lesion whose height was $\frac{2}{7}$ of the image and whose width was $\frac{1}{4}$ gave good results. 
 
 \subsection{Verification}
 \subsubsection{Visual checking}
+Regarding the Kaggle brain dataset, the data generated was paid close attention to since the ground truth CSV file was created by hand (see section \ref{sec:braingroundtruth}). In fact, each generated image was taken a close look at, which allowed to spot 3 mistakes over the whole dataset. They concerned typos in the "Nodule Center Position", which created pitch black images since the cropped area was outside.
+Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control images with red dots were generated for both datasets. 
+
 
 \section{Transfer learning implementation}
 \subsection{Architecture generalities}

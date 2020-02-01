@@ -7,7 +7,7 @@ Song et al. \cite{07} proposed a deep convolutional neural network (DCNN) method
 This chapter is built top-down: first a superficial overview of the entire process is established in order to understand the purpose of the experiment as a whole. Then, each part or theoretical notion of the experiment is deeply described. The structure of the dataset is detailed, all steps of its processing are explained and the techniques used as verification of the proper functioning of the algorithm are presented. After the processing of the data, the training phase is deepened and all hyperparameters, options and implementation choices are given to ensure the reproductibility of the experiment. This part is followed by the presentation of the raw results, which is itself followed by their analysis in the "discussion" section.
 
 \section{Process overview}
-Schematically, the entire experiment process can be represented as shown in figure \ref{fig:paper_reproduction_process}. The PROSTATEx dataset is composed of samples whose clinical significance is provided (labeled data) and samples without this information (unlabeled data). The latter are used for the challenge, which consists in predicting the probability of patients lesions to be malignant (class 1) or benign (class 0). In both cases, the data is processed before been used (see \ref{prostatex_data_processing} for details). After the processing, the labeled data are split into training, validation and test sets using respectively 80\%, 10\% and 10\% of all available data for each set. The training set is then given in batches as input to the neural network, which update its weight consequently. At the end of each epoch, the current model is tested on the validation set (that the model has never seen previously) and the metrics are plotted on Tensorboard (see \ref{paper_tensorboard}). If the current model has a bigger AUC and a bigger accuracy than the previous best model, it becomes the best model and it is saved.  When the training phase reaches the defined number of epochs, the model is then tested on the test set. This same model is also used to take part in the PROSTATEx challenge to output predictions into a .csv file for each patient and findings.
+Schematically, the entire experiment process can be represented as shown in figure \ref{fig:paper_reproduction_process}. The PROSTATEx dataset is composed of samples whose clinical significance is provided (labeled data) and samples without this information (unlabeled data). The latter are used for the challenge, which consists in predicting the probability of patients lesions to be malignant (class 1) or benign (class 0). In both cases, the data is processed before been used (see \ref{sec:prostatex_data_processing} for details). After the processing, the labeled data are split into training, validation and test sets using respectively 80\%, 10\% and 10\% of all available data for each set. The training set is then given in batches as input to the neural network, which update its weight consequently. At the end of each epoch, the current model is tested on the validation set (that the model has never seen previously) and the metrics are plotted on Tensorboard (see \ref{paper_tensorboard}). If the current model has a bigger AUC and a bigger accuracy than the previous best model, it becomes the best model and it is saved.  When the training phase reaches the defined number of epochs, the model is then tested on the test set. This same model is also used to take part in the PROSTATEx challenge to output predictions into a .csv file for each patient and findings.
 
 \begin{figure}[!h]
 \centering
@@ -18,15 +18,112 @@ Schematically, the entire experiment process can be represented as shown in figu
 
 
 \section{PROSTATEx: Data processing}
-\label{prostatex_data_processing}
+\label{sec:prostatex_data_processing}
 \subsection{Dataset description}
-\label{prostatex_dataset_description}
+\label{sec:prostatex_dataset_description}
+The SPIE-AAPM-NCI PROSTATEx Challenge dataset is publicly available on the Cancer Imaging Archive. This dataset is composed of multiparametric MRIs (T2W, DWI, ADC, DCE, PD, Ktrans) for a total of 204 training patients and 208 challenge patients. Images were taken under the sagittal, transverse and coronal planes.
+
+The PROSTATEx dataset comes with two CSV files for the training set. The first one, \textit{ProstateX-Findings-Train.csv}, lists all findings with their clinical significance. Multiple findings can be associated with the same patient (ProxID). The second one, \textit{ProstateX-Images-Train.csv}, gives information about where to find the right DICOM file for each patient and each finding. Important labels are "ProxID" (patient ID), "fid" (finding ID $\in [1,\infty]$), "ClinSig" (clinical significance, TRUE or FALSE), "DCMSerNumber" (digit before the dash in the folder name containing DICOM files), "ijk" (position of the lesion: slice number $k$ at coordinates $(i,j)$, $i,j,k \in [0,\infty]$) and "VoxelSpacing" (3-dimensional vector representing the correspondance between a pixel and the space it occupies in the real world). Both CSV files are complementary to each other. Regarding the challenge patients, two analog CSV files are provided. The only difference is the absence of clinical significance. Finally, images are in the DICOM file format (see section \ref{sec:DICOM}). 
+
+
+\subsection{Methodology}
+The methodology described in this section is the closest replication possible of the authors' data processing methodology. Most of it were reproductible in a similar way, apart from the manual lesion contouring which was performed by a qualified radiologist in the authors' case. Furthermore, the authors didn't mention any participation in the official PROSTATEx challenge. In order to get an unbiased evaluation of the performance of our model, these images were also processed as explained below in order to take part in the challenge, but were not augmented. Nevertheless, the authors created their own test set by splitting the PROSTATEx training images into a training set ($80\%$), a validation set ($10\%$) and a test set ($10\%$). They mentioned that the test set was augmented $11$ times but gave no information about the training and validation sets. Since the training set is imbalanced (3 false for 1 true), the true class was augmented more times than the false class ($60x$) in order to create balanced training and validation sets. 
+
+
 \subsection{From DICOM to NumPy arrays}
+\label{sec:DICOMtoNumPy}
+Before anything else, T2W, DWI and ADC grayscale images were used, which means that DCE, PD and Ktrans images were left aside. Moreover, only images showing the prostate under the transverse plane were used. The reason for this is that the tumors are much more visible under this perspective. 
+The first step consisted in converting DICOM files. Algorithm \ref{alg:PROSTATEx_preprocessing} describes the steps involved in converting PROSTATEx's DICOM files to NumPy arrays. The right slices were found thanks to the two CSV files. Important information such as the patient ID, the sequence, the lesion location and the voxel spacing were used as file output names, which allows to use these files independently for the next steps (i.e. without relying on the CSV files). 
+
+\begin{algorithm}
+    \caption{PROSTATEx preprocessing}
+    \label{alg:PROSTATEx_preprocessing}
+    \begin{algorithmic}[1] % The number tells where the line numbering should start
+        \Procedure{main}{$dataset\_folder, findings\_CSV, slices\_CSV, output\_folder$}
+        		\State Create output directories: $"output\_folder/True", "output\_folder/False"$\\
+        		\State $findings \gets read\_CSV(findings\_CSV)$ \Comment{ProstateX-Findings-Train.csv}
+        		\State $slices \gets read\_CSV(slices\_CSV)$ \Comment{ProstateX-Images-Train.csv}
+            \State $meta \gets merge(findings, slices)$\Comment{Both CSV files are complementary to each other.}\\
+            \For{$row$ in $meta$}
+            		\State $patient\_id \gets row["ProxID"]$
+            		\State $finding\_id \gets row["fid"]$
+            		\State $mri\_type\_number \gets row["DCMSerNumber"]$
+            		\State $clinical\_significance \gets row["ClinSig"]$
+            		\State $img\_i, img\_j, img\_k \gets row["ijk"]$
+            		\State $slice\_number \gets img\_k + 1$ \Comment{CSV indexing in $[0,\infty]$, DICOM in $[1,\infty]$}\\
+                \For{$visit\ in\ patient\_id$'s folder}
+                		\For{$mri\_type$ in $visit$}
+                			\If {$mri\_type$ starts with "$mri\_type\_number$-"}
+                				\For{$dicom\_file$ in $mri\_type$}
+                					\If {$slice\_number == dicom\_file.InstanceNumber$}
+                						\State{$slice \gets normalize\_dicom(dicom\_file)$} \Comment{see section \ref{sec:dicom_data_manipulation}}
+                						\State{Save $slice$ in $"output\_folder/clinical\_significance"$}
+                					\EndIf
+                				\EndFor
+                			\EndIf
+            			\EndFor
+            		\EndFor
+            \EndFor
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm} 
+
+
 \subsection{From NumPy arrays to augmented stacked images}
+\label{sec:numpyToAugmentedStacked}
+This step can be split into two substeps: aligning and stacking images before augmenting them. Once full images were converted to NumPy arrays, the images related to a specific lesion of a specific patient needed to be aligned and resampled to the same resolution. In fact, T2-weighted images have a much higher resolution than the DWI and ADC images (in this dataset at least). Without this operation, a single pixel on a DWI image would have covered a lot more tissue than a pixel of the corresponding T2-image. To perform the alignment, the lesion was localized on the three sequences than to the CSV file. Then, the goal was to crop a large patch which contained the same amount of tissue on the three images. This patch had to be centered on the lesion to ease the augmentation process. So, a fixed patch size was defined for the T2-image since its resolution was the highest. Then, using the voxel spacing information, the patch size required to cover the same amount of tissue was computed for the two other sequences (DWI, ADC). Finally, the three images were cropped, resized to the same resolution and stacked. Stacking images consists in putting each single image (grayscale) into a single array, as three different channels. At this point, the pixel $i,j$ of the three channels represents the exact same tissue, which means that the lesion is at the same position and is covered by the same number of pixels on each channel. This approach increases the probability of detecting a cancer by ensuring a good visibilty for each lesion, since the latter is not necesarily as visible on the three images.
+
+An important part of this process is the normalization. In fact, images were normalized before beeing stacked, based on a Z-score, i.e. 
+
+\begin{equation}
+\label{eq:normalization}
+	Pixel_{{i,j}_{normalized}} = \frac{Pixel_{i,j} - \mu}{\sigma}
+\end{equation}
+
+\noindent where $Pixel_{i,j} \in [0,255]$ is a grayscale pixel value, $\mu$ is the mean value of all images of the corresponding sequence for this patient and $\sigma$ the standard deviation of all images of the corresponding sequence for this patient. According to the authors, normalizing each sequence of each patient separately allows to keep slight contrast nuances which ultimately help the final diagnosis. In other words, all T2-weighted images belonging to a specific patient were concatenated into a single NumPy array. Then, the mean and standard devation of the array were computed. These values served as $\mu$ and $\sigma$ to normalize the T2-images of this specific patient. Same for this patient's DWI and ADC images. The same process was applied to all patients separately. 
+
+Finally, the dataset was augmented in the same way as the authors. Concretely, images were rotated ($-20$ to $20^\circ$), flipped horizontally (probability of $0.5$) and slid horizontally (value $\in [-1, 0, 1]$ pixel). These techniques alone allowed to create a sufficient amount of data. Therefore, two other augmentation methods used by the authors (horizontal stretching by a factor $\in [0.9,1.1]$ and vertical sliding) were not made use of. Images were exported as NumPy arrays.
+
+
 \subsection{From NumPy arrays to augmented non-stacked images}
+Another way of processing and using the data was experimented with. Instead of stacking the images, each image was cropped and augmented separately. At the end, each image was given as separate input to the neural network. 
+
+
 \subsection{Data processing verification}
+\label{sec:dataProcessingVerification}
+
 \subsubsection{Cropping verification using red dots}
-\subsubsection{Alignment visualization}
+In order to check the correctness of the augmentation process, images with a red dot at the lesion coordinates were generated. First of all, a red dot was placed on the full image thanks to the "i,j,k" attribute in the CSV file. This full image was exported. Then, images were augmented in the exact same manner as described in section \ref{sec:numpyToAugmentedStacked}. The expected result satisfies the following properties:
+\begin{itemize}
+	\item The red dot is localized in the center of the cropped and augmented image.
+	\item The three cropped and augmented images within a stacked image contain the exact same tissue. 
+	\item The three cropped and augmented images within a stacked image are not rotated/shifted/flipped differently. 
+	\item A lesion is visible to the naked eye. 
+\end{itemize}
+
+\noindent Figure \ref{fig:reddot} shows an example generated during this test. While beeing exactly the same for the 3 images, the red dot looks bigger on the images whose resolution was smaller since it was drawn before resampling the images. These images come from the same exam performed on the same patient on the same day. 
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio=true]{./figures/test_red_dot.png}
+\caption{Red dot test - Patient 0082, Finding ID 1\\From left to right: T2, DWI, ADC.}
+\label{fig:reddot}
+\end{figure}
+
+
+
+\subsubsection{Alignment verification}
+In addition to the previous test, an additional one aiming at checking the alignment of the images was created. This test ensures that the three images show the exact same content at the same spot over the three channels. 
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio=true]{./figures/alignment.png}
+\caption{Alignment - Patient 0242 - Finding ID 1}
+\label{fig:alignment}
+\end{figure}
+
+
+
 
 \section{Training the neural network}
 \subsection{Architecture}
