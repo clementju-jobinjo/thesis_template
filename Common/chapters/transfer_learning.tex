@@ -7,8 +7,25 @@ What we do: improve cancer detection/classification on medical imaging
 How we do it: transfer learning
 
 \section{Goal}
+Transfer learning consists in using a network which was pretrained on a dataset A to improve the performance of the task on a dataset B. This technique makes sense when the quantity of data available is not sufficient and when the data of both datasets share common features. Both conditions are fulfilled in the case of cancer detection. In fact, medical data are highly confidential and cannot be shared easily. Provided that medical institutions agree to share it, it has to undergo an anonymization process which follows very strict rules. Then, to be usable as part of a deep learning classication task, data must be organized and described precisely. In other words, additional information such as the clinical significance, the position of the lesion, etc. must be collected and put together. This whole process requires considerable effort, which is one of the reasons why medical data is hard to find. In this case, transfer learning aims at using various small datasets in order to achieve the same or better performance than with a single huge dataset. 
+
 
 \section{Process overview}
+The approach consists in five different steps.
+First of all, similar datasets are collected and processed in the same way. These datasets need to share common features. For example, DWI images (MRI sequence) and CT scans share the same color scheme and look alike (the same kind of tissue is visible, etc.). On the contrary, mammographies are completely different in that they the tissue is less visible FIGURE. 
+
+Second, the convolutional neural network is built and split into two parts. It is still a single network but the first layers are treated as the feature extractor. As the name suggests, the role of these layers is to extract visual features characterizing what a cancerous tumor looks like. On the other hand, the last layers are considered as decision maker. They will gather the features collected by the feature extractor and process them to make a decision on the class of the input sample. 
+
+Third, the model is trained on the target dataset and the model whose performance is the best is saved. The target dataset is the dataset which one wants to improve the performance of the model on. This first training establishes a baseline of performance and of features to learn further on thanks to the other datasets. 
+
+Fourth, the core of transfer learning process starts. For each non-target dataset, two different trainings take place:
+
+\begin{enumerate}
+	\item The model saved at the end of the previous training is loaded. Its last layers (the decision maker) are completely reset, i.e. the weights are reset to another initialization, as if no training occured for these layers. Afterwards, the first layers (the decision maker) are frozen and the model is trained. Since the first layers have been frozen, their weights will remain the same. Only the weights of the last layers will change. This part of the transfer learning allows the model to make use of the previously learned features while adapting to the new body part by training the decision maker. 
+	\item Once the training with frozen layers is over, the best model is loaded, the frozen layers are unfrozen, and a normal training is performed on the same dataset. Thanks to this, the model adapts the previously learned features and tries to learn new features which could be useful for the classification of the target dataset. 
+\end{enumerate}
+
+Fifth, the previous step is also applied to the target dataset. These final two trainings aim at keeping the interesting features from the other datasets while learning specializing the model in the target dataset again. Hopefully, the new weight initialization resulting from the transfer learning will allow to reach better metric values than before the transfer learning. Usually, the best model 
 
 
 \section{Data processing}
@@ -95,7 +112,47 @@ Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control image
 
 \section{Transfer learning implementation}
 \subsection{Architecture generalities}
+
+ 
+
+
 \subsection{Script options}
+
+% Please add the following required packages to your document preamble:
+% \usepackage{graphicx}
+% \usepackage[table,xcdraw]{xcolor}
+% If you use beamer only pass "xcolor=table" option, i.e. \documentclass[xcolor=table]{beamer}
+\begin{table}[]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|llll|}
+\hline
+\rowcolor[HTML]{DAE8FC} 
+\textbf{Command}            & \textbf{Description}                                                                                                                                                                                                & \textbf{Required}                                                           & \textbf{Type} \\ \hline
+\textbf{--training-set1}     & Path to training set 1                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
+\textbf{--validation-set1}   & Path to validation set 1                                                                                                                                                                                                                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
+\textbf{--test-set1}     & Path to test set 1                                                                                                                                                                                                                                                                                                                                                                                                   & True                                                                        & String        \\ \hline
+\textbf{--training-set2}     & Path to training set 2                                                                                                                                                                                                 & True                                                                        & String        \\ \hline
+\textbf{--validation-set2}   & Path to validation set 2 
+& True                                                                        & String        \\ \hline
+\textbf{--training-set3}     & Path to training set 3                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
+\textbf{--validation-set3}   & Path to validation set 3                                                                                                                                                                                                                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
+\textbf{--batchsize}        & Number of samples per batch                                                                                                                                                                                         & True                                                                        & Int           \\ \hline
+\textbf{--nbepochs}         & Number of epochs the training phase lasts                                                                                                                                                                  & True                                                                        & Int           \\ \hline
+\textbf{--lr}               & Learning rate used in the optimizer                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}False\\ Default: 1e-3\end{tabular}               & Float         \\ \hline
+\textbf{--lossfunction}     & \begin{tabular}[c]{@{}l@{}}Loss function name\\{[}CrossEntropyLoss, L1Loss, MSELoss{]}\end{tabular}                                                                                                            & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'CrossEntropyLoss'\end{tabular} & String        \\ \hline
+\textbf{--cuda-device}      & GPU name to run the experiment                                                                                                                                                                                      & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'cuda'\end{tabular}             & String        \\ \hline
+\textbf{--modeltoload}      & \begin{tabular}[c]{@{}l@{}}Pretrained model name \\If given, load it, otherwise randomly initialize it\end{tabular}                                                                                     & \begin{tabular}[c]{@{}l@{}}False\\ Default: ""\end{tabular}                 & String        \\ \hline
+\textbf{--dropout}          & Dropout probability                                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}False\\ Default: 0.3\end{tabular}                & Float         \\ \hline
+\textbf{--optimized-metric} & \begin{tabular}[c]{@{}l@{}}Metric to optimize\\ The best model during the training will be saved according to it\\{[}'auc', 'accuracy', 'precision', 'recall', 'f1score', 'specificity'{]}\end{tabular} & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'auc'\end{tabular}              & String        \\ \hline
+\textbf{--outputdirectory}  & Root of the output directory used by Tensorboard to save the models                                                                                                                                                 & True                                                                        & String        \\ \hline
+\textbf{--cv} & \begin{tabular}[c]{@{}l@{}}Whether to use cross-validation or not\\{[}'True', 'False'{]}\end{tabular} & \begin{tabular}[c]{@{}l@{}}True\end{tabular}             
+& String        \\ \hline
+\end{tabular}%
+}
+\caption{Complete list of script options}
+\label{fig:transfer_learning_options}
+\end{table}
+
 \subsection{Visualization of the usefulness of the features learned on each dataset}
 \subsection{Experimental setup}
 \section{Results}
