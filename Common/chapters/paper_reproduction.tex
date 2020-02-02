@@ -198,5 +198,40 @@ The figure \ref{fig:gradient_flow} shows the gradient flow at epoch 0, batch 6. 
 \label{fig:gradient_flow}
 \end{figure}
 \section{Results}
+Figures \ref{fig:paper_reprodution_results_part_1}, \ref{fig:paper_reprodution_results_part_2} and \ref{fig:paper_reprodution_results_part_3} show the different metrics registered on the training and validation sets during the training phase. The best model was chosen at epoch ... with an accuracy of ... and an AUC of ... (the condition for a model to be chosen as best is that the current AUC should be bigger than the auc of the previous best model and the same principle apply to the accuracy).\\
+This best model was also used to take part in the ProstateX challenge. The res
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth, height=\textheight, keepaspectratio=true]{./figures/paper_reproduction_results_part1.png}
+\caption{Accuracy, AUC and loss on the training and validation set}
+\label{fig:paper_reprodution_results_part_1}
+\end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth, height=\textheight, keepaspectratio=true]{./figures/paper_reproduction_results_part2.png}
+\caption{F1-score, precision and recall on the training and validation set}
+\label{fig:paper_reprodution_results_part_2}
+\end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[height=0.4\textheight, keepaspectratio=true]{./figures/paper_reproduction_results_part3.png}
+\caption{Specificity on the training and validation set}
+\label{fig:paper_reprodution_results_part_3}
+\end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[height=0.4\textheight, keepaspectratio=true]{./figures/paper_reproduction_results_challenge.png}
+\caption{Score achieved in the PROSTATEx challenge}
+\label{fig:paper_reprodution_results_challenge}
+\end{figure}
 
 \section{Discussion}
+Thanks to all curves in the "results", many information regarding the model performance can be inferred. Indeed, "reviewing learning curves of models during training can be used to diagnose problems with learning, such as an underfit or overfit model, as well as whether the training and validation datasets are suitably representative"\cite{40}.\\
+First of all, when observing the loss plot, what is noticeable is that the training and validation loss have the same behaviour until the epoch 600 approximately. This is a clear sign of good fit of the model on the data. All features learned by the model on the training data are also applicable on the validation set. This situation is the optimal one. After this phase, the model slightly start to overfit. In fact, the training loss continue to linearly decrease whereas the validation loss decreases less quickly until reaching  \\
+
+As the goal of the experiment was to reproduce the results of the paper, 
+
