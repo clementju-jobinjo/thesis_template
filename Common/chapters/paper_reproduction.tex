@@ -2,12 +2,12 @@
 
 \chapter{Paper reproduction}
 \label{ch:paper_reproduction}
-This chapter relies on the article "Computer-Aided Diagnosis of Prostate Cancer Using a Deep Convolutional Neural Network from Multiparametric MRI" from Song et al.\cite{07}, shortly presented in chapter \ref{ch:literature_review}. It aims at reproducing the experiment of the paper in order to acquire the medical, theoretical and technical background before proposing a transfer learning method as a way to improve the classification using other body parts, which overcome the lack of available data in the medical field (see chapter \ref{ch:transfer_learning}).\\
+This chapter is based on the article "Computer-Aided Diagnosis of Prostate Cancer Using a Deep Convolutional Neural Network from Multiparametric MRI" from Song et al.\cite{07}, shortly presented in chapter \ref{ch:literature_review}. It aims at reproducing the experiment of the paper in order to acquire the medical, theoretical and technical background before proposing a transfer learning method as a way to improve the classification using other body parts, which overcome the lack of available data in the medical field (see chapter \ref{ch:transfer_learning}).\\
 Song et al. \cite{07} proposed a deep convolutional neural network (DCNN) method to detect prostate cancer based on the SPIE-AAPM-NCI PROSTATEx Challenge dataset. This dataset is one of the biggest available dataset for prostate cancer classification. The two different output classes of the latter are benign lesion (class 0) and malignant lesion (class 1). This paper explains all the steps to follow with the goal of building a computer-aided-diagnosis (CAD) system for prostate cancer detection. Moreover, it also provides results about the algorithm performance, which can be used as a benchmark to compare with the results of the reproduction of the experiment. However, since the article gives no information about the results their model got on the official PROSTATEx challenge test set, the reproduction of the experiment will fill that gap.\\
-This chapter is built top-down: first a superficial overview of the entire process is established in order to understand the purpose of the experiment as a whole. Then, each part or theoretical notion of the experiment is deeply described. The structure of the dataset is detailed, all steps of its processing are explained and the techniques used as verification of the proper functioning of the algorithm are presented. After the processing of the data, the training phase is deepened and all hyperparameters, options and implementation choices are given to ensure the reproductibility of the experiment. This part is followed by the presentation of the raw results, which is itself followed by their analysis in the "discussion" section.
+This chapter is built top-down: first a superficial overview of the entire process is established in order to understand the purpose of the experiment as a whole. Then, each part or theoretical notion of the experiment is described in detail. The structure of the dataset is exposed, all steps of its processing are explained and the techniques used as verification of the proper functioning of the algorithm are presented. After the processing of the data, the training phase is dealt with in depth and all hyperparameters, options and implementation choices are described to ensure the reproductibility of the experiment. This part is followed by the presentation of the raw results, which is itself followed by their analysis in the "discussion" section.
 
 \section{Process overview}
-Schematically, the entire experiment process can be represented as shown in figure \ref{fig:paper_reproduction_process}. The PROSTATEx dataset is composed of samples whose clinical significance is provided (labeled data) and samples without this information (unlabeled data). The latter are used for the challenge, which consists in predicting the probability of patients lesions to be malignant (class 1) or benign (class 0). In both cases, the data is processed before been used (see \ref{sec:prostatex_data_processing} for details). After the processing, the labeled data are split into training, validation and test sets using respectively 80\%, 10\% and 10\% of all available data for each set. The training set is then given in batches as input to the neural network, which update its weight consequently. At the end of each epoch, the current model is tested on the validation set (that the model has never seen previously) and the metrics are plotted on Tensorboard (see \ref{paper_tensorboard}). If the current model has a bigger AUC and a bigger accuracy than the previous best model, it becomes the best model and it is saved.  When the training phase reaches the defined number of epochs, the model is then tested on the test set. This same model is also used to take part in the PROSTATEx challenge to output predictions into a .csv file for each patient and findings.
+Schematically speaking, the entire experiment process can be represented as shown on figure \ref{fig:paper_reproduction_process}. The PROSTATEx dataset is composed of samples whose clinical significance is provided (labeled data) and samples without this information (unlabeled data). The latter are used for the challenge, which consists in predicting the probability of patients lesions to be malignant (class 1) or benign (class 0). In both cases, the data is processed before been used (see \ref{sec:prostatex_data_processing} for details). After the processing, the labeled data are split into training, validation and test sets using respectively 80\%, 10\% and 10\% of all available data for each set. The training set is then given in batches as input to the neural network, which update its weight consequently. At the end of each epoch, the current model is tested on the validation set (that the model has never seen previously) and the metrics are plotted on Tensorboard (see \ref{paper_tensorboard}). If the current model has a bigger AUC and a bigger accuracy than the previous best model, it becomes the best model and it is saved. When the training phase reaches the defined number of epochs, the model is tested on the test set. The same model is also used to generated predictions for each patient and finding of the PROSTATEx challenge dataset in order to take part in it. 
 
 \begin{figure}[!h]
 \centering
@@ -112,7 +112,7 @@ In order to check the correctness of the augmentation process, images with a red
 
 
 
-\subsubsection{Alignment verification}
+\subsubsection{Alignment}
 In addition to the previous test, an additional one aiming at checking the alignment of the images was created. This test ensures that the three images show the exact same content at the same spot over the three channels. 
 
 \begin{figure}[!h]
@@ -123,13 +123,11 @@ In addition to the previous test, an additional one aiming at checking the align
 \end{figure}
 
 
-
-
 \section{Training the neural network}
 \subsection{Architecture}
-The model architecture used in the paper is a modified version of the VGG network from the Oxford's Visual Geometry Group (VGG). This model was initially designed as part of the Large Scale Visual Recognition Challenge 2014 that used the ImageNet dataset of 14 millions images belonging to 1000 classes. The figure \ref{fig:paper_model} illustrates its structure and its corresponding implementation in Python with the PyTorch Framework.\\
-It is first composed by three convolution-dropout-max-pooling blocks followed by three fully connected-dropout blocks. Each convolutional box (in blue) in the figure represents in reality three layers: the convolutional layer, the batch normalization layer and the exponential linear unit activation function. The same principle is used for the fully connected layer box (in orange) that is divided into a fully connected layer followed by the exponential linear unit. The last fully connected box (in purple) has the same structure except that the exponential linear unit is replaced by a softmax  function for classification.\\
-In comparison to the original VGG, this model keeps the small filter size of 3x3 or 1x1,  also doubles the number of filters after each convolution-dropout-max-pooling block and has a stride of 1 for all convolutions. It differs from the traditional VGG in that it makes use of a smaller number of layer since the task is simpler than the original one, it uses exponential linear units instead of rectified linear units as activation functions and adds dropout and batch normalization layers.
+The model architecture used in the paper is a modified version of the VGG network from the Oxford's Visual Geometry Group (VGG). This model was initially designed as part of the Large Scale Visual Recognition Challenge 2014 that used the ImageNet dataset of 14 millions images belonging to 1000 classes. Figure \ref{fig:paper_model} illustrates its structure and its corresponding implementation in Python with the PyTorch framework.\\
+It is first composed by three convolution-dropout-max-pooling blocks followed by three fully-connected-dropout blocks. Each convolutional box (in blue) in the figure represents in reality three layers: the convolutional layer, the batch normalization layer and the exponential linear unit (ELU) activation function. The same principle applies to the fully connected layer box (in orange) that is divided into a fully connected layer followed by the exponential linear unit. The last fully connected box (in purple) has the same structure except that the exponential linear unit is replaced by a softmax  function for classification.\\
+In comparison to the original VGG, this model keeps the small filter size of 3x3 or 1x1, also doubles the number of filters after each convolution-dropout-max-pooling block and has a stride of 1 for all convolutions. It differs from the traditional VGG in that it makes use of a smaller number of layers since the task is simpler than the original one. Moreover, it uses exponential linear units instead of rectified linear units as activation functions and adds dropout and batch normalization layers.
 \begin{figure}[!h]
 \centering
 \includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/model_paper_manual.png}
@@ -138,7 +136,7 @@ In comparison to the original VGG, this model keeps the small filter size of 3x3
 \end{figure}
 \subsection{Criterion to save the best model}
 \subsection{Tensorboard}
-During the experiment the following metrics are registered: loss, accuracy, precision, recall, F1-score, specificity and AUC. These metrics are computed separately on the training and on the validation sets at the end of each epoch. They are then stored across all epochs and plotted on the same figure thanks to Tensorboard at the end of the process. Subsequently, this is also the case for the metrics measured on the test set.\\
+During the experiment the following metrics are computed: loss, accuracy, precision, recall, F1-score, specificity and AUC. These metrics are computed separately on the training and on the validation sets at the end of each epoch. They are then stored across all epochs and plotted on the same figure thanks to Tensorboard at the end of the process. Subsequently, this is also the case for the metrics measured on the test set.\\
 "Tensorboard provides the visualization and tooling needed for machine learning experimentation:
 \begin{itemize}
 \item Tracking and visualizing metrics.
@@ -147,10 +145,10 @@ During the experiment the following metrics are registered: loss, accuracy, prec
 \item Projecting embeddings to a lower dimensional space.
 \item Displaying images, text, and audio data"\cite{39}.
 \end{itemize}
-In this experiment, Tensorboard is mainly used to plot the Matplotlib figures of the model performance. In addition to this, written reports regarding which model was the best and the results it reached are also added on the dashboard.
+In this experiment, Tensorboard is mainly used to plot the Matplotlib figures of the model performance. In addition to this, written reports regarding which model was the best and the results it achieved are also added to the dashboard.
 \label{paper_tensorboard}
 \subsection{Script options}
-Since training a neural network requires datasets, hyperparameters and many more configuration choices, the creation of a generic script that accepts multiple options is necessary. In order to achieve this goal, the Python module "argparse" is extremely useful. The latter automatically generates help/usage messages and displays errors when the argument given by the user are invalid. The table shows all options accepted by the script.
+Since training a neural network requires datasets, hyperparameters and many more configuration choices, the creation of a generic script that accepts multiple options is necessary. In order to achieve this goal, the Python module "argparse" is extremely useful. The latter automatically generates help/usage messages and displays errors when the argument given by the user are invalid. Table \ref{fig:paper_reproduction_options} shows all options accepted by the script.
 
 
 % Please add the following required packages to your document preamble:
@@ -181,15 +179,15 @@ Since training a neural network requires datasets, hyperparameters and many more
 \end{table}
 
 \subsection{Experimental setup}
-The best performing model was implemented with PyTorch using the ADAM optimizer to update its weights, a learning rate of 1e-8 and the cross-entropy as loss function. The data was organized in batches of 128 samples and the experiment ran for 1300 epochs. The best model was selected with respect to the area under curve. Regarding the weights initialization, the best model from the roulette that maximized the F1-score was chosen as initial model.\\
-The model was trained on a Nvidia GeForce GTX Titan X graphic card during approximately 15 hours.
+The best performing model was implemented with PyTorch using the Adam optimizer to update its weights, a learning rate of 1e-8 and the cross-entropy as loss function. The data was organized in batches of 128 samples and the experiment ran for 1300 epochs. The best model was selected with respect to the area under curve. Regarding the weight initialization, the best model from the roulette that maximized the F1-score was chosen as initial model.\\
+The model was trained on an Nvidia GeForce GTX Titan X graphics card during approximately 15 hours.
 
 \subsection{Training verification}
 In deep learning, two main problems can occur during training. The first one is called the "vanishing gradient" problem and refers to the fact that it is possible for the loss function to compute extremely small gradients, near zero. Consequently, the weight update is also extremely small, which makes the neural network hard or impossible to train. The second problem, the "exploding gradient" is the opposite. Concretely, in this case, large gradients are computed, which results in huge weight updates that can even reach "NaN" values. This makes the model unstable and unable to learn from training data.  \\
-As a result, it is important to analyse the gradient propagation across the network to ensure not been face to such problems. To achieve this goal, a visualization of all gradients of the network is implemented. This allows to visually notice the gradient flow at a glance and to see its evolution during all epochs (one visualization per batch is generated).
+As a result, it is important to analyze the gradient propagation across the network to ensure that it is not facing such problems. To achieve this goal, a visualization tool to display the gradients of the entire network was implemented. This allows to visually notice the gradient flow at a glance and to see its evolution during all epochs (one visualization per batch is generated).
 \subsubsection{Gradient flow visualization}
 The visualization displays the gradient flow through the entire neural network. It shows the name of each layer on the x-axis and its average gradient value on the y-axis (recall: for each layer the gradient is a matrix). Furthermore, it also gives information about the max value of the gradient and indicates in black if one of them is equal to zero.\\
-The figure \ref{fig:gradient_flow} shows the gradient flow at epoch 0, batch 6. From the output layer (called "last\_layer0.weight" on the graph) to the first layer the gradient is well propagated: no huge average gradients are registered, neither extremely small ones.
+The figure \ref{fig:gradient_flow} shows the gradient flow at epoch 0, batch 6. From the output layer (called "last\_layer0.weight" on the graph) to the first layer, the gradient is well propagated: no huge average gradients are registered, neither extremely small ones.
 
 \begin{figure}[!h]
 \centering
@@ -198,8 +196,8 @@ The figure \ref{fig:gradient_flow} shows the gradient flow at epoch 0, batch 6. 
 \label{fig:gradient_flow}
 \end{figure}
 \section{Results}
-Figures \ref{fig:paper_reprodution_results_part_1}, \ref{fig:paper_reprodution_results_part_2} and \ref{fig:paper_reprodution_results_part_3} show the different metrics registered on the training and validation sets during the training phase. The best model was chosen at epoch ... with an accuracy of ... and an AUC of ... (the condition for a model to be chosen as best is that the current AUC should be bigger than the auc of the previous best model and the same principle apply to the accuracy).\\
-This best model was also used to take part in the ProstateX challenge. The res
+Figures \ref{fig:paper_reprodution_results_part_1}, \ref{fig:paper_reprodution_results_part_2} and \ref{fig:paper_reprodution_results_part_3} show the different metrics registered on the training and validation sets during the training phase. The best model was chosen at epoch ... with an accuracy of ... and an AUC of ... (the condition for a model to be chosen as best is that the current AUC should be higher than the AUC of the previous best model, same for the accuracy).\\
+This best model was also used to take part in the ProstateX challenge. The res XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 \begin{figure}[!h]
 \centering
@@ -230,8 +228,8 @@ This best model was also used to take part in the ProstateX challenge. The res
 \end{figure}
 
 \section{Discussion}
-Thanks to all curves in the "results", many information regarding the model performance can be inferred. Indeed, "reviewing learning curves of models during training can be used to diagnose problems with learning, such as an underfit or overfit model, as well as whether the training and validation datasets are suitably representative"\cite{40}.\\
-First of all, when observing the loss plot, what is noticeable is that the training and validation loss have the same behaviour until the epoch 600 approximately. This is a clear sign of good fit of the model on the data. All features learned by the model on the training data are also applicable on the validation set. This situation is the optimal one. After this phase, the model slightly start to overfit. In fact, the training loss continue to linearly decrease whereas the validation loss decreases less quickly until reaching  \\
+Thanks to all curves in the "results", a lot of information regarding the model performance can be inferred. In fact, "reviewing learning curves of models during training can be used to diagnose problems with learning, such as an underfit or overfit model, as well as whether the training and validation datasets are suitably representative"\cite{40}.\\
+First of all, when observing the loss plot, what is noticeable is that the training and validation losses follow the same behaviour until the epoch 600 approximately. This is a clear sign of good fit of the model on the data. All features learned by the model on the training data are also applicable to the validation set. This situation is the optimal one. After this phase, the model slightly started to overfit. In fact, the training loss continues to linearly decrease whereas the validation loss decreases less quickly until reaching  XXXXXXXXXXXXXXXXXXXXXXXX\\
 
 As the goal of the experiment was to reproduce the results of the paper, 
 
