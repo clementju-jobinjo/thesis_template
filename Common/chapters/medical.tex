@@ -2,10 +2,10 @@
 
 \chapter{Medical information}
 \label{ch:medical}
+This chapter gives an overview of the basic medical knowledge that is required to apprehend the following chapters smoothly. First of all, some notions about cancer are described in order to understand what it is and which effects it has on the human body. Second, medical data has its own file formats. To make use of them in a deep learning project, medical files must be processed in a certain way, depending on each format. In fact, formats represent 2D, 3D or even 4D data. Some of them require specific normalization in order to get the right rendering. Finally, some visualization tools were developped to display raw medical files easily. 
+
 
 \section{Cancer}
-
-
 \subsection{Basics}
 An accumulation of cells forming a mass is called a tumor. These tumors are detectable thanks to medical imaging (see section \ref{sec:medical_imaging}) and other symptoms. However, not every tumor is as dangerous as the other, as it can be benign (does not contain cancerous cells) or malignant (contains cancerous cells).
 
@@ -28,7 +28,7 @@ Healthy cells replication is limited to a certain amount, which is not the case 
 
 \subsection{Seriousness}
 
-Most cancers can be staged thanks to the TNM system. The T corresponds to the tumor size and its location; the N corresponds to whether or not the tumor has spread to draining lymph nodes; the M corresponds to the presence or absence of metastases in other parts of the body \cite{21}. These pieces of information are used to classify cancer between four (I to IV) or sometimes five (0 to IV) different stages, reflecting the progression and the seriousness of the illness \cite{22}. The earlier they are detected, the higher the chances of recovering are.
+Most cancers can be staged thanks to the TNM system. The T corresponds to the tumor size and its location; the N corresponds to whether or not the tumor has spread to draining lymph nodes; the M corresponds to the presence or absence of metastases in other parts of the body \cite{21}. These pieces of information are used to classify cancer between four (I to IV) or sometimes five (0 to IV) different stages, reflecting the progression and the seriousness of the illness \cite{22}. The earlier they are detected, the higher the chances of recovery are. This aspect makes cancer detection critical since every misjudgment can threaten someone's life. 
 
 %\subsection{Chronological evolution}
 
@@ -162,3 +162,40 @@ Medical data is often represented over 16 bits. However, exporting images to PNG
         \EndProcedure
     \end{algorithmic}
 \end{algorithm}
+
+
+\section{Visualization tools}
+Processing data manually increases the probability of making mistakes. For that matter, visualization tools relying on the same processing code as the ones used to generate training images were developped. Their primary goal is to compare our visual representation of an image to the one obtained in professional pieces of software. These tools are convenient to visualize a dataset easily. In some cases (especially RAW/MHD images), no free software capable of reading the files was available, which made the corresponding tool useful. 
+
+
+\subsection{DICOM}
+Visualizing DICOM files is pretty straightforward since each file represent a single two-dimensional image. However, the way this standard works require a lot of pixel transformation and normalization to obtain the desired result (see section \ref{sec:dicom_data_manipulation}), which may be a source of errors. Our tools allows to display a single DICOM file as well as a sequence of files if the function is feeded with a directory. Users can then scroll through the Z-axis, displaying the next or previous slice. 
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio=true]{./figures/visualize_lung_dcm.png}
+\caption{Visualization of a folder of DICOM files}
+\label{fig:visualize_lung_dcm}
+\end{figure}
+
+
+\subsection{NIfTI}
+As a single NIfTI file can contain three- or four-dimensional data (the fourth dimension being time), our visualization tool takes this aspect into consideration by allowing to scroll through them: scrolling with the mouse goes through slices belonging to a specific timestamp over a specific axis, while the left and right arrows allows to jump to the same slice at another timestamp. When reaching the end of a timestamp with the mouse, the first slice of the next timestamp is displayed. Furthermore, the three-dimensionality implies that the volume is viewable under three different perspectives. For example, a three-dimensional brain volume can display it from the top of the head to the bottom, from one ear to the other and from the back of the head to the person's face. Therefore, the user can choose a specific axis to navigate through. If no axis is chosen, all three perspectives are shown one after the other.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio=true]{./figures/visualize_brain_nii.png}
+\caption{Visualization of a four-dimensional NIfTI file}
+\label{fig:visualize_brain_nii}
+\end{figure}
+
+
+\subsection{RAW}
+Medical RAW files are three-dimensional, which means that a single file contains a volume, i.e. a succession of 2D slices. Scrolling with the mouse goes through slices over a specific axis. Like the NIfTI file format, the user can profit from the three-dimensionality by displaying the body part under three different perspectives. This tool was particularly useful since no free software capable of handling these files was available. Photography-related programs such as Photoshop can open RAW pictures but not these three-dimensional ones. 
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=\textwidth, keepaspectratio=true]{./figures/visualize_liver_raw.png}
+\caption{Visualization of a three-dimensional RAW file}
+\label{fig:visualize_liver_raw}
+\end{figure}
