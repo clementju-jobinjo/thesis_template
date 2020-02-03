@@ -147,8 +147,10 @@ During the experiment the following metrics are computed: loss, accuracy, precis
 \end{itemize}
 In this experiment, Tensorboard is mainly used to plot the Matplotlib figures of the model performance. In addition to this, written reports regarding which model was the best and the results it achieved are also added to the dashboard.
 \label{paper_tensorboard}
+
+
 \subsection{Script options}
-Since training a neural network requires datasets, hyperparameters and many more configuration choices, the creation of a generic script that accepts multiple options is necessary. In order to achieve this goal, the Python module "argparse" is extremely useful. The latter automatically generates help/usage messages and displays errors when the argument given by the user are invalid. Table \ref{fig:paper_reproduction_options} shows all options accepted by the script.
+Since training a neural network requires datasets, hyperparameters and many more configuration choices, the creation of a generic script that accepts multiple options is necessary. In order to achieve this goal, the Python module "argparse" is extremely useful. The latter automatically generates help/usage messages and displays errors when the arguments type in by the user are invalid. Table \ref{fig:paper_reproduction_options} shows all options accepted by the script.
 
 
 % Please add the following required packages to your document preamble:
@@ -178,6 +180,11 @@ Since training a neural network requires datasets, hyperparameters and many more
 \label{fig:paper_reproduction_options}
 \end{table}
 
+
+\subsection{Model roulette}
+As stated by the authors, "the training process is sensitive to the parameter initialization" \cite{07}. Experience showed us that the exact same hyperparameters with two different initializations could give opposite results. Therefore, in order not to train the model vainly, a script which generates a given number of initializations was created. Each untrained model was then tested on the validation set since the best model during training is saved according to its performance on the validation set. The model whose score was the highest on a given metric was saved and used as base model for the experiments. 
+
+
 \subsection{Experimental setup}
 The best performing model was implemented with PyTorch using the Adam optimizer to update its weights, a learning rate of 1e-8 and the cross-entropy as loss function. The data was organized in batches of 128 samples and the experiment ran for 1300 epochs. The best model was selected with respect to the area under curve. Regarding the weight initialization, the best model from the roulette that maximized the F1-score was chosen as initial model.\\
 The model was trained on an Nvidia GeForce GTX Titan X graphics card during approximately 15 hours.
@@ -185,6 +192,8 @@ The model was trained on an Nvidia GeForce GTX Titan X graphics card during appr
 \subsection{Training verification}
 In deep learning, two main problems can occur during training. The first one is called the "vanishing gradient" problem and refers to the fact that it is possible for the loss function to compute extremely small gradients, near zero. Consequently, the weight update is also extremely small, which makes the neural network hard or impossible to train. The second problem, the "exploding gradient" is the opposite. Concretely, in this case, large gradients are computed, which results in huge weight updates that can even reach "NaN" values. This makes the model unstable and unable to learn from training data.  \\
 As a result, it is important to analyze the gradient propagation across the network to ensure that it is not facing such problems. To achieve this goal, a visualization tool to display the gradients of the entire network was implemented. This allows to visually notice the gradient flow at a glance and to see its evolution during all epochs (one visualization per batch is generated).
+
+
 \subsubsection{Gradient flow visualization}
 The visualization displays the gradient flow through the entire neural network. It shows the name of each layer on the x-axis and its average gradient value on the y-axis (recall: for each layer the gradient is a matrix). Furthermore, it also gives information about the max value of the gradient and indicates in black if one of them is equal to zero.\\
 The figure \ref{fig:gradient_flow} shows the gradient flow at epoch 0, batch 6. From the output layer (called "last\_layer0.weight" on the graph) to the first layer, the gradient is well propagated: no huge average gradients are registered, neither extremely small ones.
