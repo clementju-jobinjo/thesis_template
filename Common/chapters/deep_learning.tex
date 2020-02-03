@@ -2,7 +2,9 @@
 
 \chapter{Deep learning}
 \label{ch:deep_learning}
-This chapter provides the theoretical foundation in deep learning for the understanding of the rest of the work. It starts with the historical story of the deep learning before describing what is a neural network. Then, the notion of training a neural network, with all that is involved such as forward propagation, backpropagation, hyperparameters, data splitting or performance evaluation, is explained. This part is followed with another devoted to a special type of neural networks, the "convolutional neural networks". They are used in many computer vision problems due to their great performance for these tasks. Finally, the concept of "transfer learning" is discussed since the entire chapter \ref{ch:transfer_learning} relies on it.
+This chapter provides the theoretical foundation in deep learning which is required to understand of the rest of the work. It starts with an historical timeline of deep learning before describing what a neural network is. Then, the notion of training a neural network, with all that is involved such as forward propagation, backpropagation, hyperparameters, data splitting or performance evaluation is explained. This part is followed by another section devoted to a special type of neural networks, the "convolutional neural networks". They are used in many computer vision applications due to their great performance for these tasks. Finally, the concept of "transfer learning" is discussed since the entire chapter \ref{ch:transfer_learning} relies on it.
+
+
 \section{Introduction to deep learning}
 Deep learning is currently one of the trendiest topics in machine learning, a subset of artificial intelligence. Machine learning refers to statistical models that allow computers to perform specific tasks without having been explicitly programmed to solve them. In fact, these models try to find structural patterns within data in order to understand new incoming situations and react in the best possible way. There exist various techniques in machine learning such as k-NN, SVM, k-means, decision trees, association rules, etc. What mainly differentiates deep learning from these algorithms is the concept of neural networks (see section  \ref{what_is_a_neural_network}) that are combined to form deep neural networks.\\
 Neural networks are inspired from the biological neural networks of the brain. These systems try to learn how to solve a problem based on the data they receive as input. Many concrete applications make use of neural networks: autonomous vehicles, smarter translators, computer-aided diagnoses, personal assistants, art creation, robotics, etc. The presence of deep learning techniques in these use cases clearly testifies to the enthusiasm of many areas for this technology. Furthermore, since this field has recently gained interest (see section \ref{historical_background}), a lot of research is still ongoing, which suggests that many exciting new applications will certainly be discovered in the near future.
@@ -19,7 +21,7 @@ Finally, before the year 2012, the abilities of neural networks were still to be
 \begin{figure}[!h]
 \centering
 \includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/history.png}
-\caption{Milestones - Wang et al. \cite{14}}
+\caption{Deep learning milestones - Wang et al. \cite{14}}
 \label{history}
 \end{figure}
 
@@ -555,7 +557,7 @@ To perform a convolution, numerical input data and a "filter". A filter can be s
 \label{fig:convolution}
 \end{figure}
 
-Different parameters can change the way a convolution behaves. First of all, the previous example relied on a filter moving by respectively one cell to the right and to the bottom. In this case, the "stride" is equal to 1. Other applications could rely on a bigger stride. Furthermore, the previous example reduced the output size of $3x3$ in proportion to the initial input size $5x5$. To influence the output size, a padding can be added to the outside of the input image, usually filled with 0s. Three ways of padding images are commonly used as shown on figure \ref{fig:convolution_padding}:
+Different parameters can change the way a convolution behaves. First of all, the previous example relied on a filter moving by respectively one cell to the right and to the bottom. In this case, the so-called "stride" is equal to 1. Other applications could rely on a bigger stride. Furthermore, the previous example reduced the output size of $3x3$ in proportion to the initial input size of $5x5$. To influence the output size, a padding can be added to the outside of the input image, usually filled with 0s. Three ways of padding images are commonly used as shown on figure \ref{fig:convolution_padding}:
 \begin{itemize}
 	\item \textbf{Valid:} the input image is not padded. This means that the filter only goes through existing pixel values, which makes the output size smaller than the input size. 
 	
