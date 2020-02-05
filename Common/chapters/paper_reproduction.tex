@@ -134,7 +134,6 @@ In comparison to the original VGG, this model keeps the small filter size of 3x3
 \caption{Model architecture with the corresponding PyTorch code}
 \label{fig:paper_model}
 \end{figure}
-\subsection{Criterion to save the best model}
 \subsection{Tensorboard}
 During the experiment the following metrics are computed: loss, accuracy, precision, recall, F1-score, specificity and AUC. These metrics are computed separately on the training and on the validation sets at the end of each epoch. They are then stored across all epochs and plotted on the same figure thanks to Tensorboard at the end of the process. Subsequently, this is also the case for the metrics measured on the test set.\\
 "Tensorboard provides the visualization and tooling needed for machine learning experimentation:
