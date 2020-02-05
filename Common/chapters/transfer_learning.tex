@@ -107,19 +107,33 @@ The first step was to standardize the file names and formats. The chosen convent
 \subsubsection{From JPG to NumPy arrays}
 Images had to be converted to single-channel NumPy arrays (grayscale) so that the values could be normalized further on. First, a mere conversion involving no content modification apart from going from three to one channel was performed. Second, images were normalized according to equation \ref{eq:normalization}. The mean and standard deviation were computed over the whole dataset. Both classes were augmented by a common factor (200x) since both class contain a relatively close number number of instances (133 positives and 96 negatives). Similarly to Lung CT Challenge, tumor sizes vary substantially. The same methodology was applied regarding the patch size, i.e. choosing a size which fits the majority of large tumors perfectly. Even though the images all show the head under the same perspective (same height/width ratio, visible skull, black margin around the skull), images were probably collected from different sources, which explains the heterogeneity of resolutions. As a consequence, the patch size could not be a fixed number of pixels for all images because the cropped area would be the entire head on one image and a small portion of the tumor on another. The trick consisted in finding the horizontal and vertical portions of the image occupied by the tumor. In fact, cropping an area centered on the lesion whose height was $\frac{2}{7}$ of the image and whose width was $\frac{1}{4}$ gave good results. 
 
+
+\subsection{Image cropping}
+Multiple ways of cropping images were tested out. The differences lay in how much tissue was kept apart from the lesion itself. In some cases, more context around the lesion allows to capture details about the connections between the lesion and blood vessels for example. Moreover, the abrupt borders inducing a clear change of colors can help detect tumors. Experienced showed that more context helps when the images are single-sequence. On the other hand, cropping right around the lesion or even in the lesion gave better results for multi-sequence data, i.e. when T2-weighted, DWI and ADC images (MRIs) were simultaneously used to perform the tumor detection and classification. In the latter case, the lesion usually appears distinctively on the three sequences, and this impacts the decision a lot. On single-sequence images, there is a clear lack of information which makes it difficult to differentiate a tumor from another tissue without much context. 
+
+
 \subsection{Verification}
 \subsubsection{Visual checking}
 Regarding the Kaggle brain dataset, the data generated was paid close attention to since the ground truth CSV file was created by hand (see section \ref{sec:braingroundtruth}). In fact, each generated image was taken a close look at, which allowed to spot 3 mistakes over the whole dataset. They concerned typos in the "Nodule Center Position", which created pitch black images since the cropped area was outside.
-Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control images with red dots were generated for both datasets. 
+Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control images with red dots were also generated for the other datasets. 
 
 
 \section{Transfer learning implementation}
 \subsection{Architecture generalities}
 
- 
+
+\subsubsection{Layer freezing}
+After each dataset switch, the model is first trained with freezed layers. The freezed layers are those considered as feature extractor, i.e. the first layers of the model. The exact point where the model is split is arbitrary, but is usually located after the convolutions. To perform this freezing, multiple steps are required:
+\begin{enumerate}
+	\item Reset the last layers. To do so, an instance of the model is created by loading the state dictionary of the previous one, before replacing the module containing the last layers with a new instance. 
+	\item Iterate over the batch normalization layers and freeze them. Step 3 is not sufficient to freeze batch normalization layers. This can be achieved by calling module.eval() on each module containing such layers (after the model.train() call). 
+	\item Pass the parameters of these last layers only to the optimizer.
+\end{enumerate}
 
 
 \subsection{Script options}
+A single Python script allows to run the entire transfer learning pipeline. Multiple command line arguments are required in order to load the right datasets and the right model, to define the hyperparameters, etc. Table \ref{fig:transfer_learning_options} gives a exhaustive list of the script options. The particularity lies in the learning rate, number of epochs, batch size and dropout options. In fact, the pipeline consists in seven different phases of training: dataset 1 (full model), dataset 2 (frozen model), dataset 2 (full), dataset 3 (frozen), dataset 3 (full), dataset 4 (frozen) and dataset 4 (full). In such a case, each phase will probably use different hyperparameters. Therefore, these command line options need to specify seven different parameters. For example, a valid value for the "--lr" option could be "1e-8,1e-5,1e-6,1e-6,1e-5,1e-7,1e-8".
+
 
 % Please add the following required packages to your document preamble:
 % \usepackage{graphicx}
@@ -139,13 +153,13 @@ Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control image
 & True                                                                        & String        \\ \hline
 \textbf{--training-set3}     & Path to training set 3                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
 \textbf{--validation-set3}   & Path to validation set 3                                                                                                                                                                                                                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
-\textbf{--batchsize}        & Number of samples per batch                                                                                                                                                                                         & True                                                                        & Int           \\ \hline
-\textbf{--nbepochs}         & Number of epochs the training phase lasts                                                                                                                                                                  & True                                                                        & Int           \\ \hline
-\textbf{--lr}               & Learning rate used in the optimizer                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}False\\ Default: 1e-3\end{tabular}               & Float         \\ \hline
+\textbf{--batchsize}        & Number of samples per batch                                                                                                                                                                                         & True                                                                        & Comma-separated ints          \\ \hline
+\textbf{--nbepochs}         & Number of epochs the training phase lasts                                                                                                                                                                  & True                                                                        & Comma-separated ints            \\ \hline
+\textbf{--lr}               & Learning rate used in the optimizer                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}True\end{tabular}               & Comma-separated floats         \\ \hline
 \textbf{--lossfunction}     & \begin{tabular}[c]{@{}l@{}}Loss function name\\{[}CrossEntropyLoss, L1Loss, MSELoss{]}\end{tabular}                                                                                                            & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'CrossEntropyLoss'\end{tabular} & String        \\ \hline
 \textbf{--cuda-device}      & GPU name to run the experiment                                                                                                                                                                                      & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'cuda'\end{tabular}             & String        \\ \hline
 \textbf{--modeltoload}      & \begin{tabular}[c]{@{}l@{}}Pretrained model name \\If given, load it, otherwise randomly initialize it\end{tabular}                                                                                     & \begin{tabular}[c]{@{}l@{}}False\\ Default: ""\end{tabular}                 & String        \\ \hline
-\textbf{--dropout}          & Dropout probability                                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}False\\ Default: 0.3\end{tabular}                & Float         \\ \hline
+\textbf{--dropout}          & Dropout probability                                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}True\end{tabular}                & Comma-separated floats          \\ \hline
 \textbf{--optimized-metric} & \begin{tabular}[c]{@{}l@{}}Metric to optimize\\ The best model during the training will be saved according to it\\{[}'auc', 'accuracy', 'precision', 'recall', 'f1score', 'specificity'{]}\end{tabular} & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'auc'\end{tabular}              & String        \\ \hline
 \textbf{--outputdirectory}  & Root of the output directory used by Tensorboard to save the models                                                                                                                                                 & True                                                                        & String        \\ \hline
 \textbf{--cv} & \begin{tabular}[c]{@{}l@{}}Whether to use cross-validation or not\\{[}'True', 'False'{]}\end{tabular} & \begin{tabular}[c]{@{}l@{}}True\end{tabular}             
@@ -159,5 +173,18 @@ Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control image
 \subsection{Visualization of the usefulness of the features learned on each dataset}
 \subsection{Experimental setup}
 \section{Results}
+
+\subsection{Independent training}
+To get reference values and evaluate the impact of transfer learning on the model performance, a set of trainings on each dataset was performed independently. These experiments involved multiple hyperparameter combinations. The best results were used as benchmark values. 
+
+\subsubsection{PROSTATEx}
+
+\subsubsection{Kaggle brain}
+
+\subsubsection{Lung CT Challenge}
+
+
+\subsection{Transfer learning}
+
 
 \section{Discussion}
