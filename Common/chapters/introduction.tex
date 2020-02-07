@@ -25,4 +25,17 @@ xx
 
 
 \section{Contributions}
-xx
+This work proposes various methods to detect cancer on MRIs, with a focus on prostate cancer. Concretely, the major contributions of this work are:
+\begin{itemize}
+\item Processing scripts for the PROSTATEx dataset, the Lung CT Challenge dataset and the Kaggle Brain dataset. This includes the conversion of DICOM/.png files to NumPy arrays, their registration (alignment for stacking and same resolution to have the same amount of tissues on each ) and their split into multiple sets to be given as input to machine learning algorithms.
+\item Visualization scripts for DICOM, NIFTI and RAW medical file formats. A system to navigate through 4D data (width, height, depth and time) using the directional arrows is implemented: left/right arrows to vary the time axis and up/down to navigate through the difference slices (i.e the depth) of all images of a patient.
+\item A state of the art deep learning model for prostate cancer detection. All steps are clearly described, the corresponding scripts are available on Github and the unadulterated results are presented. This allows a complete reproducibility of the experiment.
+\item Processing script for the PROSTATEx challenge. This goes from the processing of the test images of the challenge to the generation of the .csv file containing their output predictions, which is either "benign lesion" or "malignant tumor".
+\item A transfer learning pipeline that makes use of different body parts to increase the classification performance of one chosen body part. This technique is a concrete solution to overcome the lack of available data for each body part. Furthermore, it increases the generalization ability of the neural network.
+\item Verification scripts to check the gradient flow of a neural network, the cropping of images, the presence of NaN value in images etc. All these scripts can be easily be imported in other projects.
+
+
+
+
+ 
+\end{itemize}
