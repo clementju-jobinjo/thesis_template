@@ -11,6 +11,7 @@ Transfer learning consists in using a network which was pretrained on a dataset 
 
 
 \section{Process overview}
+\label{sec:process_overview}
 The approach consists in five different steps.
 First of all, similar datasets are collected and processed in the same way. These datasets need to share common features. For example, DWI images (MRI sequence) and CT scans share the same color scheme and look alike (the same kind of tissue is visible, etc.). On the contrary, mammographies are completely different in that they the tissue is less visible FIGURE. 
 
@@ -121,7 +122,6 @@ Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control image
 \section{Transfer learning implementation}
 \subsection{Architecture generalities}
 
-
 \subsubsection{Layer freezing}
 After each dataset switch, the model is first trained with freezed layers. The freezed layers are those considered as feature extractor, i.e. the first layers of the model. The exact point where the model is split is arbitrary, but is usually located after the convolutions. To perform this freezing, multiple steps are required:
 \begin{enumerate}
@@ -170,8 +170,26 @@ A single Python script allows to run the entire transfer learning pipeline. Mult
 \label{fig:transfer_learning_options}
 \end{table}
 
-\subsection{Visualization of the usefulness of the features learned on each dataset}
+\subsection{Visualization of the impact of the various datasets on the target task}
+On paper, each step of the transfer learning is supposed to make the model learn new features that are useful for the first dataset (the target dataset). As described in section \ref{sec:process_overview}, the model can be seen as a feature extractor and a decision maker. Hence, to see how much each step was actually helping the process, the decision maker resulting from the first step of the transfer learning, i.e. the training on the first/target dataset, was saved. As this decision maker is saved after the training on the target dataset, it is specialized in the classification of the latter. In other words, if the target dataset is a prostate dataset, it will classify prostate tumors with a relatively high precision. 
+
+Then, after each epoch of every other transfer learning step, the saved decision maker was attached to the current feature extractor. This temporary model was then tested on the target training and validation sets, which resulted in different training and validation metrics. 
+
+At the end of the transfer learning pipeline, a graph was generated for each metric. These curves show the evolution of the latter across the entire process, which allows to determine the impact of each non-target dataset on the target task. If a metric is increasing, the features learned thanks to the corresponding dataset are useful for the target one. Figure \ref{fig:global_performance_example} shows an example of this graph for the AUC.\\
+As expected, the curve is flat during the frozen parts. Since the same decision maker is attached to frozen layers (which remain the same by definition), the values of the metrics don't change at all. 
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/global_performance_example.png}
+\caption{Please replace this figure with a real example as soon as the results are available!}
+\label{fig:global_performance_example}
+\end{figure}
+
+
 \subsection{Experimental setup}
+
+
+
 \section{Results}
 
 \subsection{Independent training}
