@@ -127,8 +127,21 @@ After each dataset switch, the model is first trained with freezed layers. The f
 \begin{enumerate}
 	\item Reset the last layers. To do so, an instance of the model is created by loading the state dictionary of the previous one, before replacing the module containing the last layers with a new instance. 
 	\item Iterate over the batch normalization layers and freeze them. Step 3 is not sufficient to freeze batch normalization layers. This can be achieved by calling module.eval() on each module containing such layers (after the model.train() call). 
-	\item Pass the parameters of these last layers only to the optimizer.
+	\item Only pass the parameters of these last layers to the optimizer.
 \end{enumerate}
+
+
+\subsubsection{Parallelization}
+Each experiment before transfer learning was performed on a single GPU. While being a lot faster than training on a CPU, the computation time was still relatively high. In order to get results from the transfer learning in a reasonable amount of time, parallelization was required. In fact, the longest transfer learning experiment consisted of $(5$ folds $* 4$ learning rates $* 1200$ epochs $+ 1200$ epochs$) * 7$ parts $= 176400$ epochs. On a single GPU, this experiment would have taken around two weeks to complete. 
+
+Thanks to parallelization, the cross-validation combinations could be run simultaneously on different GPUs (5 of them since 5-fold cross-validation was used). To achieve this while using Python and GPUs, we relied on a library called Ray. The function responsible for training the model needs to be defined as a Ray remote function thanks to a decorator (@$ray.remote$ above the function declaration). This new function does not return the actual return values, but object IDs pointing to placeholders for the future results, which allows to continue the execution and run other parallel functions. Outside of the cross-validation loop, a call to $ray.get()$ on the object IDs allows to wait for the simultaneous executions to complete and to collect the different results. 
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/tl_parallel_run.png}
+\caption{Transfer learning - Parallelization}
+\label{fig:tl_parallel_run}
+\end{figure}
 
 
 \subsection{Script options}
@@ -169,6 +182,9 @@ A single Python script allows to run the entire transfer learning pipeline. Mult
 \caption{Complete list of script options}
 \label{fig:transfer_learning_options}
 \end{table}
+
+
+
 
 \subsection{Visualization of the impact of the various datasets on the target task}
 On paper, each step of the transfer learning is supposed to make the model learn new features that are useful for the first dataset (the target dataset). As described in section \ref{sec:process_overview}, the model can be seen as a feature extractor and a decision maker. Hence, to see how much each step was actually helping the process, the decision maker resulting from the first step of the transfer learning, i.e. the training on the first/target dataset, was saved. As this decision maker is saved after the training on the target dataset, it is specialized in the classification of the latter. In other words, if the target dataset is a prostate dataset, it will classify prostate tumors with a relatively high precision. 
