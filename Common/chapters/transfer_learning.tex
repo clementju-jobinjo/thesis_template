@@ -12,7 +12,7 @@ Transfer learning consists in using a network which was pretrained on a dataset 
 
 \section{Process overview}
 \label{sec:process_overview}
-The approach consists in five different steps.
+The approach consists in five different steps. Figure \ref{fig:tl_overview} gives a visual representation of the following explanations.\\
 First of all, similar datasets are collected and processed in the same way. These datasets need to share common features. For example, DWI images (MRI sequence) and CT scans share the same color scheme and look alike (the same kind of tissue is visible, etc.). On the contrary, mammographies are completely different in that they the tissue is less visible FIGURE. 
 
 Second, the convolutional neural network is built and split into two parts. It is still a single network but the first layers are treated as the feature extractor. As the name suggests, the role of these layers is to extract visual features characterizing what a cancerous tumor looks like. On the other hand, the last layers are considered as decision maker. They will gather the features collected by the feature extractor and process them to make a decision on the class of the input sample. 
@@ -26,7 +26,18 @@ Fourth, the core of transfer learning process starts. For each non-target datase
 	\item Once the training with frozen layers is over, the best model is loaded, the frozen layers are unfrozen, and a normal training is performed on the same dataset. Thanks to this, the model adapts the previously learned features and tries to learn new features which could be useful for the classification of the target dataset. 
 \end{enumerate}
 
-Fifth, the previous step is also applied to the target dataset. These final two trainings aim at keeping the interesting features from the other datasets while learning specializing the model in the target dataset again. Hopefully, the new weight initialization resulting from the transfer learning will allow to reach better metric values than before the transfer learning. Usually, the best model 
+Fifth, the previous step is also applied to the target dataset. These final two trainings aim at keeping the interesting features from the other datasets while learning specializing the model in the target dataset again. Hopefully, the new weight initialization resulting from the transfer learning will allow to reach better metric values than before the transfer learning. 
+
+
+\begin{figure}[!h]
+\centering
+\noindent
+\makebox[\textwidth]{
+\includegraphics[width=1.2\textwidth, keepaspectratio=true]{./figures/tl_overview.png}
+}
+\caption{Transfer learning - Overview}
+\label{fig:tl_overview}
+\end{figure}
 
 
 \section{Data processing}
@@ -138,7 +149,10 @@ Thanks to parallelization, the cross-validation combinations could be run simult
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/tl_parallel_run.png}
+\noindent
+\makebox[\textwidth]{
+\includegraphics[width=1.3\textwidth, keepaspectratio=true]{./figures/tl_parallel_run.png}
+}
 \caption{Transfer learning - Parallelization}
 \label{fig:tl_parallel_run}
 \end{figure}
