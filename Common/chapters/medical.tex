@@ -144,26 +144,6 @@ With the goal of preserving the compatibility between the ANALYZE and the NIfTI 
 Some datasets use a combination of RAW and MHD files. The latter contain metainformation about their corresponding RAW file(s) which contain the data. In most cases, each MHD file points to a unique RAW file whose name is the same as the MHD file name. A single RAW file can be used to represent three-dimensional data, i.e. the combination of multiple two-dimensional images. Libraries such as \mbox{SimpleITK} in Python allow to manipulate RAW images in an easy way. 
 
 
-\section{Conversion}
-
-Medical data is often represented over 16 bits. However, exporting images to PNG require 8-bit images. To transpose a 16-bit image to an 8-bit one, the procedure described by algorithm \ref{alg:16_to_8_bits_conversion} was applied.
-
-\begin{algorithm}
-    \caption{16 to 8 bits conversion}
-    \label{alg:16_to_8_bits_conversion}
-    \begin{algorithmic}[1] % The number tells where the line numbering should start
-        \Procedure{16\_to\_8\_bits\_conversion}{$pixel\_array$}
-        		\State{$Pixel_{min} \gets$ minimal pixel value in $pixel\_array$}
-        		\State{$Pixel_{max} \gets$ maximal pixel value in $pixel\_array$}
-        		\For{$pixel\_value$ in $pixel\_array$}
-        			\State $pixel\_value \gets \frac{(pixel\_value - Pixel_{min}) * 255.0}{Pixel_{max} - Pixel_{min}}$
-        		\EndFor
-        		\State Modify object type to 8 bits
-        		\State Export $pixel\_array$ to PNG
-        \EndProcedure
-    \end{algorithmic}
-\end{algorithm}
-
 
 \section{Visualization tools}
 Processing data manually increases the probability of making mistakes. For that matter, visualization tools relying on the same processing code as the ones used to generate training images were developped. Their primary goal is to compare our visual representation of an image to the one obtained in professional pieces of software. These tools are convenient to visualize a dataset easily. In some cases (especially RAW/MHD images), no free software capable of reading the files was available, which made the corresponding tool useful. 
@@ -200,3 +180,30 @@ Medical RAW files are three-dimensional, which means that a single file contains
 \caption{Visualization of a three-dimensional RAW file}
 \label{fig:visualize_liver_raw}
 \end{figure}
+
+
+
+\section{Conversion to PNG}
+
+In addition to the visualization tools, libraries allowing to convert medical files into PNG files were developped. The main one is called "anydatasettopng" and is the one to use to convert any file format to PNG since it makes use of the others. Given a root directory, it scans the latter and its subdirectories to find all DICOM, NIfTI and RAW/MHD files. Then, each file is converted to PNG and saved into the same directory as the one it came from. This library allows to keep an easily accessible visual representation of medical files without having to rely on a specific piece of software to display them. Finally, it also played the role of debugging tool since the conversion techniques are the same as the ones used further in this work. 
+
+
+\subsection{8-bit conversion}
+
+Medical data is often represented over 16 bits. However, exporting images to PNG require 8-bit images. To transpose a 16-bit image to an 8-bit one, the procedure described by algorithm \ref{alg:16_to_8_bits_conversion} was applied. 
+
+\begin{algorithm}
+    \caption{16 to 8 bits conversion}
+    \label{alg:16_to_8_bits_conversion}
+    \begin{algorithmic}[1] % The number tells where the line numbering should start
+        \Procedure{16\_to\_8\_bits\_conversion}{$pixel\_array$}
+        		\State{$Pixel_{min} \gets$ minimal pixel value in $pixel\_array$}
+        		\State{$Pixel_{max} \gets$ maximal pixel value in $pixel\_array$}
+        		\For{$pixel\_value$ in $pixel\_array$}
+        			\State $pixel\_value \gets \frac{(pixel\_value - Pixel_{min}) * 255.0}{Pixel_{max} - Pixel_{min}}$
+        		\EndFor
+        		\State Modify object type to 8 bits
+        		\State Export $pixel\_array$ to PNG
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
