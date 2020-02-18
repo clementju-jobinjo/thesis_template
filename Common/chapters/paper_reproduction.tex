@@ -196,16 +196,16 @@ As stated by the authors, "the training process is sensitive to the parameter in
 
 
 \subsubsection{Experimental setup}
-Keeping the exact same hyperparameters as the original paper lead the reproduction experiment to disappointing results. Consequently, new hyperparameters had to be found. A grid search approach driven by the AUC obtained on the challenge test set was chosen. In practical terms, this consists in trying multiple combinations of hyperparameters and keeping the one that produced the best AUC on the challenge test set. At the end of this process, it appears that the best model was obtained when the data was organized in batches of 32 samples, with an initial learning rate of 1e-7, a learning rate decay on plateau using a factor of 100 with a patience of 2 (the learning rate is divided by 100 when the validation AUC sequentially decreases for two epochs) and a dropout rate of 0.2. This model was implemented with PyTorch using the Adam optimizer to update its weights and was trained on an Nvidia GeForce GTX Titan X graphics card during approximately 3 hours.\\
+Keeping the exact same hyperparameters as the original paper lead the reproduction experiment to disappointing results. Consequently, new hyperparameters had to be found. A grid search approach driven by the AUC obtained on the test set (the one built for the experiment, not the one of the challenge) was chosen. In practical terms, this consists in trying multiple combinations of hyperparameters and keeping the one that produced the best AUC on this test set. At the end of this process, it appears that the best model was obtained when the data was organized in batches of 32 samples, with an initial learning rate of 1e-7, a learning rate decay on plateau using a factor of 100 with a patience of 2 (the learning rate is divided by 100 when the validation AUC sequentially decreases for two epochs) and a dropout rate of 0.2. This model was implemented with PyTorch using the Adam optimizer to update its weights and was trained on an Nvidia GeForce GTX Titan X graphics card during approximately 3 hours.\\
 
 \subsection{Training verification}
-In deep learning, two main problems can occur during training. The first one is called the "vanishing gradient" problem and refers to the fact that it is possible for the loss function to compute extremely small gradients, near zero. Consequently, the weight update is also extremely small, which makes the neural network hard or impossible to train. The second problem, the "exploding gradient" is the opposite. Concretely, in this case, large gradients are computed, which results in huge weight updates that can even reach "NaN" values. This makes the model unstable and unable to learn from training data.  \\
-As a result, it is important to analyze the gradient propagation across the network to ensure that it is not facing such problems. To achieve this goal, a visualization tool to display the gradients of the entire network was implemented. This allows to visually notice the gradient flow at a glance and to see its evolution during all epochs (one visualization per batch is generated).
+In deep learning, two main problems can occur during training. The first one is called the "vanishing gradient" problem and refers to the fact that it is possible for the loss function to compute extremely small gradients, near zero. Consequently, the weight update is also extremely small, which makes the neural network hard or impossible to train. The second problem, the "exploding gradient" is the opposite. In this case, large gradients are computed, which leads to huge weight updates that can even reach "NaN" values. This makes the model unstable and unable to learn from training data.  \\
+As a result, it is important to analyse the gradient propagation across the network to ensure that it is not facing such problems. To achieve this goal, a visualization tool to display the gradients of the entire network was implemented. This allows to visually notice the gradient flow at a glance and to see its evolution during all epochs (one visualization per batch is generated).
 
 
 \subsubsection{Gradient flow visualization}
 The visualization displays the gradient flow through the entire neural network. It shows the name of each layer on the x-axis and its average gradient value on the y-axis (recall: for each layer the gradient is a matrix). Furthermore, it also gives information about the max value of the gradient and indicates in black if one of them is equal to zero.\\
-The figure \ref{fig:gradient_flow} shows the gradient flow at epoch 0, batch 6. From the output layer (called "last\_layer0.weight" on the graph) to the first layer, the gradient is well propagated: no huge average gradients are registered, neither extremely small ones.
+The figure \ref{fig:gradient_flow} shows the gradient flow at epoch 0, batch 6. From the output layer (called "last\_layer0.weight" on the graph) to the first layer, the gradient is well propagated: no huge average gradients are registered, neither extremely small ones. The training process goes on correctly.
 
 \begin{figure}[!h]
 \centering
@@ -215,7 +215,8 @@ The figure \ref{fig:gradient_flow} shows the gradient flow at epoch 0, batch 6. 
 \end{figure}
 
 \subsection{Results}
-Figures \ref{fig:paper_reprodution_results_part_1}, \ref{fig:paper_reprodution_results_part_2} and \ref{fig:paper_reprodution_results_part_3} show the different metrics registered on the training and validation sets during the training phase. The best model was chosen at epoch ... with an accuracy of ... and an AUC of ... (the condition for a model to be chosen as best is that the current AUC should be higher than the AUC of the previous best model, same for the accuracy).\\
+Figure \ref{fig:paper_reprodution_results} shows the different metrics registered on the training and validation sets during the training phase. The best model was chosen at epoch 21 with an accuracy of 0.7525 and an AUC of 0.765 (recall: the condition for a model to be chosen as best is that the current AUC and accuracy should be higher than the AUC and accuracy of the previous best model) on the validation set.\\
+Figure \ref{fig:paper_reprodution_auc_on_our_test_set}
 This best model was also used to take part in the ProstateX challenge. The res XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 \begin{figure}[!h]
@@ -225,12 +226,23 @@ This best model was also used to take part in the ProstateX challenge. The res X
 \label{fig:paper_reprodution_results}
 \end{figure}
 
+
 \begin{figure}[!h]
 \centering
-\includegraphics[height=0.4\textheight, keepaspectratio=true]{./figures/paper_reproduction_results_challenge.png}
-\caption{Score achieved in the PROSTATEx challenge}
-\label{fig:paper_reprodution_results_challenge}
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/auc_our_test_set.png}
+\caption{AUC of the best model on our test set}
+\label{fig:paper_reprodution_auc_on_our_test_set}
 \end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[height=0.4\textheight, keepaspectratio=true]{./figures/paper_reproduction_results_challenge1.png}
+\caption{Score achieved in the PROSTATEx challenge using only our custom training set (80\% of all available data) for the training}
+\label{fig:paper_reprodution_results_challenge_1}
+\end{figure}
+
+
+
 
 
 \subsection{Discussion}
@@ -243,4 +255,22 @@ As the goal of the experiment was to reproduce the results of the paper,
 \label{sec:classification_challenge}
 \subsection{Training the neural network with the whole dataset}
 \subsection{Results on the challenge test set}
+
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/paper_reproduction_results_challenge_full_dataset.png}
+\caption{Metrics on the training using all data available as training set}
+\label{fig:challenge_all_results}
+\end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[height=0.4\textheight, keepaspectratio=true]{./figures/paper_reproduction_results_challenge2.png}
+\caption{Score achieved in the PROSTATEx challenge using all available data as training set}
+\label{fig:paper_reprodution_results_challenge2}
+\end{figure}
+
+
+
 \subsection{Discussion}
