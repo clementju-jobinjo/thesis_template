@@ -2,20 +2,19 @@
 
 \chapter{Improving performance using transfer learning}
 \label{ch:transfer_learning}
-%What we do: improve cancer detection/classification on medical imaging
-%How we do it: transfer learning
 This chapter proposes a technique to improve cancer detection and classification despite the lack of publicly available medical data. To achieve this, transfer learning is used.\\
 First, a general definition of transfer learning is given. Its utility in this specific application is discussed as it is useful but not in any case. Second, the different steps involved in the process are described in order to get an overview of the whole transfer learning pipeline that was applied. Then, a section focuses on the processing of new datasets that are used in the final experiment. Finally, the latter and its results are discussed. 
 
 
 \section{Goal}
-Transfer learning consists in using a network which was pretrained on a dataset A to improve the performance of the task on a dataset B. This technique makes sense when the quantity of data available is not sufficient and when the data of both datasets share common features. Both conditions are fulfilled in the case of cancer detection. In fact, medical data are highly confidential and cannot be shared easily. Provided that medical institutions agree to share it, it has to undergo an anonymization process which follows very strict rules. Then, to be usable as part of a deep learning classication task, data must be organized and described precisely. In other words, additional information such as the clinical significance, the position of the lesion, etc. must be collected and put together. This whole process requires considerable effort, which is one of the reasons why medical data is hard to find. In this case, transfer learning aims at using various small datasets in order to achieve the same or better performance than with a single huge dataset. 
+Transfer learning consists in using a network which was pretrained on a dataset A to improve the performance of the task on a dataset B. This technique makes sense when the quantity of data available is not sufficient and when the data of both datasets share common features. Both conditions are fulfilled in the case of cancer detection. In fact, medical data are highly confidential and cannot be shared easily. Provided that medical institutions agree to share it, it has to undergo an anonymization process which follows very strict rules. Then, to be usable as part of a deep learning classification task, data must be organized and described precisely. In other words, additional information such as the clinical significance, the position of the lesion, etc. must be collected and put together. This whole process requires considerable effort, which is one of the reasons why medical data is hard to find. In this case, transfer learning aims at using various small datasets in order to achieve the same or better performance than with a single huge dataset. 
 
 
 \section{Process overview}
 \label{sec:process_overview}
 The approach consists in five different steps. Figure \ref{fig:tl_overview} gives a visual representation of the following explanations.\\
-First of all, similar datasets are collected and processed in the same way. These datasets need to share common features. For example, DWI images (MRI sequence) and CT scans share the same color scheme and look alike (the same kind of tissue is visible, etc.). On the contrary, mammographies are completely different in that they the tissue is less visible FIGURE. 
+First of all, similar datasets are collected and processed in the same way. These datasets need to share common features. For example, DWI images (MRI sequence) and CT scans share the same color scheme and look alike (the same kind of tissue is visible, etc.). 
+%On the contrary, mammographies are completely different in that they the tissue is less visible FIGURE. 
 
 Second, the convolutional neural network is built and split into two parts. It is still a single network but the first layers are treated as the feature extractor. As the name suggests, the role of these layers is to extract visual features characterizing what a cancerous tumor looks like. On the other hand, the last layers are considered as decision maker. They will gather the features collected by the feature extractor and process them to make a decision on the class of the input sample. 
 
