@@ -44,11 +44,11 @@ Fifth, the previous step is also applied to the target dataset. These final two 
 \section{Data processing}
 \subsection{PROSTATEx}
 \label{sec:PROSTATEx}
-As the other datasets used in this work don't contain multi-sequence exams (single-sequence MRIs and CT scans), it was required to extract single channel images from the PROSTATEx dataset. DWI images were selected because lesions are white on this sequence, as well as on CT scans. Hence, choosing DWI images ensured a consistent representation of tumors from one dataset to the other, which helps the cancer detection.
+As the other datasets used in this work do not contain multi-sequence exams (single-sequence MRIs and CT scans), it was required to extract single channel images from the PROSTATEx dataset. DWI images were selected because lesions are white on this sequence, as well as on CT scans. Hence, choosing DWI images ensured a consistent representation of tumors from one dataset to the other, which helps the cancer detection.
 
 The overall process is the same as the one described in section \ref{sec:numpyToAugmentedStacked}, apart from the alignment and the stacking. A T2-weighted image was still used to align, crop and resize the corresponding DWI image but was not exported at the end, resulting in a single channel image (NumPy array).
 
-Ideally, transfer learning should rely on multi-sequence MRIs only. In fact, the extra information provided by different sequences increases the performance a lot. However, publicly available datasets either don't contain the clinical significance of the samples or were purely made for segmentation purposes (where labels are also images). 
+Ideally, transfer learning should rely on multi-sequence MRIs only. In fact, the extra information provided by different sequences increases the performance a lot. However, publicly available datasets either do not contain the clinical significance of the samples or were purely made for segmentation purposes (where labels are also images). 
 
 
 \subsection{LungCTChallenge}
@@ -207,7 +207,7 @@ On paper, each step of the transfer learning is supposed to make the model learn
 Then, after each epoch of every other transfer learning step, the saved decision maker was attached to the current feature extractor. This temporary model was then tested on the target training and validation sets, which resulted in different training and validation metrics. 
 
 At the end of the transfer learning pipeline, a graph was generated for each metric. These curves show the evolution of the latter across the entire process, which allows to determine the impact of each non-target dataset on the target task. If a metric is increasing, the features learned thanks to the corresponding dataset are useful for the target one. Figure \ref{fig:global_performance_example} shows an example of this graph for the AUC.\\
-As expected, the curve is flat during the frozen parts. Since the same decision maker is attached to frozen layers (which remain the same by definition), the values of the metrics don't change at all. 
+As expected, the curve is flat during the frozen parts. Since the same decision maker is attached to frozen layers (which remain the same by definition), the values of the metrics do not change at all. 
 
 \begin{figure}[!h]
 \centering
