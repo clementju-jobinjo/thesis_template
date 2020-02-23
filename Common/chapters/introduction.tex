@@ -21,11 +21,15 @@ Finally, the last part is dedicated to transfer learning and its application to 
 % The most lethal kind is the lung cancer ($1.76$ million deaths in 2018).
 
 \section{Motivation}
-xx
+As explained by Nicholas Petrick~\cite{50}, "it has long been recognized that clinicians do not always make optimal use of the data acquired by an imaging device. The limitations of the human eye-brain system, limitations in training and experience, and factors such as fatigue, distraction, and satisfaction of search may all contribute to suboptimal use of available information". In these circumstances, CAD systems can contribute to address some of these issues by being used as an aid for clinicians. In fact, they provide multiple advantages.\\
+First of all, used as an extra diagnostic, they decrease the probability to miss positive diagnoses. Then, they can also speed up the diagnosis by proposing regions of interest to clinicians, which in time, will reduce the screening costs. Similarly, lower screening costs mean a greater accessibility of screening tests, which results in an earlier cancer detection. Another benefit of using CAD systems, specially the one based on Deep Learning, is the number of cases that these latter have "seen". Indeed, in order to create efficient Deep Learning models, big amounts of data are needed. Consequently, efficient CAD systems have seen a lot of cancer examples whereas beginner clinicians have probably seen less a smallest number of them.\\
+However, all these advantages are still nowadays partially theoretical and the research is still going on to improve existent CAD systems. Problems like poor detection rates, small amounts of available data and bad levels of generalization are still recurrent. 
+%Consequently, this thesis presents how to build a modern Deep Learning model for prostate lesions classification and proposes a model based on transfer learning to overcome the lack of available data in the medical field.
+
 
 
 \section{Contributions}
-This work proposes various methods to detect cancer on MRIs, with a focus on prostate cancer. Concretely, the major contributions of this work are:
+This work proposes a state of the art deep learning model for prostate lesion classification and proposes a method based on transfer learning to overcome the lack of publicly available data in the medical field. Concretely, the major contributions of this work are:
 \begin{itemize}
 
 \item Processing scripts for the PROSTATEx dataset, the Lung CT Challenge dataset and the Kaggle Brain dataset. This includes the conversion of DICOM and PNG files to NumPy arrays, their registration (alignment and resizing to the same resolution for stacking purpose, ensuring the same amount of tissue on each image), their augmentation and the organization of the resulting images multiple subsets (training, validation and test) that can be used as input to machine learning algorithms. Also, the class imbalance problem is taked into account. The processing scripts automatically augment each class in order to balance the number of elements. In addition to this, an alternative relying on undersampling was implemented as a PyTorch sampler.
