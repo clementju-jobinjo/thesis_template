@@ -7,7 +7,10 @@ First, a general definition of transfer learning is given. Its utility in this s
 
 
 \section{Goal}
-Transfer learning consists in using a network which was pretrained on a dataset A to improve the performance of the task on a dataset B. This technique makes sense when the quantity of data available is not sufficient and when the data of both datasets share common features. Both conditions are fulfilled in the case of cancer detection. In fact, medical data are highly confidential and cannot be shared easily. Provided that medical institutions agree to share it, it has to undergo an anonymization process which follows very strict rules. Then, to be usable as part of a deep learning classification task, data must be organized and described precisely. In other words, additional information such as the clinical significance, the position of the lesion, etc. must be collected and put together. This whole process requires considerable effort, which is one of the reasons why medical data is hard to find. In this case, transfer learning aims at using various small datasets in order to achieve the same or better performance than with a single huge dataset. 
+Transfer learning consists in using a network which was pretrained on a dataset A to improve the performance of the task on a dataset B.\\
+This technique makes sense when the quantity of data available is not sufficient. This conditions is fulfilled in the case of cancer detection. In fact, medical data are highly confidential and cannot be shared easily. Provided that medical institutions agree to share it, it has to undergo an anonymization process which follows very strict rules. Then, to be usable as part of a deep learning classification task, data must be organized and described precisely. In other words, additional information such as the clinical significance, the position of the lesion, etc. must be collected and put together. This whole process requires considerable effort, which is one of the reasons why medical data is hard to find.\\
+%In this case, transfer learning aims at using various small datasets in order to achieve the same or better performance than with a single huge dataset.
+However, in order for the transfer learning to be useful, common low level features have to be present among the datasets on which the model is trained. Consequently, the goal of this experiment is to use transfer learning on three datasets of three different body parts, that are prostate, brain and lung, in order to check if they share common features that could be useful to improve the performance of the model on a specific dataset. In this experiment, the model trained to classify prostate lesions is then trained to classify brain tumors and finally lung lesions. At the end of the process, the model is once again trained on the prostate dataset and the performances of the model at the beginning and at the end of the experiment are compared.
 
 
 \section{Process overview}
@@ -23,7 +26,7 @@ Third, the model is trained on the target dataset and the model whose performanc
 Fourth, the core of transfer learning process starts. For each non-target dataset, two different trainings take place:
 
 \begin{enumerate}
-	\item The model saved at the end of the previous training is loaded. Its last layers (the decision maker) are completely reset, i.e. the weights are reset to another initialization, as if no training occured for these layers. Afterwards, the first layers (the decision maker) are frozen and the model is trained. Since the first layers have been frozen, their weights will remain the same. Only the weights of the last layers will change. This part of the transfer learning allows the model to make use of the previously learned features while adapting to the new body part by training the decision maker. 
+	\item The model saved at the end of the previous training is loaded. Its last layers (the decision maker) are completely reset, i.e. the weights are reset to another initialization, as if no training occured for these layers. Afterwards, the first layers (the features extractor) are frozen and the model is trained. Since the first layers have been frozen, their weights will remain the same. Only the weights of the last layers will change. This part of the transfer learning allows the model to make use of the previously learned features while adapting to the new body part by training the decision maker. 
 	\item Once the training with frozen layers is over, the best model is loaded, the frozen layers are unfrozen, and a normal training is performed on the same dataset. Thanks to this, the model adapts the previously learned features and tries to learn new features which could be useful for the classification of the target dataset. 
 \end{enumerate}
 
@@ -223,17 +226,50 @@ As expected, the curve is flat during the frozen parts. Since the same decision 
 
 \section{Results}
 
-\subsection{Independent training}
-To get reference values and evaluate the impact of transfer learning on the model performance, a set of trainings on each dataset was performed independently. These experiments involved multiple hyperparameter combinations. The best results were used as benchmark values. 
-
-\subsubsection{PROSTATEx}
-
-\subsubsection{Kaggle brain}
-
-\subsubsection{Lung CT Challenge}
+%\subsection{Independent training}
+%To get reference values and evaluate the impact of transfer learning on the model performance, a set of trainings on each dataset was performed independently. These experiments involved multiple hyperparameter combinations. The best results were used as benchmark values. 
+%
+%\subsubsection{PROSTATEx}
+%
+%\subsubsection{Kaggle brain}
+%
+%\subsubsection{Lung CT Challenge}
 
 
 \subsection{Transfer learning}
+All training graphs and the metrics they achieved on the validation sets are shown on figures XXXX.\\
+Table \ref{table:best_model_performance} summaries the performance of the best model on the validation and test sets at each step of the experiment.
 
-
+\begin{table}[]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|l|c|l|c|}
+\hline
+\rowcolor[HTML]{DAE8FC} 
+\multicolumn{1}{|c|}{\cellcolor[HTML]{DAE8FC}\textbf{Dataset name}} & \multicolumn{1}{c|}{\cellcolor[HTML]{DAE8FC}\textbf{Step}} & \textbf{Best model saved at nth epoch} & \multicolumn{1}{c|}{\cellcolor[HTML]{DAE8FC}\textbf{Best model on the validation set}} & \textbf{Best model on the set set}                                                                                                                                      \\ \hline
+\textbf{PROSTATEx}                                                  & DS1/Full                                                   & 497                                    & \begin{tabular}[c]{@{}l@{}}Accuracy: 0.6340\\ AUC: 0.7359\end{tabular}                 & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Accuracy: 0.6842\\ Precision: 0.3333\\ Recall: 0.5\\ F1-score: 0.4\\ Specificity: 0.7333\\ AUC: 0.6833\end{tabular}}     \\ \hline
+\textbf{Kaggle Brain}                                               & DS2/Frozen                                                 & 594                                    & \begin{tabular}[c]{@{}l@{}}Accuracy: 0.7799\\ AUC: 0.8379\end{tabular}                 & -                                                                                                                                                                       \\ \hline
+\textbf{Kaggle Brain}                                               & DS2/Full                                                   & 264                                    & \begin{tabular}[c]{@{}l@{}}Accuracy: 0.8233\\ AUC: 0.8566\end{tabular}                 & -                                                                                                                                                                       \\ \hline
+\textbf{LungCTChallenge}                                            & DS3/Frozen                                                 & 999                                    & \begin{tabular}[c]{@{}l@{}}Accuracy: 0.6617\\ AUC: 0.7019\end{tabular}                 & -                                                                                                                                                                       \\ \hline
+\textbf{LungCTChallenge}                                            & DS3/Full                                                   & 345                                    & \begin{tabular}[c]{@{}l@{}}Accuracy: 0.6924\\ AUC: 0.7197\end{tabular}                 & -                                                                                                                                                                       \\ \hline
+\textbf{PROSTATEx}                                                  & DS4/Frozen                                                 & 999                                    & \begin{tabular}[c]{@{}l@{}}Accuracy: 0.7803\\ AUC: 0.7743\end{tabular}                 & -                                                                                                                                                                       \\ \hline
+\textbf{PROSTATEx}                                                  & DS4/Full                                                   & 50                                     & \begin{tabular}[c]{@{}l@{}}Accuracy: 0.7307\\ AUC: 0.7592\end{tabular}                 & \multicolumn{1}{l|}{\begin{tabular}[c]{@{}l@{}}Accuracy: 0.7368\\ Precision: 0.4286\\ Recall: 0.75\\ F1-score: 0.5454\\ Specificity: 0.7333\\ AUC: 0.7667\end{tabular}} \\ \hline
+\end{tabular}%
+}
+\caption{Best model performance at each step of the transfer learning pipeline}
+\label{table:best_model_performance}
+\end{table}
 \section{Discussion}
+1) All steps of the transfer learning are correctly tuned\\
+	--> Description of the shapes of the curves at each step \\
+
+Consequences:\\	
+2) Features of brain and lung images are useful to classify prostate lesions\\
+	--> Explain that the frozen curve immediately start to increase, and then get stable. Furthermore they allow us to reach good performance metrics, describe them.\\
+	--> Explain the global performance graph in details\\\\
+3) Transfer learning improves the performance of the target model\\
+ --> Comparison between the results on the test set before and after the TL\\
+ 
+ 4) Summarizing the advantage of usins this pipeline \\
+ --> Increase the generalization ability of the model and its performance\\
+ --> Overcome the lack of data for one specific body part
+ 
