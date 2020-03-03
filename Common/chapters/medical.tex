@@ -32,13 +32,12 @@ Most cancers can be staged thanks to the TNM system. The T corresponds to the tu
 
 %\subsection{Chronological evolution}
 
-\section{Medical imaging file formats}
-\subsection{Types of medical imaging}
+\section{Types of medical imaging}
 \label{sec:medical_imaging}
 
 Multiple types of medical imaging exist. The most commonly used to detect cancer are Magnetic Resonance Imaging (MRI), CT (Computed Tomography) scans
 %, PET (Positron Emission Tomography) scans
-and mammographies. 
+and mammograms. 
 
 MRI relies on magnetic fields to provide a three-dimensional view of body parts, which allows to see the generated images as a volume. Different settings, usually called sequences, make the look of the output vary, as shown on figure \ref{fig:PROSTATEx-t2-adc-dwi}.
 Unlike MRI, CT is based on X-rays instead of magnetic fields, but still provides a three-dimensional representation of a body part. Figure \ref{fig:visualize_lung_dcm} shows a lung CT scan.
@@ -50,22 +49,22 @@ Unlike MRI, CT is based on X-rays instead of magnetic fields, but still provides
 \label{fig:PROSTATEx-t2-adc-dwi}
 \end{figure}
 
-\subsection{DICOM file format}
+\section{DICOM file format}
 \label{sec:DICOM}
 
-\subsubsection{Origin}
+\subsection{Origin}
 
 The acronym DICOM stands for Digital Imaging and Communications in Medicine. Before the 1980’s, images resulting from CT scans and MRIs were only decodable by machine manufacturers, while the medical community needed to export and share them for other tasks. For that reason, the ACR (American College of Radiology) and the NEMA (National Electrical Manufacturers Association) created a committee to build a standard. After two iterations with other names, DICOM was created in 1993. It standardized the representation of medical images and their transmission since it provided a network protocol built on top of TCP/IP.
 
 
-\subsubsection{Data format}
+\subsection{Data format}
 
 DICOM files can be viewed as containers of attributes, also called tags. The values of the pixels themselves are stored under the "Pixel Data" tag. Every single DICOM file usually represents a 2-dimensional image, which will form a 3-dimensional volume when put all together. 
 
 Other useful information such as the patient name and ID is directly stored within the DICOM files. This approach aims at linking each image to a specific person and event in order not to mix them up. Each DICOM file can be seen as part of a bigger dataset. 
 
 
-\subsubsection{Processing images}
+\subsection{Processing images}
 
 When manipulating DICOM files, multiple details must be taken into account. 
 
@@ -125,21 +124,21 @@ where~$c$ is the window center,~$w$ window width, ~$P$ the pixel input value, ~$
 \end{enumerate}
 
 
-\subsection{NIfTI file format}
+\section{NIfTI file format}
 
-\subsubsection{Origin}
+\subsection{Origin}
 The Neuroimaging Informatics Technology Initiative (NIfTI) file format is the successor of the ANALYZE file format. The main problem of the latter was that it was lacking information about orientation in space. Therefore, the interpretation of stored data could be problematic and inconsistent. For instance, there was a real confusion to determine the left and right sides of brain images. Hence, the NIfTI file format was defined to overcome this major issue.
 
 
-\subsubsection{Data format}
+\subsection{Data format}
 Unlike the ANALYZE format that used two files to store the metadata and the actual data, the NIfTI file format stores them in one single file “.nii” but keeps this split between the real data and the header for compatibility. This has the advantage to facilitate the use of the data and avoid storing the data without the meta-data. The NIfTI format can also be compressed/decompressed on-the-fly using the “deflate”  algorithm.
 
 
-\subsubsection{Overview of the header structure}
+\subsection{Overview of the header structure}
 With the goal of preserving the compatibility between the ANALYZE and the NIfTI formats, both headers have the same size of 348 bytes. “Some fields were reused, some were preserved, but ignored, and some were entirely overwritten”. Details about the different fields contained in the header can be found here\footnote{\url{https://brainder.org/2012/09/23/the-nifti-file-format/}}.
 
 
-\subsection{RAW and MHD file formats}
+\section{RAW and MHD file formats}
 
 Some datasets use a combination of RAW and MHD files. The latter contain metainformation about their corresponding RAW file(s) which contain the data. In most cases, each MHD file points to a unique RAW file whose name is the same as the MHD file name. A single RAW file can be used to represent three-dimensional data, i.e. the combination of multiple two-dimensional images. Libraries such as \mbox{SimpleITK} in Python allow to manipulate RAW images in an easy way. 
 

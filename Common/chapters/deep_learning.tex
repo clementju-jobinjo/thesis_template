@@ -454,37 +454,38 @@ In classification tasks, four separate output labels can occur:
 \end{itemize}
 From these four categories, multiple metrics with their own specificities can be computed \cite{25}:
 \begin{itemize}
-\item Accuracy: ratio of the correctly labeled subjects to the whole pool of subjects.
+\item Accuracy: "Ratio of the correctly labeled subjects to the whole pool of subjects".
 \begin{equation}
 Accuracy = \frac{(TP+TN)}{TP+FP+FN+TN}
 \end{equation}
 Accuracy is a great measure in the case of symmetric data (i.e the number of FN $\approx$ FP and their cost is similar). When this condition is not fulfilled, accuracy can lead to bad models. For instance, let's define a binary classification model that always outputs class 0. If the data is composed of 99 samples from class 0 and 1 sample from class 1, the accuracy is equal to 99\% but the model is not smart. Consequently, this metric has to be used in addition to other metrics.
 
-\item Precision: ratio of the correctly positive labeled subjects by the model to all positive labeled subjects.
+\item Precision: "Ratio of the correctly positive labeled subjects by the model to all positive labeled subjects".
 \begin{equation}
 Precision = \frac{TP}{(TP + FP)}
 \end{equation}
 This metric is recommended when the confidence of the true positives predicted by the model is important. For instance, this happens in spam blockers where it is preferable to have a spam in mailbox rather than a regular mail in the spam box.
 
-\item Recall (sensitivity):
+\item Recall (sensitivity): "Ratio of the correctly positive labeled subjects to all subjects whose class is actually positive".
+
 \begin{equation}
 Recall = \frac{TP}{(TP + FN)}
 \end{equation}
 This metric is recommended when the occurence of false negatives is intolerable and false positives are preferred. This makes perfect sense for disease detection models: labeling an healthy person as unhealthy is better than labeling an unhealthy person as healthy.
 
-\item F1-score:
+\item F1-score: Harmonic mean(average) of the precision and recall.
 \begin{equation}
-F1-score = \frac{2* recall * precision}{(recall + precision)}
+F1\operatorname{-}score = \frac{2* recall * precision}{(recall + precision)}
 \end{equation}
 F1-score considers both precision and recall and is the highest if these two metrics are balanced. This metric is perfectly suitable when the cost of false positives and false negatives is not the same.
 
-\item Specificity:
+\item Specificity: "Ratio of the correctly negative labeled subjects to all subjects whose class is actually negative".
 \begin{equation}
 Specificity = \frac{TN}{(TN + FP)}
 \end{equation}
 This metric is recommended when the occurence of false positives is intolerable whereas true negatives are desired. For instance drug tests can not indicate false positives but they have to cover all true negatives.
 \item ROC curve and AUC:
-As explained by Sarang Narkhede, "The ROC curve is plotted with recall against the false positive rate (1-specificity) where recall is on y-axis and the false positive rate is on the x-axis. AUC - ROC curve is a performance measurement for classification problem at various thresholds settings. ROC is a probability curve and AUC represents degree or measure of separability. It tells how much model is capable of distinguishing between classes. Higher the AUC, better the model is at predicting 0s as 0s and 1s as 1s" \cite{26}.
+As explained by Sarang Narkhede ~\cite{26}, "the ROC curve is plotted with the true positive rate (=recall) against the false positive rate (1-specificity) where recall is on y-axis and the false positive rate is on the x-axis. AUC-ROC curve is a performance measurement for classification problem at various thresholds settings. ROC is a probability curve and AUC represents degree or measure of separability. It tells how much model is capable of distinguishing between classes. Higher the AUC, better the model is at predicting 0s as 0s and 1s as 1s".
 
 \end{itemize}
 
@@ -580,9 +581,9 @@ Different parameters can change the way a convolution behaves. First of all, the
 According to Jason Brownlee, "transfer learning is a machine learning method where a model developed for a task is reused as the starting point for a model on a second task" \cite{30}. The model dedicated to the second task uses some or all parts of the first model (i.e. keeps the same weights and architecture or a part of them) and is then retrained on data available for this task. The first model can either be implemented from scratch if enough data is available or it can simply be downloaded from institutions that release large pretrained models for similar tasks.\\
 There are three major benefits \cite{30}:
 \begin{itemize}
-\item Higher start: the initial skill (before refining the model) on the source model is higher than it otherwise would be.
-\item Higher slope: the rate of skill improvement during training of the source model is steeper than it otherwise would be.
-\item Higher asymptote: the converged skill of the trained model is better than it otherwise would be.
+\item Higher start: The initial skill (before refining the model) on the source model is higher than it otherwise would be.
+\item Higher slope: The rate of skill improvement during training of the source model is steeper than it otherwise would be.
+\item Higher asymptote: The converged skill of the trained model is better than it otherwise would be.
 \end{itemize}
 Nevertheless, "in general, it is not obvious that there will be a benefit to using transfer learning in the domain until after the model has been developed and evaluated" \cite{30}.
 

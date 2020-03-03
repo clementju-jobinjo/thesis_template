@@ -57,7 +57,7 @@ Ideally, transfer learning should rely on multi-sequence MRIs only. In fact, the
 \subsection{LungCTChallenge}
 \label{sec:lungCTChallenge}
 \subsubsection{Dataset description}
-Lung CT Challenge is composed of two different subdatasets of CT scans: one is called "calibration set" (10 patients) and the other "test set" (60 patients). Each patient can have 1 or multiple findings. Since labels were provided for both sets and the amount of data is fairly low, they were merged and used as a global training set. For each finding, an abnormal mass is visible in the lungs, which means that the classification is going to differentiate malignant from benign tumors. 
+Lung CT Challenge ~\cite{12, 36, 38} is composed of two different subdatasets of CT scans: one is called "calibration set" (10 patients) and the other "test set" (60 patients). Each patient can have 1 or multiple findings. Since labels were provided for both sets and the amount of data is fairly low, they were merged and used as a global training set. For each finding, an abnormal mass is visible in the lungs, which means that the classification is going to differentiate malignant from benign tumors. 
 
 Regarding labelling, two Excel files, \textit{TestSet\_NoduleData\_PublicRelease\_wTruth} and \textit{CalibrationSet\_NoduleData}, contain labels for these images. In order to facilitate the handling of information in the code, two CSV files were manually created: \mbox{\textit{TestSet.csv}} and \textit{CalibrationSet.csv}.
 Contrary to PROSTATEx, more than two labels were used in this dataset. Both "malignant" and "Primary lung cancer" were considered as positive, whereas "benign" and "Benign nodule" were treated as negative. A third label called "Suspicious malignant nodule" appeared two times. Since the diagnosis was not clearly defined for those images, they were not included in the training data to avoid any noise. 
@@ -110,7 +110,7 @@ Images were normalized with respect to equation \ref{eq:normalization}. The mean
 \subsection{Kaggle Brain}
 \label{sec:kaggleBrain}
 \subsubsection{Dataset description}
-This dataset is publicly available on Kaggle. All images come from single-sequence MRIs. It is composed of two folders: one containing images with cancerous tumors and another one containing images either without tumor or with a non-cancerous tumor. Images whose quality was extremely low (resolution, picture of a screen, artefacts, etc.) were manually removed. In other cases, the image quality was good but disturbing objects such as left/right markers, arrows pointing the tumor, etc. were visible. These objects were manually removed using the object removal tool in Photoshop. File names and file formats were heterogeneous.
+This dataset is publicly available on Kaggle~\cite{51}. All images come from single-sequence MRIs. It is composed of two folders: one containing images with cancerous tumors and another one containing images either without tumor or with a non-cancerous tumor. Images whose quality was extremely low (resolution, picture of a screen, artefacts, etc.) were manually removed. In other cases, the image quality was good but disturbing objects such as left/right markers, arrows pointing the tumor, etc. were visible. These objects were manually removed using the object removal tool in Photoshop. File names and file formats were heterogeneous. At the end of this process, the dataset was composed of 96 benign lesions and 133 malignant ones.
 
 
 \subsubsection{Ground truth creation}
