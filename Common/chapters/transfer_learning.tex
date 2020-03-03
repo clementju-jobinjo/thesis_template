@@ -222,7 +222,26 @@ As expected, the curve is flat during the frozen parts. Since the same decision 
 
 
 \subsection{Experimental setup}
+The whole transfer learning is composed of multiple steps. In order to maximize the performance during the whole process, the hyperparameters were manually tuned at each step, following a grid search approach to find the best ones. Figure \ref{table:tl_hyperparameters_at_each_step} presents the best hyperparameters used at each time of the experiment. Note that, as it was the case in the research paper reproduction, the first model was also initialized picking a the best model among 200 initializations. The model was implemented with PyTorch using the Adam optimizer to update its weight and the complete succession of the whole process took approximately 50 hours on an Tesla v100 XSM2 graphic card.
 
+\begin{table}[]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|l|c|l|c|l|}
+\hline
+\rowcolor[HTML]{DAE8FC} 
+\textbf{Dataset}         & \multicolumn{1}{c|}{\cellcolor[HTML]{DAE8FC}\textbf{Step}} & \textbf{Learning rate} & \multicolumn{1}{c|}{\cellcolor[HTML]{DAE8FC}\textbf{Batch size}} & \textbf{Dropout} & \textbf{Number of epochs} \\ \hline
+\textbf{PROSTATEx}       & DS1/Full                                                   & 1e-8                   & 128                                                              & 0.4              & 1000                      \\ \hline
+\textbf{Kaggle Brain}    & DS2/Frozen                                                 & 1e-7                   & 128                                                              & 0.3              & 1000                      \\ \hline
+\textbf{Kaggle Brain}    & DS2/Full                                                   & 1e-8                   & 128                                                              & 0.3              & 1000                      \\ \hline
+\textbf{LungCTChallenge} & DS3/Frozen                                                 & 1e-5                   & 128                                                              & 0.3              & 1000                      \\ \hline
+\textbf{LungCTChallenge} & DS3/Full                                                   & 1e-8                   & 128                                                              & 0.3              & 1000                      \\ \hline
+\textbf{PROSTATEx}       & DS4/Frozen                                                 & 1e-5                   & 128                                                              & 0.3              & 1000                      \\ \hline
+\textbf{PROSTATEx}       & DS4/Full                                                   & 1e-9                   & 128                                                              & 0                & 1000                      \\ \hline
+\end{tabular}%
+}
+\caption{Hyperparameters used at each step of the transfer learning pipeline}
+\label{table:tl_hyperparameters_at_each_step}
+\end{table}
 
 
 \section{Results}
