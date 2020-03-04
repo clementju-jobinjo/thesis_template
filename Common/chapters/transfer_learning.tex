@@ -150,21 +150,34 @@ After each dataset switch, the model is first trained with freezed layers. The f
 	\item Only pass the parameters of these last layers to the optimizer.
 \end{enumerate}
 
-
-\subsubsection{Parallelization}
-Each experiment before transfer learning was performed on a single GPU. While being a lot faster than training on a CPU, the computation time was still relatively high. In order to get results from the transfer learning in a reasonable amount of time, parallelization was required. In fact, the longest transfer learning experiment consisted of $(5$ folds $* 4$ learning rates $* 1200$ epochs $+ 1200$ epochs$) * 7$ parts $= 176400$ epochs. On a single GPU, this experiment would have taken around two weeks to complete. 
-
-Thanks to parallelization, the cross-validation combinations could be run simultaneously on different GPUs (5 of them since 5-fold cross-validation was used). To achieve this while using Python and GPUs, we relied on a library called Ray. The function responsible for training the model needs to be defined as a Ray remote function thanks to a decorator (@$ray.remote$ above the function declaration). This new function does not return the actual return values, but object IDs pointing to placeholders for the future results, which allows to continue the execution and run other parallel functions. Outside of the cross-validation loop, a call to $ray.get()$ on the object IDs allows to wait for the simultaneous executions to complete and to collect the different results. 
+\noindent Figure \ref{fig:tl_model_split} shows the chosen model split for this experience. The first fully connected layer is part of the feature extractor because it can be considered as a feature gatherer and assembler. The next ones are part of the decision maker. 
 
 \begin{figure}[!h]
 \centering
 \noindent
 \makebox[\textwidth]{
-\includegraphics[width=1.3\textwidth, keepaspectratio=true]{./figures/tl_parallel_run.png}
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/tl_model_split.png}
 }
-\caption{Transfer learning - Parallelization}
-\label{fig:tl_parallel_run}
+\caption{Transfer learning - Model split}
+\label{fig:tl_model_split}
 \end{figure}
+
+
+
+%\subsubsection{Parallelization}
+%Each experiment before transfer learning was performed on a single GPU. While being a lot faster than training on a CPU, the computation time was still relatively high. In order to get results from the transfer learning in a reasonable amount of time, parallelization was required. In fact, the longest transfer learning experiment consisted of $(5$ folds $* 4$ learning rates $* 1200$ epochs $+ 1200$ epochs$) * 7$ parts $= 176400$ epochs. On a single GPU, this experiment would have taken around two weeks to complete. 
+%
+%Thanks to parallelization, the cross-validation combinations could be run simultaneously on different GPUs (5 of them since 5-fold cross-validation was used). To achieve this while using Python and GPUs, we relied on a library called Ray. The function responsible for training the model needs to be defined as a Ray remote function thanks to a decorator (@$ray.remote$ above the function declaration). This new function does not return the actual return values, but object IDs pointing to placeholders for the future results, which allows to continue the execution and run other parallel functions. Outside of the cross-validation loop, a call to $ray.get()$ on the object IDs allows to wait for the simultaneous executions to complete and to collect the different results. 
+%
+%\begin{figure}[!h]
+%\centering
+%\noindent
+%\makebox[\textwidth]{
+%\includegraphics[width=1.3\textwidth, keepaspectratio=true]{./figures/tl_parallel_run.png}
+%}
+%\caption{Transfer learning - Parallelization}
+%\label{fig:tl_parallel_run}
+%\end{figure}
 
 
 \subsection{Script options}
@@ -227,7 +240,8 @@ As expected, the curve is flat during the frozen parts. Since the same decision 
 
 
 \subsection{Experimental setup}
-The whole transfer learning is composed of multiple steps. In order to maximize the performance during the whole process, the hyperparameters were manually tuned at each step, following a grid search approach to find the best ones. Figure \ref{table:tl_hyperparameters_at_each_step} presents the best hyperparameters used at each time of the experiment. Note that, as it was the case in the research paper reproduction, the first model was also initialized picking a the best model among 200 initializations. The model was implemented with PyTorch using the Adam optimizer to update its weight and the complete succession of the whole process took approximately 50 hours on an Tesla v100 XSM2 graphic card.
+The whole transfer learning consists in multiple steps. In order to maximize the performance during the whole process, the hyperparameters were manually tuned at each step, following a grid search approach to find the best ones. Table \ref{table:tl_hyperparameters_at_each_step} presents the best hyperparameters used at each step of the experiment. Note that, as it was the case in the paper experiment reproduction, the first model was also initialized by loading the best model among 200 initializations. The model was implemented with PyTorch using the Adam optimizer to update its weights. The complete succession of the process took approximately 60 hours on an Nvidia GeForce RTX 2080 Ti. 
+%Tesla v100 XSM2 graphics card.
 
 \begin{table}[]
 \resizebox{\textwidth}{!}{%
