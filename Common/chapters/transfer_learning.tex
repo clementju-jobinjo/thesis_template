@@ -216,21 +216,21 @@ Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control image
 \end{table}
 
 
-\subsection{Visualization of the impact of the various datasets on the target task}
-\label{sec:global_performance}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}On paper, each step of the transfer learning is supposed to make the model learn new features that are useful for the first dataset (the target dataset). As described in section \ref{sec:process_overview}, the model can be seen as a feature extractor and a decision maker. Hence, to see how much each step was actually helping the process, the decision maker resulting from the first step of the transfer learning, i.e. the training on the first/target dataset, was saved. As this decision maker is saved after the training on the target dataset, it is specialized in the classification of the latter. In other words, if the target dataset is a prostate dataset, it will classify prostate tumors with a relatively high precision. 
-
-Then, after each epoch of every other transfer learning step, the saved decision maker was attached to the current feature extractor. This temporary model was then tested on the target training and validation sets, which resulted in different training and validation metrics. 
-
-At the end of the transfer learning pipeline, a graph was generated for each metric. These curves show the evolution of the latter across the entire process, which allows to determine the impact of each non-target dataset on the target task. If a metric is increasing, the features learned thanks to the corresponding dataset are useful for the target one. Figure \ref{fig:global_performance_example} shows an example of this graph for the AUC.\\
-As expected, the curve is flat during the frozen parts. Since the same decision maker is attached to frozen layers (which remain the same by definition), the values of the metrics do not change at all. 
-
-\begin{figure}[!h]
-\centering
-\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/global_performance_example.png}
-\caption{Please replace this figure with a real example as soon as the results are available!}
-\label{fig:global_performance_example}
-\end{figure}
+%\subsection{Visualization of the impact of the various datasets on the target task}
+%\label{sec:global_performance}
+%\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}On paper, each step of the transfer learning is supposed to make the model learn new features that are useful for the first dataset (the target dataset). As described in section \ref{sec:process_overview}, the model can be seen as a feature extractor and a decision maker. Hence, to see how much each step was actually helping the process, the decision maker resulting from the first step of the transfer learning, i.e. the training on the first/target dataset, was saved. As this decision maker is saved after the training on the target dataset, it is specialized in the classification of the latter. In other words, if the target dataset is a prostate dataset, it will classify prostate tumors with a relatively high precision. 
+%
+%Then, after each epoch of every other transfer learning step, the saved decision maker was attached to the current feature extractor. This temporary model was then tested on the target training and validation sets, which resulted in different training and validation metrics. 
+%
+%At the end of the transfer learning pipeline, a graph was generated for each metric. These curves show the evolution of the latter across the entire process, which allows to determine the impact of each non-target dataset on the target task. If a metric is increasing, the features learned thanks to the corresponding dataset are useful for the target one. Figure \ref{fig:global_performance_example} shows an example of this graph for the AUC.\\
+%As expected, the curve is flat during the frozen parts. Since the same decision maker is attached to frozen layers (which remain the same by definition), the values of the metrics do not change at all. 
+%
+%\begin{figure}[!h]
+%\centering
+%\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/global_performance_example.png}
+%\caption{Please replace this figure with a real example as soon as the results are available!}
+%\label{fig:global_performance_example}
+%\end{figure}
 
 
 \subsection{Experimental setup}
@@ -386,14 +386,27 @@ Finally, the model was trained on the first dataset again. At the beginning of t
 Regarding the full training, the curves contain quite some noise with a already small learning rate of $1*10^{-9}$. An even smaller learning rate of $1*10^{-10}$ was tested and it turned out to be too small since the training and validation curves were completely flat from the beginning to the end. Here, the validation curves show an improvement during the first 50 epochs approximately, before going down while the training metrics keeps increasing. At this point, the model reached its optimum. Moreover, the fact that the validation metrics are much higher than the training ones with a dropout probability of 0.0 indicates that the model generalizes well thanks to transfer learning. 
 
 
-\subsection{Global performance}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}The so-called global performance graphs are a visual representation of the impact of each part of the transfer learning and each dataset on the target task (see Section \ref{sec:global_performance}). In this case, they show how much the features learned from each dataset help classify prostate lesions. As a reminder, a temporary model was created and tested at the end of each epoch. The latter was composed of the current feature extractor attached to the decision maker of the best model resulting from the first training on the prostate dataset.
+\subsection{Visualization of the impact of the various datasets on the target task}
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}The so-called global performance graphs are a visual representation of the impact of each part of the transfer learning and each dataset on the target task. In this case, they show how much the features learned from each dataset help classify prostate lesions. On paper, each step of the transfer learning is supposed to make the model learn new features that are useful for the first dataset (the target dataset). As described in section \ref{sec:process_overview}, the model can be seen as a feature extractor and a decision maker. Hence, to see how much each step was actually helping the process, the decision maker resulting from the best model of the first step of the transfer learning, i.e. the training on the first/target dataset, was saved. As this decision maker is saved after the training on the target dataset, it is specialized in the classification of the latter. In other words, if the target dataset is a prostate dataset, it will classify prostate tumors with a relatively high precision.\\
+Then, after each epoch of every other transfer learning step, the saved decision maker was attached to the current feature extractor. This temporary model was then tested on the target training and validation sets, which resulted in different training and validation metrics.\\
+At the end of the transfer learning pipeline, a graph was generated for each metric. These curves show the evolution of the latter across the entire process, which allows to determine the impact of each non-target dataset on the target task. If a metric is increasing, the features learned thanks to the corresponding dataset are useful for the target one. 
 
-Figure \ref{fig:tl_global_validation_auc} shows the evolution of the AUC on the validation set of PROSTATEx. As expected, the first training on PROSTATEx generated the same curve as on \ref{fig:tl_ds1_full}). The latter looks steeper because of the difference in the X-axis scale.\\
-Then, the frozen training on the second dataset (as well as the other frozen trainings) shows a flat line. Reason for that is that the feature extractor and the decision maker do not change here. In fact, the former is frozen and the latter is always the same. As the decision maker is the one coming from the best model of the first training according to the validation AUC, the flat line is as high as the best validation AUC value reached during the first training. \\
-Furthermore, the full training curve shows that brain cancer features are actually helpful. If they were not, the metric would not have increased as fast and would not have reached such values.\\
+Figure \ref{fig:tl_global_validation_auc} shows the evolution of the AUC on the validation set of PROSTATEx. As expected, the first training on PROSTATEx generated the same curve as on Figure \ref{fig:tl_ds1_full}. The latter looks steeper because of the difference in the X-axis scale.\\
+Moreover, the frozen training on the second dataset (as well as the other frozen trainings) shows a flat line. Reason for that is that the feature extractor and the decision maker do not change here. In fact, the former is frozen and the latter is always the same. As the decision maker is the one coming from the best model of the first training according to the validation AUC, the flat line is as high as the best validation AUC value reached during the first training. 
+
+Furthermore, the full training curve shows that brain cancer features are actually helpful. If they were not, the metric would not have increased as fast and would not have reached such values.
+
 During the full training on the lung dataset, the AUC starts at a high value after the first epoch. The combination of the prostate, brain and lung features seem to help the model generalize. This hypothesis is confirmed by the values reached during last training on the prostate dataset. In fact, the AUC value is higher than the one reached during the first training. Interestingly, the curve starts high, improves for 50 epochs and starts decreasing. This implies that the model reached a high level of generalization during transfer learning. These 50 epochs were enough to keep the low level features learned thanks to the other datasets while adapting the model to the target task again. 
 
+
+%\subsection{Visualization of the impact of the various datasets on the target task}
+%\label{sec:global_performance}
+%\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}On paper, each step of the transfer learning is supposed to make the model learn new features that are useful for the first dataset (the target dataset). As described in section \ref{sec:process_overview}, the model can be seen as a feature extractor and a decision maker. Hence, to see how much each step was actually helping the process, the decision maker resulting from the first step of the transfer learning, i.e. the training on the first/target dataset, was saved. As this decision maker is saved after the training on the target dataset, it is specialized in the classification of the latter. In other words, if the target dataset is a prostate dataset, it will classify prostate tumors with a relatively high precision. 
+%
+%Then, after each epoch of every other transfer learning step, the saved decision maker was attached to the current feature extractor. This temporary model was then tested on the target training and validation sets, which resulted in different training and validation metrics. 
+%
+%At the end of the transfer learning pipeline, a graph was generated for each metric. These curves show the evolution of the latter across the entire process, which allows to determine the impact of each non-target dataset on the target task. If a metric is increasing, the features learned thanks to the corresponding dataset are useful for the target one. Figure \ref{fig:global_performance_example} shows an example of this graph for the AUC.\\
+%As expected, the curve is flat during the frozen parts. Since the same decision maker is attached to frozen layers (which remain the same by definition), the values of the metrics do not change at all.
 
 
 %To draw these graphs, a temporary model was created and tested at the end of each epoch. The latter is composed of the current feature extractor attached to the decision maker of the best model resulting from the first training on the prostate dataset. Doing so ensures that the model is able to classify prostate cancer (thanks to the trained decision maker) but making use of the features learned during transfer learning exclusively.\\
@@ -406,7 +419,7 @@ During the full training on the lung dataset, the AUC starts at a high value aft
 \includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/tl_global_validation_auc.png}
 }
 \caption{Transfer learning - Global Performance - Validation AUC}
-\label{fig:tl_global_validation_auc.png}
+\label{fig:tl_global_validation_auc}
 \end{figure}
 
 
