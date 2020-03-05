@@ -11,14 +11,20 @@ This chapter is built in a top-down fashion. First, an overview of the entire pr
 
 \section{Process overview}
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Johan}}Schematically speaking, the entire experiment process can be represented as shown on Figure \ref{fig:paper_reproduction_process}. The first part of the experiment is about the reproduction of the paper experiment, whereas the second one is devoted to the participation in the SPIE-AAPM-NCI PRO\- STATEx challenge since the authors of the article did not take part in it.\\
-The former makes use of the PROSTATEx training set. This dataset is only composed of samples whose clinical significance is provided (labeled data). The first step of the reproduction is the data processing. In fact, many processing steps are involved to transform the original DICOM files into NumPy arrays which can be fed to the neural network. Data processing includes lesion cropping, normalization, MRI images stacking, data augmentation, etc. (see Section \ref{sec:prostatex_data_processing} for further details).\\
+\begin{itemize}
+
+
+\item The former makes use of the PROSTATEx training set. This dataset is only composed of samples whose clinical significance is provided (labeled data). The first step of the reproduction is the data processing. In fact, many processing steps are involved to transform the original DICOM files into NumPy arrays which can be fed to the neural network. Data processing includes lesion cropping, normalization, MRI images stacking, data augmentation, etc. (see Section \ref{sec:prostatex_data_processing} for further details).\\
 Once the processing part is completed, the labeled data are split into a training set, a validation set and a test set using respectively 80\%, 10\% and 10\% of the available data for each subset. The training set samples are then fed to the neural network in batches. 
 %, which updates its weight consequently. 
-At the end of each epoch, the current model is tested on the validation set and the resulting metrics are plotted on Tensorboard (see \ref{paper_tensorboard}). The validation set is independent of the training set and has never been seen by the model, which gives an indication of how well the latter generalizes. Then, if the current model reached a higher AUC and a higher accuracy than the previous best model, it becomes the new best model and is saved. Furthermore, if the validation AUC is decreasing for a defined number of epochs, the learning rate is reduced to prevent overfitting and avoid a  progressive decrease in validation performance. This technique contributes to maintaining a good generalization level and optimizes the training with respect to the AUC. As soon as the training phase reaches the defined number of epochs, the model is tested on the test set with the authors' method called "enhanced prediction" to compute the AUC. The latter method consists in predicting an output for each augmented image before averaging the predictions for each lesion of each patient.
+At the end of each epoch, the current model is tested on the validation set and the resulting metrics are plotted on Tensorboard (see \ref{paper_tensorboard}). The validation set is independent of the training set and has never been seen by the model, which gives an indication of how well the latter generalizes. Then, if the current model reached a higher AUC and a higher accuracy than the previous best model, it becomes the new best model and is saved. Furthermore, if the validation AUC is decreasing for a defined number of epochs, the learning rate is reduced to prevent overfitting and avoid a  progressive decrease in validation performance. This technique contributes to maintaining a good generalization level and optimizes the training with respect to the AUC.\\
+As soon as the training phase reaches the defined number of epochs, the model is tested on the test set with the authors' method called "enhanced prediction" to compute the AUC. The latter method consists in predicting an output for each augmented image before averaging the predictions for each lesion of each patient.
 
-The second part of the experiment relies on the results of the first one. Indeed, the same data processing pipeline is used and the hyperparameters used to train the neural network are the same. The difference lies in the fact that the entire dataset (i.e. the entire PROSTATEx training set) is used as training set instead of splitting the data into a training/validation/test set. In this way, the model sees more training examples, which maximizes the performance of the model on the challenge test set by increasing its generalization ability. During the training phase, the model is saved at the end of each epoch. Once the training is over, multiple models are chosen around the epoch that produced the best result on the validation set during the first part of the experiment. These models are then evaluated on the challenge test set by submitting their predictions for each lesion to the Grand Challenge organization. The model with the best result on the challenge is considered as the most efficient one.
+\item The second part of the experiment relies on the results of the first one. Indeed, the same data processing pipeline is used and the hyperparameters used to train the neural network are the same. The difference lies in the fact that the entire dataset (i.e. the entire PROSTATEx training set) is used as training set instead of splitting the data into a training/validation/test set. In this way, the model sees more training examples, which maximizes the performance of the model on the challenge test set by increasing its generalization ability. During the training phase, the model is saved at the end of each epoch. Once the training is over, multiple models are chosen around the epoch that produced the best result on the validation set during the first part of the experiment. These models are then evaluated on the challenge test set by submitting their predictions for each lesion to the Grand Challenge organization. The model with the best result on the challenge is considered as the most efficient one.
+\end{itemize}
+\clearpage
 
-\begin{figure}[!h]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/paper_reproduction_process.png}
 \caption{Overview of the whole experiment process}
@@ -34,20 +40,26 @@ The second part of the experiment relies on the results of the first one. Indeed
 
 \subsubsection{Dataset description}
 \label{sec:prostatex_dataset_description}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}The SPIE-AAPM-NCI PROSTATEx Challenge dataset is publicly available on the Cancer Imaging Archive website~\cite{33, 34, 35}. This dataset is composed of multiparametric MRIs for a total of 204 training patients and 208 challenge patients. Images were taken under the sagittal, transverse and coronal planes. These MRIs are multiparametric because the same exam was performed using different radiological settings called "sequences". Each sequence allows to see human tissues in a different way on the resulting images. The sequences available within the scope of PROSTATEx are T2 weighted images (T2W), Diffusion weighted images (DWI), Apparent diffusion coefficient (ADC), Dynamic contrast enhanced (DCE), PD (Proton Density) and K-trans. 
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}The SPIE-AAPM-NCI PROSTATEx Challenge dataset is publicly available on the Cancer Imaging Archive website~\cite{33, 34, 35}. This dataset is composed of multiparametric MRIs for a total of 204 training patients and 208 challenge patients. Images were taken under the sagittal, transverse and coronal planes. These MRIs are multiparametric because the same exam was performed using different radiological settings called "sequences". Each sequence allows to see human tissues in a different way on the resulting images. The sequences available within the scope of PROSTATEx are T2 weighted images (T2W), Diffusion weighted images (DWI), Apparent diffusion coefficient (ADC), Dynamic contrast enhanced (DCE), PD (Proton Density) and K-trans. The PROSTATEx dataset comes with two CSV files for the training set:
+\begin{itemize}
+\item The first one, \textit{ProstateX-Findings-Train.csv}, lists all findings with their clinical significance. Multiple findings can be associated with the same patient (ProxID).
 
-The PROSTATEx dataset comes with two CSV files for the training set. The first one, \textit{ProstateX-Findings-Train.csv}, lists all findings with their clinical significance. Multiple findings can be associated with the same patient (ProxID). The second one, \textit{ProstateX-Images-Train.csv}, gives information about where to find the right DICOM file for each patient and each finding. Important labels are "ProxID" (patient ID), "fid" (finding ID $\in [1,\infty]$), "ClinSig" (clinical significance, TRUE or FALSE), "DCMSerNumber" (digit before the dash in the folder name containing DICOM files), "ijk" (position of the lesion: slice number $k$ at coordinates $(i,j)$, $i,j,k \in [0,\infty]$) and "VoxelSpacing" (3-dimensional vector representing the correspondance between a pixel and the space it occupies in the real world). Both CSV files are complementary to each other. Regarding the challenge patients, two analog CSV files are provided: \textit{ProstateX-Findings-Test.csv} and \textit{ProstateX-Images-Train.csv}. The only difference is the absence of clinical significance. Finally, images are in the DICOM file format (see Section \ref{sec:DICOM}). 
+\item The second one, \textit{ProstateX-Images-Train.csv}, gives information about where to find the right DICOM file for each patient and each finding. Important labels are "ProxID" (patient ID), "fid" (finding ID $\in [1,\infty]$), "ClinSig" (clinical significance, TRUE or FALSE), "DCMSerNumber" (digit before the dash in the folder name containing DICOM files), "ijk" (position of the lesion: slice number $k$ at coordinates $(i,j)$, $i,j,k \in [0,\infty]$) and "VoxelSpacing" (3-dimensional vector representing the correspondance between a pixel and the space it occupies in the real world). Both CSV files are complementary to each other. 
+\end{itemize}
+
+\noindent Regarding the challenge patients, two analog CSV files are provided: \textit{ProstateX-Findings-Test.csv} and \textit{ProstateX-Images-Train.csv}. The only difference is the absence of clinical significance. Finally, images are in the DICOM file format (see Section \ref{sec:DICOM}). 
 
 
 \subsubsection{Methodology}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}The methodology described in this section is the closest replication possible of the authors' data processing methodology. Most of it were reproductible in a similar way, apart from the manual lesion contouring which was performed by a qualified radiologist in the authors' case. Furthermore, the authors did not mention any participation in the official PROSTATEx challenge. In order to get an unbiased evaluation of the performance of our model, these images were also processed as explained below in order to take part in the challenge, but were not augmented. Nevertheless, the authors created their own test set by splitting the PROSTATEx training images into a training set ($80\%$), a validation set ($10\%$) and a test set ($10\%$). They mentioned that the test set was augmented $11$ times but gave no information about the training and validation sets. Since the training set is imbalanced (3 false for 1 true), the true class was augmented more times than the false class (which was augmented $60$x) in order to create balanced training and validation sets. 
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}The methodology described in this section is the closest replication possible of the authors' data processing methodology. Most of it were reproductible in a similar way, apart from the manual lesion contouring which was performed by a qualified radiologist in the authors' case. Furthermore, the authors did not mention any participation in the official PROSTATEx challenge. \\
+In order to get an unbiased evaluation of the performance of our model, these images were also processed as explained below in order to take part in the challenge, but were not augmented. Nevertheless, the authors created their own test set by splitting the PROSTATEx training images into a training set ($80\%$), a validation set ($10\%$) and a test set ($10\%$). They mentioned that the test set was augmented $11$ times but gave no information about the training and validation sets. Since the training set is imbalanced (3 false for 1 true), the true class was augmented more times than the false class (which was augmented $60$x) in order to create balanced training and validation sets. 
 
 
 \subsubsection{From DICOM to NumPy arrays}
 \label{sec:DICOMtoNumPy}
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}Before anything else, T2W, DWI and ADC grayscale images were used, which means that DCE, PD and Ktrans images were left aside. Furthermore, DWI images regroup various parameters which create different subcategories. One of them is the so-called "b-value" which is "a factor that reflects the strength and timing of the gradients used to generate diffusion-weighted images. The higher the b-value, the stronger the diffusion effects" \cite{49}. The authors tested three different b-value configurations. This led to the conclusion that using DWI images with the highest b-value increased the performance of the model. For that matter, DWI images with the highest b-value only were used. \\
 Moreover, only images showing the prostate under the transverse plane were used. The reason for this is that the tumors are much more visible under this perspective. 
-The first step consisted in converting DICOM files. Algorithm \ref{alg:PROSTATEx_preprocessing} describes the steps involved in converting PROSTATEx's DICOM files to NumPy arrays. The right slices were found thanks to the two CSV files. Important information such as the patient ID, the sequence, the lesion location and the voxel spacing were used as file output names, which allows to use these files independently for the next steps (i.e. without relying on the CSV files). 
+The first step consisted in converting DICOM files. Algorithm \ref{alg:PROSTATEx_preprocessing} describes the steps involved in converting PROSTATEx's DICOM files to NumPy arrays. The right slices were found thanks to the two CSV files. Important information such as the patient ID, the sequence, the lesion location and the voxel spacing were used as file output names, which allows to use these files independently for the next steps (i.e. without relying on the CSV files). These information are then used for the next step that consists in stacking and augmenting the images. Furthermore, they are also extremely useful for the visualization scripts in order to provide concrete details regarding the images.
 
 \begin{algorithm}
     \caption{PROSTATEx preprocessing}
@@ -82,39 +94,33 @@ The first step consisted in converting DICOM files. Algorithm \ref{alg:PROSTATEx
     \end{algorithmic}
 \end{algorithm} 
 
+\newpage
 
 \subsubsection{From NumPy arrays to augmented stacked images}
 \label{sec:numpyToAugmentedStacked}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Johan \& Julien}}This step can be split into two substeps: aligning and stacking images before augmenting them and splitting them across a training set, a validation set and a test set.
-
-Once full images were converted to NumPy arrays, the images related to a specific lesion of a specific patient needed to be aligned and resampled to the same resolution. In fact, T2-weighted images have a much higher resolution than the DWI and ADC images (in this dataset at least). Without this operation, a single pixel on a DWI image would have covered a lot more tissue than a pixel of the corresponding T2 image. To perform the alignment, the lesion was localized on the three sequences than to the CSV file. Then, the goal was to crop a large patch which contained the same amount of tissue on the three images. This patch had to be centered on the lesion to ease the augmentation process. So, a fixed patch size was defined for the T2 image since its resolution was the highest. Then, using the voxel spacing information, the patch size required to cover the same amount of tissue was computed for the two other sequences (DWI, ADC). Finally, the three images were cropped, resized to the same resolution and stacked. Stacking images consists in putting each single image (grayscale) into a single array, as three different channels. At this point, the pixel $i,j$ of the three channels represents the exact same tissue, which means that the lesion is at the same position and is covered by the same number of pixels on each channel. This approach increases the probability of detecting a cancer by ensuring a good visibilty for each lesion, since the latter is not necessarily as visible on the three images.
-
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Johan \& Julien}}This step can be split into two substeps: aligning and stacking images before augmenting them and splitting them across a training set, a validation set and a test set.\\
+Once full images were converted to NumPy arrays, the images related to a specific lesion of a specific patient needed to be aligned and resampled to the same resolution. In fact, T2-weighted images have a much higher resolution than the DWI and ADC images (in this dataset at least). Without this operation, a single pixel on a DWI image would have covered a lot more tissue than a pixel of the corresponding T2 image. To perform the alignment, the lesion was localized on the three sequences than to the CSV file. Then, the goal was to crop a large patch which contained the same amount of tissue on the three images. This patch had to be centered on the lesion to ease the augmentation process. So, a fixed patch size was defined for the T2 image since its resolution was the highest. Then, using the voxel spacing information, the patch size required to cover the same amount of tissue was computed for the two other sequences (DWI, ADC). Finally, the three images were cropped, resized to the same resolution and stacked. Stacking images consists in putting each single image (grayscale) into a single array, as three different channels. At this point, the pixel $i,j$ of the three channels represents the exact same tissue, which means that the lesion is at the same position and is covered by the same number of pixels on each channel. This approach increases the probability of detecting a cancer by ensuring a good visibilty for each lesion, since the latter is not necessarily as visible on the three images.\\
 An important part of this process is the normalization. In fact, images were normalized before beeing stacked, based on a Z-score, i.e. 
-
 \begin{equation}
 \label{eq:normalization}
 	Pixel_{{i,j}_{normalized}} = \frac{Pixel_{i,j} - \mu}{\sigma}
 \end{equation}
-
-\noindent where $Pixel_{i,j} \in [0,255]$ is a grayscale pixel value, $\mu$ is the mean value of all images of the corresponding sequence for this patient and $\sigma$ the standard deviation of all images of the corresponding sequence for this patient. According to the authors, normalizing each sequence of each patient separately allows to keep slight contrast nuances which ultimately helps the final diagnosis. In other words, all T2-weighted images belonging to a specific patient were concatenated into a single NumPy array. Then, the mean and standard devation of the array were computed. These values served as $\mu$ and $\sigma$ to normalize the T2-images of this specific patient. Same for the patient's DWI and ADC images. The same process was applied to all patients separately. 
-
-Then, the dataset was augmented in the same way as the authors. Concretely, images were rotated ($-20$ to $20^\circ$), flipped horizontally (probability of $0.5$) and slid horizontally (value $\in [-1, 0, 1]$ pixel). These techniques alone allowed to create a large enough amount of data. Therefore, two other augmentation methods used by the authors (horizontal stretching by a factor $\in [0.9,1.1]$ and vertical sliding) were not used.\\
-On the other hand, authors did not mention how they managed class imbalance. It seems like the manual lesion contouring performed by the qualified radiologist led to a natural class balance. However, the unmodified dataset has a ratio of 3 negative images for 1 positive. To solve this problem, multiple approaches were implemented. The first one made use of undersampling which consists in taking N elements of each class, where N is the size of the class whose number of elements is the smallest. As the size of the dataset is relatively small, taking a subset of it was not a good idea and led to a clear lack of data. The second solution solved the problem by using different augmentation factors. In fact, one of the script options sets the augmentation factor for the class whose number of elements is the largest. Then, according to this factor, the algorithm computes the augmentation factor for the other class in order to balance the final datasets. For example, if the dataset follows the above-mentioned 3 negatives for 1 positive ratio, and if the script option augmentation factor is set to 50, each image belonging to the negative class is going to be augmented 50 times and each image belonging to the positive class 150 times. At the end, the resulting dataset is balanced and makes use of all images. 
-
+\noindent where $Pixel_{i,j} \in [0,255]$ is a grayscale pixel value, $\mu$ is the mean value of all images of the corresponding sequence for this patient and $\sigma$ the standard deviation of all images of the corresponding sequence for this patient. According to the authors, normalizing each sequence of each patient separately allows to keep slight contrast nuances which ultimately helps the final diagnosis. In other words, all T2-weighted images belonging to a specific patient were concatenated into a single NumPy array. Then, the mean and standard devation of the array were computed. These values served as $\mu$ and $\sigma$ to normalize the T2-images of this specific patient. Same for the patient's DWI and ADC images. The same process was applied to all patients separately. \\ Then, the dataset was augmented in the same way as the authors. Concretely, images were rotated ($-20$ to $20^\circ$), flipped horizontally (probability of $0.5$) and slid horizontally (value $\in [-1, 0, 1]$ pixel). These techniques alone allowed to create a large enough amount of data. Therefore, two other augmentation methods used by the authors (horizontal stretching by a factor $\in [0.9,1.1]$ and vertical sliding) were not used.\\
+On the other hand, authors did not mention how they managed class imbalance. It seems like the manual lesion contouring performed by the qualified radiologist led to a natural class balance. However, the unmodified dataset has a ratio of 3 negative images for 1 positive. To solve this problem, multiple approaches were implemented. The first one made use of undersampling which consists in taking N elements of each class, where N is the size of the class whose number of elements is the smallest. As the size of the dataset is relatively small, taking a subset of it was not a good idea and led to a clear lack of data. The second solution solved the problem by using different augmentation factors. In fact, one of the script options sets the augmentation factor for the class whose number of elements is the largest. Then, according to this factor, the algorithm computes the augmentation factor for the other class in order to balance the final datasets. For example, if the dataset follows the above-mentioned 3 negatives for 1 positive ratio, and if the script option augmentation factor is set to 50, each image belonging to the negative class is going to be augmented 50 times and each image belonging to the positive class 150 times. At the end, the resulting dataset is balanced and makes use of all images.\\
 Finally, the data was split into three subsets (training ($80$\%), validation ($10$\%) and test ($10$\%)) and was exported as NumPy arrays. The percentages represent a percentage of patients. Figure \ref{fig:paper_reproduction_split} explains the entire splitting process and gives details about the patients that are in each set. In fact, each subset contains respectively 80\%, 10\% and 10\% of all patients belonging to the "true" and "false" class. At the beginning of the process, class "false" contains $\lfloor 0.8 * 164 \rfloor = 131$ training patients, $\lfloor 0.1 * 164 \rfloor = 16$ test patients and $164 - 131 - 16 = 17$ validation patients. On the other hand, class "true" contains $\lfloor 0.8 * 69 \rfloor = 55$ training patients, $\lfloor 0.1 * 69 \rfloor = 6$ test patients and $69 - 55 - 6 = 8$ validation patients. Then, during the stacking process, some patients were not used since the three sequences were not available for them. These patients were simply discarded. At the end, the "false" class was composed of 131 training patients, 17 validation patients and 15 test patients, whereas the "true" class was composed of 55 training patients, 8 validation patients and 4 test patients. This approach does not take the number of images into account (a patient may have multiple lesions for example) but guarantees that every lesion is exclusive to a specific subset. In other words, it is impossible to find a slighty different version of the same lesion (resulting from the data augmentation) in the training set and in the validation set for example. This would be problematic since the validation set, as well as the test set, need to contain unseen data to be able to evaluate the generalization ability of the model in an unbiased way. 
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/paper_reproduction_split.png}
+\includegraphics[width=0.95\textwidth, keepaspectratio=true]{./figures/paper_reproduction_split.png}
 \caption{Patient splitting process}
 \label{fig:paper_reproduction_split}
 \end{figure}
 
 
 \subsubsection{From NumPy arrays to augmented non-stacked images}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}Another way of processing and using the data was tested. Instead of stacking the images of various sequences coming from the same exam, each image was treated independently. In other words, each of them was resized as explained previously, then cropped, augmented and exported separately. At the end, each image was fed as separate input to the neural network. 
-
-This way of proceeding gave awful results. The main reason is that images from different sequences show the same tissue in an almost opposite way. The most striking difference to the human eye is the colors. Tumors are usually white on DWI images and black on ADC images. Moreover, they are not always as visible on the images of the various sequences. Therefore, finding similar features on all sequences was extremely difficult. Stacking the three sequences solves this problem. In this case, the first 4225 input neurons (4225 input neurons for a $65$x$65$px image) are dedicated to T2 images, the next 4225 neurons to DWI images and the last 4225 neurons to ADC images. 
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}Another way of processing and using the data was tested. Instead of stacking the images of various sequences coming from the same exam, each image was treated independently. In other words, each of them was resized as explained previously, then cropped, augmented and exported separately. At the end, each image was fed as separate input to the neural network.\\
+This way of proceeding gave awful results. The main reason is that images from different sequences show the same tissue in an almost opposite way. The most striking difference to the human eye is the colors. Tumors are usually white on DWI images and black on ADC images. Moreover, they are not always as visible on the images of the various sequences. Therefore, finding similar features on all sequences was extremely difficult. Stacking the three sequences solves this problem. 
+%In this case, the first 4225 input neurons (4225 input neurons for a $65$x$65$px image) are dedicated to T2 images, the next 4225 neurons to DWI images and the last 4225 neurons to ADC images. 
 
 
 \subsection{Data processing verification}
@@ -139,7 +145,7 @@ This way of proceeding gave awful results. The main reason is that images from d
 
 
 \subsubsection{Alignment}
-In addition to the previous test, an additional one aiming at checking the alignment of the images was created. This test ensures that the three images show the exact same content at the same spot over the three channels. 
+In addition to the previous test, an additional one aiming at checking the alignment of the images was created. This test ensures that the three images show the exact same content at the same spot over the three channels (see Figure \ref{fig:alignment}). 
 
 \begin{figure}[!h]
 \centering
@@ -147,7 +153,6 @@ In addition to the previous test, an additional one aiming at checking the align
 \caption{Alignment - Patient 0242 - Finding ID 1}
 \label{fig:alignment}
 \end{figure}
-
 
 \subsection{Training the neural network}
 
@@ -174,7 +179,7 @@ Since training a neural network requires datasets, hyperparameters and many more
 % \usepackage{graphicx}
 % \usepackage[table,xcdraw]{xcolor}
 % If you use beamer only pass "xcolor=table" option, i.e. \documentclass[xcolor=table]{beamer}
-\begin{table}[]
+\begin{table}[!h]
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{|llll|}
 \hline
@@ -243,30 +248,33 @@ The figure \ref{fig:gradient_flow} shows the gradient flow at epoch 0, batch 6. 
 
 \subsection{Results}
 \label{sec:paper_reproduction_results}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Johan}}Figure \ref{fig:paper_reprodution_results} shows the different metrics registered on the training and validation sets during the training phase. The best model was chosen at epoch 21 with an accuracy of $0.7525$ and an AUC of $0.765$ on the validation set (recall: the condition for a model to be chosen as best is that the current AUC and accuracy should be higher than the AUC and accuracy of the previous best model).\\
-This best model was evaluated on the test set built for the experiment and achieved an AUC of $0.75$ using their "enhanced prediction" technique (see figure \ref{fig:paper_reprodution_auc_on_our_test_set}).\\
-Finally, the model was also tested on the official SPIE-AAPM-NCI Prostate MR Classification Challenge test set and achieved an AUC of 0.71 (see figure \ref{fig:paper_reprodution_results_challenge_1}). This result will be used as benchmark in comparison with the model trained on the whole dataset in the second part of the experiment.
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Johan}}Figure \ref{fig:paper_reproduction_results} shows the different metrics registered on the training and validation sets during the training phase. The best model was chosen at epoch 21 with an accuracy of $0.7525$ and an AUC of $0.765$ on the validation set (recall: the condition for a model to be chosen as best is that the current AUC and accuracy should be higher than the AUC and accuracy of the previous best model).\\
+This best model was evaluated on the test set built for the experiment and achieved an AUC of $0.75$ using their "enhanced prediction" technique (see figure \ref{fig:paper_reproduction_auc_on_our_test_set}).\\
+Finally, the model was also tested on the official SPIE-AAPM-NCI Prostate MR Classification Challenge test set and achieved an AUC of 0.71 (see figure \ref{fig:paper_reproduction_results_challenge_1}). This result will be used as benchmark in comparison with the model trained on the whole dataset in the second part of the experiment.
+
+\newpage
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=1.1\textwidth, keepaspectratio=true]{./figures/paper_reproduction_results.png}
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/paper_reproduction_results.png}
 \caption{Metrics on the training and validation sets}
-\label{fig:paper_reprodution_results}
+\label{fig:paper_reproduction_results}
 \end{figure}
 
 
-\begin{figure}[!h]
+
+\begin{figure}[!t]
 \centering
 \includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/auc_our_test_set.png}
 \caption{AUC of the best model on our test set}
-\label{fig:paper_reprodution_auc_on_our_test_set}
+\label{fig:paper_reproduction_auc_on_our_test_set}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!t]
 \centering
-\includegraphics[height=0.4\textheight, keepaspectratio=true]{./figures/paper_reproduction_results_challenge1.png}
+\includegraphics[height=1\textwidth, keepaspectratio=true]{./figures/paper_reproduction_results_challenge1.png}
 \caption{Score achieved in the PROSTATEx challenge using only our custom training set (80\% of all available data) for the training}
-\label{fig:paper_reprodution_results_challenge_1}
+\label{fig:paper_reproduction_results_challenge_1}
 \end{figure}
 
 
@@ -278,10 +286,10 @@ The precision plot, which is used to measure the proportion of malignant lesions
 Another extremely important aspect of a computer-aider diagnosis system is to avoid the number of false negatives as much as possible. In fact, the consequences of classifying a malignant lesion as benign are far worse than the opposite. This concept is measured by the recall, which quantifies the proportion of malignant lesions correctly classified among all malignant lesion. The model has a recall of around $0.74$ on the validation set.\\
 The two last metrics (precision and recall) are both considered in the f1-score that is equal to $0.76$. \\
 Finally, the specificity indicates the proportion of correctly classified benign lesions among all benign lesions and is equal to approximately $0.76$.\\
-Globally, this model is balanced as no metric is exploding at the expense of another. This stability constitutes a serious strength regarding its generalization ability.
-
+Globally, this model is balanced as no metric is exploding at the expense of another. This stability constitutes a serious strength regarding its generalization ability.\\
 As the goal of the experiment was to reproduce the experiment of the paper, a comparison between the two models is necessary. The reproducted model achieved an AUC of $0.75$ on our test set (see Figure \ref{fig:paper_reprodution_auc_on_our_test_set}) using the authors' "enhanced prediction" technique, whereas the authors achieved an AUC $\in [0.876-0.994]$ with 95\% of confidence on their test set. Consequently, the model presented in this work has a slightly smaller AUC of $[0.126-0.244]$ than the one achieved in the paper. Multiple factors can explain this difference. First, in their work, the cropping of lesions was performed by a qualified radiologist, whereas, in our case, it was automatically done using the information in the CSV files. Then, the way the test set is built can make the results vary a lot. In fact, the authors didn't provide any information about how they built their test set. It is therefore possible that the test set was chosen to maximize the performance of the model. In the current work, the test set is built randomly. Consequently, the comparison of the performance is difficult since the test set is not the same in the two works. The only way to seriously compare the two models would be to compare their performance on the official SPIE-AAPM-NCI Prostate MR classification challenge test set. The model of this section (trained with 80\% of all the data available) reached an AUC of $0.71$. Unfortunately, no information about the performance of the model of the paper is given. Knowing that the best result at the time of the challenge was an AUC of $0.87$ on the challenge test set, it is highly surprising not to take part in it when claiming an AUC in the interval $[0.876-0.994]$ with 95\% of confidence... Finally, another source of difference is the number of participants in the experiment and the level of experience they have. Indeed, seven authors contributed to the paper, including one bachelors' student and six PhD with one of them working for Siemens Healthcare and one for hImagingTek Ltd. These big companies are specialized in the medical imaging and have departments dedicated to machine learning. On the opposite, this work was produced independently by two MSc students without previous experience in the medical imaging field. 
 
+\newpage
 \section{SPIE-AAPM-NCI Prostate MR Classification Challenge}
 \label{sec:classification_challenge}
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Johan}}This section aims at maximizing the result on the SPIE-AAPM-NCI Prostate MR classification Challenge test set by using the entire dataset as training set, instead of using 80\% of it, as it was done in the previous section. First, the changes needed to reach this new goal are detailed, then the raw results are presented and the latter are finally interpreted.
@@ -291,19 +299,20 @@ As the goal of the experiment was to reproduce the experiment of the paper, a co
 As a complement, this part of the experiment focuses on the challenge results in order to improve the $0.71$ in AUC achieved by the model trained with 80\% of all available data. In a general way, the more available data there is, the better the model performs. Consequently, the idea behind this section is to use the entire dataset as training set, discarding the validation and test sets from previous section. Apart from this new split, the data processing and the hyperparameters stay the same. The only difference in the training is about the learning rate scheduler. Since the validation set does not exist anymore, there is no possibility to use the \textit{reducelronplateau} function to prevent overfitting. However, this does not cause any problem thanks to the results of the previous section. In fact, it is clearly visible that the model would have started to overfit at epoch 17 if no learning rate correction had been applied. Hence, it is possible to conclude that, in this case, the best model should also be the one around epoch 17 (or a few epochs later). In order to ensure this, the models at epochs 15, 16, 17, 18, 19, 20, 21, 22, 23 and 30 were evaluated on the official challenge test set. For each of these models, a CSV file containing the predictions for each lesion of each patient was automatically generated and submitted to the challenge.
 
 \subsection{Results on the challenge test set}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Johan}}Table \ref{fig:results_for_all_models_challenge} shows the AUC values achieved by the model on the official challenge test set. The range of values is contained in the interval $[0.75-0.76]$. Each model was tested in order to see if a slight peak of $0.01$ could be found from one epoch to the other.\\ 
-Figure \ref{fig:challenge_all_results_experiment} presents the metric values the model reached while training on the whole dataset. The models whose results are reported in Table \ref{fig:results_for_all_models_challenge} were picked from this training.\\
+\setlength{\marginparwidth}{1.5cm}\leavevmode \marginnote{\textbf{Johan}}Figure \ref{fig:challenge_all_results_experiment} presents the metric values the model reached while training on the whole dataset. The models whose results are reported in Table \ref{fig:results_for_all_models_challenge} were picked from this training.\\
+Table \ref{fig:results_for_all_models_challenge} shows the AUC values achieved by the model on the official challenge test set. The range of values is contained in the interval $[0.75-0.76]$. Each model was tested in order to see if a slight peak of $0.01$ could be found from one epoch to the other.\\ 
 Finally, Figure \ref{fig:paper_reprodution_results_challenge2} shows our participation to the challenge with the model picked at epoch 20, which achieved an AUC of $0.76$.
 
+\newpage
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/paper_reproduction_results_challenge_full_dataset.png}
+\includegraphics[width=0.95\textwidth, keepaspectratio=true]{./figures/paper_reproduction_results_challenge_full_dataset.png}
 \caption{Metrics on the training using all data available as training set}
 \label{fig:challenge_all_results_experiment}
 \end{figure}
 
-\begin{table}[]
+\begin{table}[!t]
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|l|l|}
 \hline
@@ -316,14 +325,14 @@ AUC            & 0.75        & 0.75        & 0.76        & 0.76        & 0.76   
 \label{fig:results_for_all_models_challenge}
 \end{table}
 
-\begin{figure}[!h]
+\begin{figure}[!t]
 \centering
-\includegraphics[height=0.4\textheight, keepaspectratio=true]{./figures/paper_reproduction_results_challenge2.png}
+\includegraphics[height=1\textwidth, keepaspectratio=true]{./figures/paper_reproduction_results_challenge2.png}
 \caption{Score achieved in the PROSTATEx challenge by the model picked at epoch 20, trained on all available data as training set}
 \label{fig:paper_reprodution_results_challenge2}
 \end{figure}
 
-
+\clearpage
 
 \subsection{Discussion}
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Johan}}Figure \ref{fig:challenge_all_results_experiment} illustrates once again the correct behavior of the model during the training. All metrics reach their point of convergence at some point, the curves do not oscillate much and the loss curve is continually decreasing, which is a good learning indicator. In comparison to the the first part of the experiment, it is clearly visible that the metrics have an higher best value. This is due to the absence of learning rate scheduler during the training. As a result, from a certain epoch onwards, features learned by the model are not transposable to unseen data anymore and the latter overfits the data. To determine this point, multiple models around the epoch 20 were evaluated on the challenge test set (see Figure \ref{fig:results_for_all_models_challenge}). It is noticeable that the model did not reach its best performance before epoch 15 and that it started overfitting after epoch 23. Every model between these two epochs achieved an AUC of $0.76$ on the challenge, which seems to be the optimum value with this data and this configuration.\\

@@ -7,8 +7,7 @@
 
 \section{Cancer}
 \subsection{Basics}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}An accumulation of cells forming a mass is called a tumor. These tumors are detectable thanks to medical imaging (see section \ref{sec:medical_imaging}) and other symptoms. However, not every tumor is as dangerous as the other, as it can be benign (does not contain cancerous cells) or malignant (contains cancerous cells).
-
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}An accumulation of cells forming a mass is called a tumor. These tumors are detectable thanks to medical imaging (see section \ref{sec:medical_imaging}) and other symptoms. However, not every tumor is as dangerous as the other, as it can be benign (does not contain cancerous cells) or malignant (contains cancerous cells).\\
 The term cancer refers to different phenomena which involve mutation, abnormal multiplication and spreading of cells. As stated by Hanahan et al. in "The Hallmarks of Cancer" \cite{19} and "The Hallmarks of Cancer: The Next Generation" \cite{20}, every malignant tumor acquires six different capabilities during its evolution: 
 \begin{itemize}
 	\item \textbf{"Sustaining proliferative signaling"}\\ Cancerous cells don't wait for the body's approval to grow and proliferate, contrary to normal cells. They become responsible for their own multiplication.
@@ -31,10 +30,7 @@ Healthy cells replication is limited to a certain amount, which is not the case 
 
 \section{Types of medical imaging}
 \label{sec:medical_imaging}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}Multiple types of medical imaging exist. The most commonly used to detect cancer are Magnetic Resonance Imaging (MRI), CT (Computed Tomography) scans
-%, PET (Positron Emission Tomography) scans
-and mammograms. 
-
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}Multiple types of medical imaging exist. The most commonly used to detect cancer are Magnetic Resonance Imaging (MRI), CT (Computed Tomography) scans and mammograms.\\
 MRI relies on magnetic fields to provide a three-dimensional view of body parts, which allows to see the generated images as a volume. Different settings, usually called sequences, make the look of the output vary, as shown on figure \ref{fig:PROSTATEx-t2-adc-dwi}.
 Unlike MRI, CT is based on X-rays instead of magnetic fields, but still provides a three-dimensional representation of a body part. Figure \ref{fig:visualize_lung_dcm} shows a lung CT scan.
 
@@ -53,8 +49,7 @@ Unlike MRI, CT is based on X-rays instead of magnetic fields, but still provides
 
 
 \subsection{Data format}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}DICOM files can be viewed as containers of attributes, also called tags. The values of the pixels themselves are stored under the "Pixel Data" tag. Every single DICOM file usually represents a 2-dimensional image, which will form a 3-dimensional volume when put all together. 
-
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}DICOM files can be viewed as containers of attributes, also called tags. The values of the pixels themselves are stored under the "Pixel Data" tag. Every single DICOM file usually represents a 2-dimensional image, which will form a 3-dimensional volume when put all together.\\
 Other useful information such as the patient name and ID is directly stored within the DICOM files. This approach aims at linking each image to a specific person and event in order not to mix them up. Each DICOM file can be seen as part of a bigger dataset. 
 
 
@@ -69,17 +64,15 @@ Other useful information such as the patient name and ID is directly stored with
 \subsubsection{Data manipulation}
 \label{sec:dicom_data_manipulation}
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}CT and MRI machines, as well as monitors, differ from one manufacturer to the other and even from one model to the other. DICOM takes this problematic into account by providing specific tags that allow to display the exact same representation of the data, no matter the hardware used. Otherwise, physicians may struggle to detect anomalies because of color and exposition-related variations. 
-Therefore, before displaying or converting an image to any format (such as png), pixel data must be normalized. 
-
-The procedure depends on the tags "Window Width" and "Window Center" (one always come with the other). These are used to represent a range of values corresponding to the pixel values in the data. For instance, a window center of 0 and a window width of 200 imply pixel values between -100 and 100. 
-
+Therefore, before displaying or converting an image to any format (such as png), pixel data must be normalized.\\
+The procedure depends on the tags "Window Width" and "Window Center" (one always come with the other). These are used to represent a range of values corresponding to the pixel values in the data. For instance, a window center of 0 and a window width of 200 imply pixel values between -100 and 100.\\
 If they are missing, a simple conversion is sufficient. The parameters used to convert the data are given by two tags: 
 \begin{itemize}
 	\item Bits allocated: the number of bits used to represent a single pixel (value: 1 or a multiple of 8)
 	\item Samples per pixel: the number of channels for each pixel
 
 \end{itemize}
-
+\newpage
 \noindent Examples: 
 \begin{itemize}
 \item 1 bit, 1 sample: black and white
@@ -124,7 +117,7 @@ where~$c$ is the window center,~$w$ window width, ~$P$ the pixel input value, ~$
 
 
 \subsection{Data format}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}Unlike the ANALYZE format that used two files to store the metadata and the actual data, the NIfTI file format stores them in one single file “.nii” but keeps this split between the real data and the header for compatibility. This has the advantage to facilitate the use of the data and avoid storing the data without the meta-data. The NIfTI format can also be compressed/decompressed on-the-fly using the “deflate”  algorithm.
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}Unlike the ANALYZE format that used two files to store the metadata and the actual data, the NIfTI file format stores them in one single file “.nii” but keeps this split between the real data and the header for compatibility. This has the advantage to facilitate the use of the data and avoid storing the data without the meta-data. The NIfTI format can also be compressed/decompressed on-the-fly using the “deflate” algorithm. M. Winkler affirms that this is particularly useful as "it is very common for images to have large areas of solid background, or files describing masks and regions of interest containing just a few unique values that appear repeated many time"~\cite{52}.
 
 
 \subsection{Overview of the header structure}
@@ -142,7 +135,7 @@ Processing data manually increases the probability of making mistakes. For that 
 
 
 \subsection{DICOM}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}Visualizing DICOM files is pretty straightforward since each file represents a single two-dimensional image. However, a lot of pixel transformations and normalizations have to be applied to obtain the desired result (see section \ref{sec:dicom_data_manipulation}), which may be a source of errors. Our tools allows to display a single DICOM file as well as a sequence of files if the function is fed with a directory. Users can then scroll through the Z-axis, displaying the next or previous slice. 
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}Visualizing DICOM files is pretty straightforward since each file represents a single two-dimensional image. However, a lot of pixel transformations and normalizations have to be applied to obtain the desired result (see section \ref{sec:dicom_data_manipulation}), which may be a source of errors. Our tools allows to display a single DICOM file as well as a sequence of files if the function is fed with a directory. Users can then scroll through the Z-axis, displaying the next or previous slice.  Figure \ref{fig:visualize_lung_dcm} shows the visualization of a lung at three different Z-axis coordinates. This allows the user to simply have a complete overview of the body part he want to analyse.
 
 \begin{figure}[!h]
 \centering
