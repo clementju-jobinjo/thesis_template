@@ -110,11 +110,12 @@ Lastly, images were normalized with respect to Equation \ref{eq:normalization}. 
 \subsubsection{Ground truth creation}
 \label{sec:braingroundtruth}
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}The particularity of this dataset is that no information apart from the clinical significance is provided. Therefore, it was necessary to create a ground truth CSV file from scratch so that the same processing methods as the other datasets could be applied to this one.\\
-The first step was to standardize the file names and formats. The chosen convention is "$[yes|no]{index}.jpg$". The vast majority of the files were in the JPG file format, so the few PNG images were converted. Then, a CSV file containing the following columns was created: "PatientID", "Nodule Center Position", "fid", "Diagnosis". The "PatientID" is the filename without extension that was set during the first step (for example "$yes99$" or "$no3$"). The "Nodule Center Position" represents the pixel coordinates of the lesion. Fortunately, brain tumors are clearly visible on brain MRIs, which eased the process. To find the coordinates, every single image was opened at its original size in an image visualization software. A rectangle selection tool was used to draw a rectangle from the top left corner of the image (because the top left pixel corresponds to the pixel at the coordinates $(0,0)$ in NumPy arrays) to the center of the lesion. The pixel width and height of this rectangle gave the "i,j" coordinates of the lesion. These coordinates were reported manually. Then, the "fid" corresponds to the Finding ID. This parameter would be more pertinent if the same "PatientID" could have multiple findings, i.e. if the same patient could have multiple tumors. Since this information is made use of during the image processing of the other datasets, it was also added here. In this particular case, the "fid" was always set to "1". Finally, the "Diagnosis" was defined as "False" or "True" according to the folder which the image was in. 
+The first step was to standardize the file names and formats. The chosen convention is "$[yes|no]{index}.jpg$". The vast majority of the files were in the JPG file format, so the few PNG images were converted. Then, a CSV file containing the following columns was created: "PatientID", "Nodule Center Position", "fid", "Diagnosis". The "PatientID" is the filename without extension that was set during the first step (for example "$yes99$" or "$no3$"). The "Nodule Center Position" represents the pixel coordinates of the lesion. Fortunately, brain tumors are clearly visible on brain MRIs, which eased the process. To find the coordinates, every single image was opened at its original size in an image visualization software. A rectangle selection tool was used to draw a rectangle from the top left corner of the image (because the top left pixel corresponds to the pixel at the coordinates $(0,0)$ in NumPy arrays) to the center of the lesion. The pixel width and height of this rectangle gave the "i,j" coordinates of the lesion. These coordinates were reported manually. Then, the "fid" corresponds to the Finding ID. This parameter would be more pertinent if the same "PatientID" could have multiple findings, i.e. if the same patient could have multiple tumors. Since this information is made use of during the image processing of the other datasets, it was also added here. In this particular case, the "fid" was always set to "1". Finally, the "Diagnosis" was defined as "False" or "True" according to the folder which the image was in. This allows to simply use the same processing techniques as it is done for the other datasets.
 
 
 \subsubsection{From JPG to NumPy arrays}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}Images had to be converted to single-channel NumPy arrays (grayscale) so that the values could be normalized further on. First, a mere conversion involving no content modification apart from going from three to one channel was performed. Second, images were normalized according to Equation \ref{eq:normalization}. The mean and standard deviation were computed over the whole dataset. Both classes were augmented by a common factor (200x) since both classes contain a relatively close number of instances (133 positives and 96 negatives). Similarly to Lung CT Challenge, tumor sizes vary substantially. The same methodology was applied regarding the patch size, i.e. choosing a size which fits the majority of large tumors perfectly. Even though the images all show the head under the same perspective (same height/width ratio, visible skull, black margin around the skull), images were probably collected from different sources, which explains the heterogeneity of resolutions. As a consequence, the patch size could not be a fixed number of pixels for all images because the cropped area would be the entire head on one image and a small portion of the tumor on another. The trick consisted in finding the horizontal and vertical portions of the image occupied by the tumor. In fact, cropping an area centered on the lesion whose height was $\frac{2}{7}$ of the image and whose width was $\frac{1}{4}$ gave good results. Finally, images were also resized to 65x65px using a bicubic interpolation before being saved as NumPy arrays. 
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Julien}}Images had to be converted to single-channel NumPy arrays (grayscale) so that the values could be normalized further on. First, a mere conversion involving no content modification apart from going from three to one channel was performed. Second, images were normalized according to Equation \ref{eq:normalization}. The mean and standard deviation were computed over the whole dataset. Both classes were augmented by a common factor (200x) since both classes contain a relatively close number of instances (133 positives and 96 negatives).\\
+Similarly to Lung CT Challenge, tumor sizes vary substantially. The same methodology was applied regarding the patch size, i.e. choosing a size which fits the majority of large tumors perfectly. Even though the images all show the head under the same perspective (same height/width ratio, visible skull, black margin around the skull), images were probably collected from different sources, which explains the heterogeneity of resolutions. As a consequence, the patch size could not be a fixed number of pixels for all images because the cropped area would be the entire head on one image and a small portion of the tumor on another. The trick consisted in finding the horizontal and vertical portions of the image occupied by the tumor. In fact, cropping an area centered on the lesion whose height was $\frac{2}{7}$ of the image and whose width was $\frac{1}{4}$ gave good results. Finally, images were also resized to 65x65px using a bicubic interpolation before being saved as NumPy arrays. 
 
 
 \subsection{Image cropping}
@@ -174,7 +175,7 @@ Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control image
 % \usepackage{graphicx}
 % \usepackage[table,xcdraw]{xcolor}
 % If you use beamer only pass "xcolor=table" option, i.e. \documentclass[xcolor=table]{beamer}
-\begin{table}[]
+\begin{table}[!h]
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{|llll|}
 \hline
@@ -227,7 +228,7 @@ Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control image
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Johan}}The whole transfer learning consists in multiple steps. In order to maximize the performance during the whole process, the hyperparameters were manually tuned at each step, following a grid search approach to find the best ones. Table \ref{table:tl_hyperparameters_at_each_step} presents the best hyperparameters used at each step of the experiment. Note that, as it was the case in the paper experiment reproduction, the first model was also initialized by loading the best model among 200 initializations. The model was implemented with PyTorch using the Adam optimizer to update its weights. The complete succession of the process took approximately 60 hours on an Nvidia GeForce RTX 2080 Ti. 
 %Tesla v100 XSM2 graphics card.
 
-\begin{table}[]
+\begin{table}[!h]
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{|l|l|c|l|c|l|}
 \hline
@@ -264,78 +265,80 @@ Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control image
 Table \ref{table:tl_best_model_performance} summaries the performance of the best model on the validation and test sets at each step of the experiment. 
 Finally, Figure \ref{fig:tl_results_test_set} compares the performance of the model resulting from the first training to the one which underwent the transfer learning experiment. 
 
+\newpage 
+
 \begin{figure}[!h]
 \centering
 \noindent
 \makebox[\textwidth]{
-\includegraphics[width=1.1\textwidth, keepaspectratio=true]{./figures/tl_DS1_full.png}
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/tl_DS1_full.png}
 }
 \caption{Transfer learning - DS1 Full}
 \label{fig:tl_ds1_full}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!t]
 \centering
 \noindent
 \makebox[\textwidth]{
-\includegraphics[width=1.1\textwidth, keepaspectratio=true]{./figures/tl_DS2_frozen.png}
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/tl_DS2_frozen.png}
 }
 \caption{Transfer learning - DS2 Frozen}
 \label{fig:tl_ds2_frozen}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!t]
 \centering
 \noindent
 \makebox[\textwidth]{
-\includegraphics[width=1.1\textwidth, keepaspectratio=true]{./figures/tl_DS2_full.png}
+\includegraphics[width=0.95\textwidth, keepaspectratio=true]{./figures/tl_DS2_full.png}
 }
 \caption{Transfer learning - DS2 Full}
 \label{fig:tl_ds2_full}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!t]
 \centering
 \noindent
 \makebox[\textwidth]{
-\includegraphics[width=1.1\textwidth, keepaspectratio=true]{./figures/tl_DS3_frozen.png}
+\includegraphics[width=0.98\textwidth, keepaspectratio=true]{./figures/tl_DS3_frozen.png}
 }
 \caption{Transfer learning - DS3 Frozen}
 \label{fig:tl_ds3_frozen}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!t]
 \centering
 \noindent
 \makebox[\textwidth]{
-\includegraphics[width=1.1\textwidth, keepaspectratio=true]{./figures/tl_DS3_full.png}
+\includegraphics[width=0.98\textwidth, keepaspectratio=true]{./figures/tl_DS3_full.png}
 }
 \caption{Transfer learning - DS3 Full}
 \label{fig:tl_ds3_full}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!t]
 \centering
 \noindent
 \makebox[\textwidth]{
-\includegraphics[width=1.1\textwidth, keepaspectratio=true]{./figures/tl_DS4_frozen.png}
+\includegraphics[width=0.98\textwidth, keepaspectratio=true]{./figures/tl_DS4_frozen.png}
 }
 \caption{Transfer learning - DS4 Frozen}
 \label{fig:tl_ds4_frozen}
 \end{figure}
 
-\begin{figure}[!h]
+\begin{figure}[!t]
 \centering
 \noindent
 \makebox[\textwidth]{
-\includegraphics[width=1.1\textwidth, keepaspectratio=true]{./figures/tl_DS4_full.png}
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/tl_DS4_full.png}
 }
 \caption{Transfer learning - DS4 Full}
 \label{fig:tl_ds4_full}
 \end{figure}
 
 
-\begin{table}[]
+\begin{table}[!t]
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{|l|l|c|l|c|}
 \hline
@@ -353,6 +356,8 @@ Finally, Figure \ref{fig:tl_results_test_set} compares the performance of the mo
 \caption{Best model performance at each step of the transfer learning pipeline}
 \label{table:tl_best_model_performance}
 \end{table}
+
+
 
 
 \section{Discussion}
@@ -410,7 +415,7 @@ During the full training on the lung dataset, the AUC starts at a high value aft
 \centering
 \noindent
 \makebox[\textwidth]{
-\includegraphics[width=1.1\textwidth, keepaspectratio=true]{./figures/tl_results_test_set.png}
+\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/tl_results_test_set.png}
 }
 \caption{Transfer learning - Performance comparison between the best model obtained during DS1 Full and DS4 Full}
 \label{fig:tl_results_test_set}
