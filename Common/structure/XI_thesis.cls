@@ -350,7 +350,7 @@ KOMA-script documentation for details.}]{fancyhdr}
 \ifbool{consistentlayout}{
 	\DeclareDocumentEnvironment{abstract}{ O{} }{%
 		\addchap*{\abstractname}%
-		{\chapteralign\normalsize\abstractauthorfont \authorname \par}% Author name
+		{\chapteralign\normalsize\abstractauthorfont \href{mailto:julienclement22@gmail.com}{Julien Clément}, \href{mailto:joh.job13@gmail.com}{Johan Jobin} \par}% Author name
 		\vspace{\baselineskip}
 		{\chapteralign\parbox{.7\linewidth}{\chapteralign\normalsize\itshape\abstracttitlefont Prostate Cancer Classification: A Freeze/Unfreeze Transfer Learning Approach Using Multiple Body Parts
 }\par}% Thesis title
