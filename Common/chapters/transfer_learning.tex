@@ -8,6 +8,7 @@ First, a general definition of transfer learning is given. Its utility in this s
 
 
 \section{Goal}
+\label{sec:tl_goal}
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Jobin \& Cl{\'e}ment}}Transfer learning consists in using a network which was pretrained on a dataset A to improve the performance of the task on a dataset B.
 
 This technique makes sense when the quantity of data available is not sufficient. This condition is fulfilled in the case of cancer detection. In fact, medical data is highly confidential and cannot be shared easily. Provided that medical institutions agree to share it, it has to undergo an anonymization process which follows very strict rules. Then, to be usable as part of a deep learning classification task, data must be organized and described precisely. In other words, additional information such as the clinical significance, the position of the lesion, etc. must be collected and put together. This whole process requires considerable effort, which is one of the reasons why usable medical data is hard to find.
@@ -15,11 +16,13 @@ This technique makes sense when the quantity of data available is not sufficient
 %In this case, transfer learning aims at using various small datasets in order to achieve the same or better performance than with a single huge dataset.
 However, in order for the transfer learning to be useful, common low level features have to be present among the datasets on which the model is trained. Consequently, the goal of this experiment is to use transfer learning on three datasets coming from three different body parts that are prostate, brain and lung, in order to check if they share common features that could be useful to improve the performance of the model on a specific dataset. In this experiment, the model trained to classify prostate lesions is then trained to classify brain tumors and finally lung lesions. At the end of the process, the model is once again trained on the prostate dataset and the performances of the model at the beginning and at the end of the experiment are compared.
 
+In this experiment, the goal is to increase the model performance on the test set, particularly the AUC. In fact, the latter represents a degree of separability, i.e. how well the model distinguishes between classes. In cancer classification, the diagnosis must be clear. For instance, Model A and Model B can classify a sample X as benign (prediction: class 0) but with different probabilities of 0.10 and 0.45 respectively, where the latter are the probabilities of belonging to class 1 (malignant). While Model A is sure of choice, Model B is not trustworthy and may misdiagnose samples. 
+
 
 \section{Process overview}
 \label{sec:process_overview}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}The approach consists in five different steps. Figure \ref{fig:tl_overview} gives a visual representation of the following explanations.\\
-\begin{itemize}
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}The approach consists in five different steps. Figure \ref{fig:tl_overview} gives a visual representation of the following explanations:\\
+\begin{enumerate}
 \item First of all, similar datasets are collected and processed in the same way. These datasets need to share common features. For example, DWI images (MRI sequence) and CT scans share the same color scheme and look alike (the same kind of tissue is visible, etc.).
 %On the contrary, mammographies are completely different in that they the tissue is less visible FIGURE.
 \item Second, the convolutional neural network is built and split into two parts. It is still a single network but the first layers are treated as the feature extractor. As the name suggests, the role of these layers is to extract visual features characterizing what a cancerous tumor looks like. On the other hand, the last layers are considered as decision maker. They will gather the features collected by the feature extractor and process them to make a decision on the class of the input sample.
@@ -32,7 +35,7 @@ However, in order for the transfer learning to be useful, common low level featu
 \end{enumerate}
 \item Fifth, the previous step is also applied to the target dataset. The only difference lies in the frozen part. Instead of dropping the old last layers and initialize its weights randomly, the decision maker of the best model found during the training on the first dataset is attached to the model. These final two trainings aim at keeping the interesting features from the other datasets while learning specializing the model in the target dataset again. Hopefully, the new weight initialization resulting from the transfer learning will allow to reach better metric values than before the transfer learning. 
 
-\end{itemize}
+\end{enumerate}
 \begin{figure}[!h]
 \centering
 \noindent
@@ -45,6 +48,7 @@ However, in order for the transfer learning to be useful, common low level featu
 
 
 \section{Data processing}
+\label{sec:tl_data_processing}
 \subsection{PROSTATEx}
 \label{sec:PROSTATEx}
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}Ideally, transfer learning should rely on multi-sequence MRIs only. In fact, the extra information provided by different sequences increases the performance a lot. However, publicly available datasets either do not contain the clinical significance of the samples or were purely made for segmentation purposes (where labels are also images).
@@ -139,8 +143,7 @@ Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control image
 
 
 \section{Transfer learning implementation}
-\subsection{Architecture generalities}
-\subsubsection{Layer freezing}
+\subsection{Layer freezing}
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}After each dataset switch, the model is first trained with freezed layers. The freezed layers are those considered as feature extractor, i.e. the first layers of the model. The exact point where the model is split is arbitrary, but is usually located after the convolutions. To perform this freezing, multiple steps are required:
 \begin{enumerate}
 	\item Reset the last layers. To do so, an instance of the model is created by loading the state dictionary of the previous one, before replacing the module containing the last layers with a new instance. 
@@ -160,6 +163,9 @@ Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control image
 \label{fig:tl_model_split}
 \end{figure}
 
+\subsection{Conditions to choose the best model}
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}At each step of the transfer learning, the best model was saved in order to be used during the next transfer learning step. After each epoch, the current model was compared to the previous best model. If it was better, the current model became the best model. A model was considered better if its AUC was higher than the best model's AUC, and if its accuracy was higher than the best model's accuracy. As the goal was to optimize the AUC, the first condition makes immediate sense. The second condition was put in place in order to prevent a sudden spike in AUC to set an unreacheable value. This scenario did not occur during this experiment but during previous ones with random initialization. The AUC at early epochs could be really high, saving an untrained model the best model. 
+
 
 %\subsubsection{Parallelization}
 %Each experiment before transfer learning was performed on a single GPU. While being a lot faster than training on a CPU, the computation time was still relatively high. In order to get results from the transfer learning in a reasonable amount of time, parallelization was required. In fact, the longest transfer learning experiment consisted of $(5$ folds $* 4$ learning rates $* 1200$ epochs $+ 1200$ epochs$) * 7$ parts $= 176400$ epochs. On a single GPU, this experiment would have taken around two weeks to complete. 
@@ -178,7 +184,15 @@ Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control image
 
 
 \subsection{Script options}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}A single Python script allows to run the entire transfer learning pipeline. Multiple command line arguments are required in order to load the right datasets and the right model, to define the hyperparameters, etc. Table \ref{fig:transfer_learning_options} gives a exhaustive list of the script options. The particularity lies in the learning rate, number of epochs, batch size and dropout options. In fact, the pipeline consists in seven different phases of training: dataset 1 (full model), dataset 2 (frozen model), dataset 2 (full), dataset 3 (frozen), dataset 3 (full), dataset 4 (frozen) and dataset 4 (full). In such a case, each phase will probably use different hyperparameters. Therefore, these command line options need to specify seven different parameters. For example, a valid value for the "--lr" option could be "1e-8,1e-5,1e-6,1e-6,1e-5,1e-7,1e-8".
+\label{sec:tl_script_options}
+
+\subsubsection{Automated transfer learning}
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Jobin}}The first Python script runs the entire transfer learning pipeline by itself. Multiple command line arguments are required in order to load the right datasets and the right model, to define the hyperparameters, etc. Table \ref{table:transfer_learning_options} gives an exhaustive list of the script options. The particularity lies in the learning rate, number of epochs, batch size and dropout options. In fact, the pipeline consists in seven different phases of training: dataset 1 (full model), dataset 2 (frozen model), dataset 2 (full), dataset 3 (frozen), dataset 3 (full), dataset 4 (frozen) and dataset 4 (full). In such a case, each phase will probably use different hyperparameters. Therefore, these command line options need to specify seven different parameters. For example, a valid value for the "-{}-lr" option could be "1e-8,1e-5,1e-6,1e-6,1e-5,1e-7,1e-8".
+
+\subsubsection{Manual transfer learning}
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}The second Python script allows to perform each transfer learning step by hand. Thanks to this, a good combination of hyperparameters can be searched for without having to run the whole pipeline. The command line arguments slighty differ from the automated version. Table \ref{table:manual_transfer_learning_options} lists them. First of all, a single training set and a single validation set have to be specificied. In addition to this, a second dataset is required: the reference/target one, which does not change throughout the process. This dataset is useful for the global performance graphs (see Section \ref{sec:global_performance}). Another parameter used for the global performance graphs is the '-{}-last{\_}layer'. Its role is limited to this, unless '-{}-{}attach{\_}DM' is set to True. In this case, the decision maker loaded as '-{}-last{\_}layer' is attached to the current model, provided the current step is a frozen one. This option is used at the last frozen step (target dataset), as this decision maker comes from the first training (target dataset as well)	. Doing this instead of a using a new random decision maker (as it is the case for the non-target datasets) allows to start with a skilled decision maker and optimize it according to the features learned during the transfer learning. 
+
+Furthermore, arguments which were comma-separated values become single values, since this file runs a single transfer learning step instead of seven. Also, an output name for Tensorboard needs to be specified. In the automated version, this output name is automatically handled by the code itself. The latter allows to organize the various graphs generated by Tensorboard within the Tensorboard interface. If it is used in a correct way, Tensorboard can then be run on the root directory containing all graphs (which may be in subdirectories). 
 
 
 % Please add the following required packages to your document preamble:
@@ -191,29 +205,69 @@ Like PROSTATEx (see section \ref{sec:dataProcessingVerification}), control image
 \hline
 \rowcolor[HTML]{DAE8FC} 
 \textbf{Command}            & \textbf{Description}                                                                                                                                                                                                & \textbf{Required}                                                           & \textbf{Type} \\ \hline
-\textbf{--training-set1}     & Path to training set 1                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
-\textbf{--validation-set1}   & Path to validation set 1                                                                                                                                                                                                                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
-\textbf{--test-set1}     & Path to test set 1                                                                                                                                                                                                                                                                                                                                                                                                   & True                                                                        & String        \\ \hline
-\textbf{--training-set2}     & Path to training set 2                                                                                                                                                                                                 & True                                                                        & String        \\ \hline
-\textbf{--validation-set2}   & Path to validation set 2 
+\textbf{-{}-training-set1}     & Path to training set 1                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
+\textbf{-{}-validation-set1}   & Path to validation set 1                                                                                                                                                                                                                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
+\textbf{-{}-test-set1}     & Path to test set 1                                                                                                                                                                                                                                                                                                                                                                                                   & True                                                                        & String        \\ \hline
+\textbf{-{}-training-set2}     & Path to training set 2                                                                                                                                                                                                 & True                                                                        & String        \\ \hline
+\textbf{-{}-validation-set2}   & Path to validation set 2 
 & True                                                                        & String        \\ \hline
-\textbf{--training-set3}     & Path to training set 3                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
-\textbf{--validation-set3}   & Path to validation set 3                                                                                                                                                                                                                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
-\textbf{--batchsize}        & Number of samples per batch                                                                                                                                                                                         & True                                                                        & Comma-separated ints          \\ \hline
-\textbf{--nbepochs}         & Number of epochs the training phase lasts                                                                                                                                                                  & True                                                                        & Comma-separated ints            \\ \hline
-\textbf{--lr}               & Learning rate used in the optimizer                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}True\end{tabular}               & Comma-separated floats         \\ \hline
-\textbf{--lossfunction}     & \begin{tabular}[c]{@{}l@{}}Loss function name\\{[}CrossEntropyLoss, L1Loss, MSELoss{]}\end{tabular}                                                                                                            & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'CrossEntropyLoss'\end{tabular} & String        \\ \hline
-\textbf{--cuda-device}      & GPU name to run the experiment                                                                                                                                                                                      & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'cuda'\end{tabular}             & String        \\ \hline
-\textbf{--modeltoload}      & \begin{tabular}[c]{@{}l@{}}Pretrained model name \\If given, load it, otherwise randomly initialize it\end{tabular}                                                                                     & \begin{tabular}[c]{@{}l@{}}False\\ Default: ""\end{tabular}                 & String        \\ \hline
-\textbf{--dropout}          & Dropout probability                                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}True\end{tabular}                & Comma-separated floats          \\ \hline
-\textbf{--optimized-metric} & \begin{tabular}[c]{@{}l@{}}Metric to optimize\\ The best model during the training will be saved according to it\\{[}'auc', 'accuracy', 'precision', 'recall', 'f1score', 'specificity'{]}\end{tabular} & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'auc'\end{tabular}              & String        \\ \hline
-\textbf{--outputdirectory}  & Root of the output directory used by Tensorboard to save the models                                                                                                                                                 & True                                                                        & String        \\ \hline
-\textbf{--cv} & \begin{tabular}[c]{@{}l@{}}Whether to use cross-validation or not\\{[}'True', 'False'{]}\end{tabular} & \begin{tabular}[c]{@{}l@{}}True\end{tabular}             
+\textbf{-{}-training-set3}     & Path to training set 3                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
+\textbf{-{}-validation-set3}   & Path to validation set 3                                                                                                                                                                                                                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
+\textbf{-{}-batchsize}        & Number of samples per batch                                                                                                                                                                                         & True                                                                        & Comma-separated ints          \\ \hline
+\textbf{-{}-nbepochs}         & Number of epochs the training phase lasts                                                                                                                                                                  & True                                                                        & Comma-separated ints            \\ \hline
+\textbf{-{}-lr}               & Learning rate used by the optimizer                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}True\end{tabular}               & Comma-separated floats         \\ \hline
+\textbf{-{}-lossfunction}     & \begin{tabular}[c]{@{}l@{}}Loss function name\\{[}CrossEntropyLoss, L1Loss, MSELoss{]}\end{tabular}                                                                                                            & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'CrossEntropyLoss'\end{tabular} & String        \\ \hline
+\textbf{-{}-cuda-device}      & \begin{tabular}[c]{@{}l@{}}GPU name to run the experiment\\For example: 'cuda:0', 'cuda:1', ...\end{tabular}                                                                                                                                                                                      & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'cuda'\end{tabular}             & String        \\ \hline
+\textbf{-{}-modeltoload}      & \begin{tabular}[c]{@{}l@{}}Pretrained model name \\If given, load it, otherwise randomly initialize it\end{tabular}                                                                                     & \begin{tabular}[c]{@{}l@{}}False\\ Default: ""\end{tabular}                 & String        \\ \hline
+\textbf{-{}-dropout}          & Dropout probability                                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}True\end{tabular}                & Comma-separated floats          \\ \hline
+\textbf{-{}-optimized-metric} & \begin{tabular}[c]{@{}l@{}}Metric to optimize\\ The best model during the training will be saved according to it\\{[}'auc', 'accuracy', 'precision', 'recall', 'f1score', 'specificity'{]}\end{tabular} & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'auc'\end{tabular}              & String        \\ \hline
+\textbf{-{}-outputdirectory}  & Root of the output directory. Used to save the models and Tensorboard's files.
+& \begin{tabular}[c]{@{}l@{}}False\\Default: './runs'\end{tabular}                                                                                                                                                
+& String        \\ \hline
+\textbf{-{}-cv} & \begin{tabular}[c]{@{}l@{}}Whether to use cross-validation or not\\{[}'True', 'False'{]}\end{tabular} & \begin{tabular}[c]{@{}l@{}}True\end{tabular}             
 & String        \\ \hline
 \end{tabular}%
 }
-\caption{Complete list of script options}
-\label{fig:transfer_learning_options}
+\caption{Automated transfer learning -- List of script options}
+\label{table:transfer_learning_options}
+\end{table}
+
+
+%%%%%%% Manual transfer learning
+\begin{table}[!h]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|llll|}
+\hline
+\rowcolor[HTML]{DAE8FC} 
+\textbf{Command}            & \textbf{Description}                                                                                                                                                                                                & \textbf{Required}                                                           & \textbf{Type} \\ \hline
+\textbf{-{}-trainingset}     & Path to training set                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
+\textbf{-{}-validationset}   & Path to validation set                                                                                                                                                                                                                                                                                                                                                                                                  & True                                                                        & String        \\ \hline
+\textbf{-{}-reference{\_}training}     & Path to target training set (for the global performance graphs)                                                                                                                                                                                                   & True                                                                        & String        \\ \hline
+\textbf{-{}-reference{\_}validation}   & Path to target validation set (for the global performance graphs)                                                                                                                                                                                                  
+& True                                                                        & String        \\ \hline
+\textbf{-{}-batchsize}        & Number of samples per batch                                                                                                                                                                                         & True                                                                        & Int          \\ \hline
+\textbf{-{}-nbepochs}         & Number of epochs the training phase lasts                                                                                                                                                                  & True                                                                        & Int           \\ \hline
+\textbf{-{}-lr}               & Learning rate used by the optimizer                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}True\end{tabular}               & Float         \\ \hline
+\textbf{-{}-lossfunction}     & \begin{tabular}[c]{@{}l@{}}Loss function name\\{[}CrossEntropyLoss, L1Loss, MSELoss{]}\end{tabular}                                                                                                            & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'CrossEntropyLoss'\end{tabular} & String        \\ \hline
+\textbf{-{}-cudadevice}      & \begin{tabular}[c]{@{}l@{}}GPU name to run the experiment\\For example: 'cuda:0', 'cuda:1', ...\end{tabular}                                                                                                                                                                                      & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'cuda'\end{tabular}             & String        \\ \hline
+\textbf{-{}-modeltoload}      & \begin{tabular}[c]{@{}l@{}}Pretrained model name \\If given, load it, otherwise randomly initialize it\end{tabular}                                                                                     & \begin{tabular}[c]{@{}l@{}}False\\ Default: ""\end{tabular}                 & String        \\ \hline
+\textbf{-{}-dropout}          & Dropout probability                                                                                                                                                                                                 & \begin{tabular}[c]{@{}l@{}}True\end{tabular}                & Float          \\ \hline
+\textbf{-{}-inputchannel}     & \begin{tabular}[c]{@{}l@{}}Number of channels of the input images\\{[}1,3{]}\end{tabular}                                                                                                            & True 
+& String        \\ \hline
+\textbf{-{}-optimizedmetric} & \begin{tabular}[c]{@{}l@{}}Metric to optimize\\ The best model during the training will be saved according to it\\{[}'auc', 'accuracy', 'precision', 'recall', 'f1score', 'specificity'{]}\end{tabular} & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'auc'\end{tabular}              & String        \\ \hline
+\textbf{-{}-freeze}     & \begin{tabular}[c]{@{}l@{}}True to freeze the feature extractor, False otherwise.\\{[}'True', 'False'{]}\end{tabular}                                                                                                            & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'False'\end{tabular} & String        \\ 
+\hline
+\textbf{-{}-last{\_}layer}     & If DS1: Skip. Otherwise: path to last{\_}layer.pckl file of previous step                                                                                                                                                                                                  & \begin{tabular}[c]{@{}l@{}}False\\Default: 'no{\_}path'                                                                       \end{tabular} & String        \\ \hline
+\textbf{-{}-attach{\_}DM}     & \begin{tabular}[c]{@{}l@{}}True to use the "-{}-last{\_}layer" as Decision Maker for the model. Use it for DS4 Frozen.\\{[}'True', 'False'{]}\end{tabular}                                                                                                            & \begin{tabular}[c]{@{}l@{}}False\\ Default: 'False'\end{tabular} & String        \\ \hline
+\textbf{-{}-tensorboard{\_}output{\_}name}     & \begin{tabular}[c]{@{}l@{}}Step of the transfer learning pipeline. Used by Tensorboard.\\{[}'DS1/Full', 'DS2/Frozen', 'DS2/Full', 'DS3/Frozen', 'DS3/Full', 'DS4/Frozen', 'DS4/Full'{]}\end{tabular}                                                                                                            & True 
+& String        \\ \hline
+\textbf{-{}-outputdirectory}  & Root of the output directory. Used to save the models and Tensorboard's files. 
+& \begin{tabular}[c]{@{}l@{}}False\\Default: './runs'\end{tabular}                                                                        
+& String        \\ \hline
+\end{tabular}%
+}
+\caption{Manual transfer learning -- List of script options}
+\label{table:manual_transfer_learning_options}
 \end{table}
 
 
@@ -280,12 +334,8 @@ At the end of the transfer learning pipeline, a graph was generated for each met
 
 %\subsection{Transfer learning}
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Jobin \& Cl{\'e}ment}}Figures \ref{fig:tl_ds1_full} to \ref{fig:tl_ds4_full} show the performance of the model at each step of the transfer learning. Each graph displays the metric values achieved on the training and the validation set on the Y-axis, whereas the X-axis represents the number of epochs.
-Table \ref{table:tl_best_model_performance} summaries the performance of the best model on the validation and test sets at each step of the experiment. 
-Finally, Figure \ref{fig:tl_results_test_set} compares the performance of the model resulting from the first training to the one which underwent the transfer learning experiment. 
 
-\newpage 
-
-\begin{figure}[!h]
+\begin{figure}[H]
 \centering
 \noindent
 \makebox[\textwidth]{
@@ -295,7 +345,7 @@ Finally, Figure \ref{fig:tl_results_test_set} compares the performance of the mo
 \label{fig:tl_ds1_full}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
 \centering
 \noindent
 \makebox[\textwidth]{
@@ -305,7 +355,7 @@ Finally, Figure \ref{fig:tl_results_test_set} compares the performance of the mo
 \label{fig:tl_ds2_frozen}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
 \centering
 \noindent
 \makebox[\textwidth]{
@@ -315,7 +365,7 @@ Finally, Figure \ref{fig:tl_results_test_set} compares the performance of the mo
 \label{fig:tl_ds2_full}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
 \centering
 \noindent
 \makebox[\textwidth]{
@@ -325,7 +375,7 @@ Finally, Figure \ref{fig:tl_results_test_set} compares the performance of the mo
 \label{fig:tl_ds3_frozen}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
 \centering
 \noindent
 \makebox[\textwidth]{
@@ -335,7 +385,7 @@ Finally, Figure \ref{fig:tl_results_test_set} compares the performance of the mo
 \label{fig:tl_ds3_full}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
 \centering
 \noindent
 \makebox[\textwidth]{
@@ -345,7 +395,7 @@ Finally, Figure \ref{fig:tl_results_test_set} compares the performance of the mo
 \label{fig:tl_ds4_frozen}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[H]
 \centering
 \noindent
 \makebox[\textwidth]{
@@ -354,6 +404,9 @@ Finally, Figure \ref{fig:tl_results_test_set} compares the performance of the mo
 \caption{Transfer learning - DS4 Full}
 \label{fig:tl_ds4_full}
 \end{figure}
+
+\noindent Table \ref{table:tl_best_model_performance} summaries the performance of the best model on the validation and test sets at each step of the experiment. 
+Finally, Figure \ref{fig:tl_results_test_set} compares the performance of the model resulting from the first training to the one which underwent the transfer learning experiment. 
 
 
 \begin{table}[!t]
@@ -377,34 +430,35 @@ Finally, Figure \ref{fig:tl_results_test_set} compares the performance of the mo
 
 
 
-
 \section{Discussion}
 
 \subsection{Training}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}This transfer learning experiment was performed manually. This means that each step was run sequentially, each time tuning the hyperparameters (learning rate and dropout probability) to reach the best performance possible.
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}This transfer learning experiment was performed in a manual way. In other words, each step was run sequentially using the "Manual transfer learning" script (see Section \ref{sec:tl_script_options}). The learning rate and dropout probability were tuned by hand to reach the best performance possible.
 
-First of all, the best weight initialization among 200 random initializations was loaded and trained on the PROSTATEx dataset. With a learning rate of $1*10^{-8}$ and a dropout of $0.4$, the model learned genuine features in a smooth way (accuracy of $0.6340$ and AUC of $0.7359$ on the validation set). Obviously, the values are lower than the ones reached in Section \ref{sec:paper_reproduction_results} (accuracy of $0.7525$ and AUC of $0.765$) since the current experiment only uses DWI images. Hence, this model could only learn from one third of the information the first model had at disposal. Furthermore, the training and validation curves remained close during the whole experiment. This behavior indicates that the model actually learns features on the training set and generalizes well on new data (validation set), which is the best case scenario.
+\subsubsection{DS1}
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}First of all, the best initialization among 200 random initializations was loaded and trained on the PROSTATEx dataset. The best weight initialization is the one which achieved the best AUC on the PROSTATEx validation set. With a learning rate of $1*10^{-8}$ and a dropout of $0.4$, the model learned genuine features in a smooth way (accuracy of $0.6375$ and AUC of $0.7334$ on the validation set). Obviously, the values are lower than the ones reached in Section \ref{sec:paper_reproduction_results} (accuracy of $0.7525$ and AUC of $0.765$) since the current experiment only uses DWI images instead of stacked images (T2, DWI and ADC). Hence, this model could only learn from one third of the information the first model had at disposal. Furthermore, the training and validation curves remained close during the whole experiment. This behavior indicates that the model actually learns features on the training set and generalizes well on new data (validation set), which is the best-case scenario.
 
-Second, the first frozen training took place on the brain dataset. During the first epochs, the metrics remained low. For example, the accuracy was below $0.5$, which means that a model classifying the input randomly would have performed better. This was expected since the last layers were reset to new random initialization. In these early stages, the model was relying on a feature extractor capable of classifying prostate cancer and a new decision maker which did not have the time to adapt to the new task. Thanks to a learning rate of $1*10^{-7}$ and a dropout probability of $0.3$, the metrics started increasing early, reaching impressive values (accuracy of $0.7799$ and AUC of $0.8379$). Since the feature extractor is frozen, this behavior indicates that the features allowing to detect prostate cancer transfer well to brain cancer. Once more, the training and validation curves have the same shape for every metric, which implies a healthy learning process.
+\subsubsection{DS2}
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}The first frozen training took place on the brain dataset with a frozen version of the best model resulting from the previous step. During the first epochs, the metrics remained low. For example, the accuracy was below $0.575$ and the AUC below $0.5$, which means that a model classifying the input randomly could have performed better. This was expected since the last layers were reset to a new random initialization. In these early stages, the model was relying on a feature extractor capable of classifying prostate cancer. The new decision maker did not have the time to adapt to the new task and was classifying samples randomly. Thanks to a learning rate of $1*10^{-7}$ and a dropout probability of $0.3$, the metrics started increasing relatively fast, reaching impressive values (accuracy of $0.7498$ and AUC of $0.8483$). Since the feature extractor is frozen, this behavior indicates that the features allowing to detect prostate cancer transfer well to brain cancer. Once more, the training and validation curves have the same shape for every metric, which implies a healthy learning process.
 
 % Mention no reducelr ?
-Then, the full model was trained on the same dataset. The model resulting from the previous set was composed of decision maker trained on this dataset and a feature extractor resulting from the training on the prostate dataset (whose features seem to suit this dataset well). Therefore, the first metric values are already high. The rest of the training aimed at learning new useful features from the brain images, which could then be used for lung and prostate cancer classification. As expected, this step increased the metrics a bit (accuracy of $0.8233$ and AUC of $0.8566$).
+Second, the frozen layers were unfrozen and the full model was trained on the same dataset. The model resulting from the previous step is composed of a feature extractor resulting from the training on the prostate dataset (whose features seem to suit this dataset well) and a decision maker trained on this dataset. Therefore, the first metric values are already high. The rest of the training aimed at learning new useful features from the brain images, which could then be used for lung and prostate cancer classification. As expected, this step increased the metrics a bit (accuracy of $0.8172$ and AUC of $0.8596$).
 
-The model was then frozen again and trained on the third dataset composed of lung images. Here again, the metrics peaked early. This is partly due to the larger learning rate of $1*10^{-5}$ and to the common features that prostate, brain and lung cancers share. The metrics went not as high as for the brain dataset but still showed good signs of the usefulness of the prostate and brain features.
+\subsubsection{DS3}
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}The model was then frozen again and trained on the third dataset composed of lung images. Again, the metrics peaked early. This is partly due to the larger learning rate of $1*10^{-5}$ and to the common features that prostate, brain and lung cancers share. The metrics went not as high as for the brain dataset but still showed good signs of the usefulness of the prostate and brain features.
 
-The full training on the lung dataset went smoothly and allowed to increase the accuracy by $0.03$ and the AUC by $0.2$ before reaching stability.
+The full training on the lung dataset allowed to increase the accuracy by $0.06$ and the AUC by $0.1$ before reaching stability. Even with a small learning rate of $1*10^{-8}$, the optimal model was saved pretty early (at epoch 167 out of 2000). 
 
-Finally, the model was trained on the first dataset again. At the beginning of the frozen part, the last layers were not initialized randomly. In fact, the last layers coming from the model resulting from the training on the first dataset were used as last layers. Since these last layers were already trained on the same dataset, the improvement occuring during this training stemed from new features learned from the brain and lung datasets. Even with a large learning rate of $1*10^{-5}$, the curves went up slowly and regularly throughout the whole training. Therefore, the features acquired thanks to transfer learning are really helpful for the prostate cancer classification.
+\subsubsection{DS4}
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}Finally, the model was trained on the first dataset again. At the beginning of this frozen part, the last layers were not reset randomly. In fact, the last layers coming from the model resulting from the training on the first dataset were used as last layers. Since these last layers had already been trained on the same dataset, the improvement occuring during this training stemed from new features learned from the brain and lung datasets. With a large learning rate of $1*10^{-5}$, the curves went up quickly at the beginning, then slowly and regularly until the completion of the training. The initial spike and the progressive increase following it show that the low-level features acquired thanks to transfer learning are helpful for prostate cancer classification.
 
-Regarding the full training, the curves contain quite some noise with a already small learning rate of $1*10^{-9}$. An even smaller learning rate of $1*10^{-10}$ was tested and it turned out to be too small since the training and validation curves were completely flat from the beginning to the end. Here, the validation curves show an improvement during the first 50 epochs approximately, before going down while the training metrics keeps increasing. At this point, the model reached its optimum. Moreover, the fact that the validation metrics are much higher than the training ones with a dropout probability of 0.0 indicates that the model generalizes well thanks to transfer learning. 
+Regarding the full training, the curves contain quite some noise with an already small learning rate of $1*10^{-9}$. An even smaller learning rate of $1*10^{-10}$ was tested out but it turned out to be too small since the training and validation curves were completely flat from the beginning to the end. The noise is also very visible on specific graphs such as the precision and specificity since the Y-axis scale is small. During this last part of the transfer learning, the validation metrics improved during the first 50 epochs approximately, before gently going down as the training metrics kept increasing. At this point, the model reached its optimum. Moreover, the fact that the validation metrics are much higher than the training ones with a dropout probability of 0.0 indicates that the model generalizes well. 
 
 
 \subsection{Visualization of the impact of the various datasets on the target task}
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}Figure \ref{fig:tl_global_validation_auc} shows the evolution of the AUC on the validation set of PROSTATEx. As expected, the first training on PROSTATEx generated the same curve as on Figure \ref{fig:tl_ds1_full}. The latter looks steeper because of the difference in the X-axis scale.
 
-Moreover, the frozen training on the second dataset (as well as the other frozen trainings) shows a flat line. Reason for that is that the feature extractor and the decision maker do not change here. In fact, the former is frozen and the latter is always the same. As the decision maker is the one coming from the best model of the first training according to the validation AUC, the flat line is as high as the best validation AUC value reached during the first training.
-
-Furthermore, the full training curve shows that brain cancer features are actually helpful. If they were not, the metric would not have increased as fast and would not have reached such values.
+Moreover, the frozen training on the second dataset (as well as the other frozen trainings) shows a flat line. Reason for that is that the feature extractor and the decision maker do not change here. In fact, the former is frozen and the latter is always the same. As the decision maker is the one coming from the best model of the first training according to the validation AUC, the flat line is as high as the best validation AUC value reached during the first training. Furthermore, the full training curve shows that brain cancer features are actually helpful. If they were not, the metric would not have increased as fast and would not have reached such values.
 
 During the full training on the lung dataset, the AUC starts at a high value after the first epoch. The combination of the prostate, brain and lung features seem to help the model generalize. This hypothesis is confirmed by the values reached during last training on the prostate dataset. In fact, the AUC value is higher than the one reached during the first training. Interestingly, the curve starts high, improves for 50 epochs and starts decreasing. This implies that the model reached a high level of generalization during transfer learning. These 50 epochs were enough to keep the low level features learned thanks to the other datasets while adapting the model to the target task again. 
 
@@ -425,15 +479,40 @@ During the full training on the lung dataset, the AUC starts at a high value aft
 \centering
 \noindent
 \makebox[\textwidth]{
-\includegraphics[width=1\textwidth, keepaspectratio=true]{./figures/tl_global_validation_auc.png}
+\includegraphics[width=1.1\textwidth, keepaspectratio=true]{./figures/tl_global_validation_auc.png}
 }
-\caption{Transfer learning - Global Performance - Validation AUC}
+\caption{Transfer learning -- Global Performance -- Validation AUC}
 \label{fig:tl_global_validation_auc}
 \end{figure}
 
+\begin{figure}[!h]
+\centering
+\noindent
+\makebox[\textwidth]{
+\includegraphics[width=1.1\textwidth, keepaspectratio=true]{./figures/tl_global_validation_accuracy.png}
+}
+\caption{Transfer learning -- Global Performance -- Validation accuracy}
+\label{fig:tl_global_validation_accuracy}
+\end{figure}
 
-\subsection{Testing}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}To test the effectiveness of this transfer learning pipeline, the performance of the model before and after transfer learning was compared. Figure \ref{fig:tl_results_test_set} summarizes the various metrics. To obtain these numbers, both models were tested on our test set which has never been seen by the model before. The transfer learning allowed to increase every single metric. First, the AUC increased by approximately 10\%, going from $0.68$ to $0.77$. The recall went from $0.5$ to $0.75$. Both metrics are key metrics in a medical context. In fact, classifying a positive case as negative is far worse than the opposite. Hence, maximizing the AUC (which is an indicator of how well the model is able to differentiate each class) and the recall (which shows how many positive cases have been correctly detected by the model). Apart from these metrics, the accuracy gained around 10\% ($0.68$ to $0.74$). 
+\begin{figure}[!h]
+\centering
+\noindent
+\makebox[\textwidth]{
+\includegraphics[width=1.1\textwidth, keepaspectratio=true]{./figures/tl_global_validation_f1score.png}
+}
+\caption{Transfer learning -- Global Performance -- Validation f1-score}
+\label{fig:tl_global_validation_f1score}
+\end{figure}
+
+
+\subsection{Performance on the test set}
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}To test the effectiveness of this transfer learning pipeline, the performance of the model before and after transfer learning was compared. Figure \ref{fig:tl_results_test_set} summarizes the various metrics. To obtain these numbers, both models were tested on our test set composed of 19 samples which have never been seen by the model before. The "enhanced prediction" technique proposed by Song et al.~\cite{07} was applied. As a reminder, the 19 test samples were augmented 11 times following the usual augmentation process (see Section \ref{sec:tl_data_processing}). The model predicted a value for each of the 11 versions of a sample. These values were then averaged. 
+
+As explained in Section \ref{sec:tl_goal}, the primary goal of this technique was to increase the AUC as much as possible, as it evaluates how well the model can distinguish between classes. The transfer learning allowed to increase the AUC increased by approximately 18\%, going from $0.68$ to $0.80$. Armato. et al. \cite{42} stated that a less-experienced human radiologist can reach an AUC of $0.81$ and an expert an AUC of $0.91$. This performance indicates that the model was able to learn low-level features from each body part in order to generalize. Hence, the goal of a creating a robust enough model which can serve as a second diagnosis for radiologists is reached. 
+
+Regarding the other metrics, the values stayed the same. The reason for that is that the AUC is computed using exact predictions (float values $\in [0.0,1.0]$ expressing the probability that a sample belongs to the positive class), whereas the other metrics are based on class predictions (either 0 or 1). In other words, the model made the same predictions but its predictions were a lot more distinct and trustworthy. The fact that this test set is relatively small can play a role in this outcome since the validation metrics were far better during the last training on PROSTATEx than during the first one (for instance, the validation accuracy went from $0.6375$ to $0.7749$ when the best model was saved, which is clearly visible on Figures \ref{fig:tl_global_validation_auc}, \ref{fig:tl_global_validation_accuracy} and \ref{fig:tl_global_validation_f1score} when comparing "DS1{\_}Full" with "DS4{\_}Full"). 
+
 
 
 \begin{figure}[!h]
@@ -448,5 +527,5 @@ During the full training on the lung dataset, the AUC starts at a high value aft
 
 
 \subsection{Conclusion}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}This transfer learning approach using frozen and unfrozen parts allowed to increase the performance of the model up to 10\% depending on the metric. Moreover, it also increased the generalization ability of the model by learning features coming from different body parts. This makes the model more robust and more likely to classify new unseen data well. These improvements are a huge step forward in a field where the nonavailability of data is a real obstacle that prevents deep learning-based cancer classification systems from making a major breakthrough.
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}This transfer learning approach using frozen and unfrozen parts allowed to increase the AUC of the model by 15\%. It increased the generalization ability of the model by learning features coming from different body parts. This makes the model more robust and more likely to classify new unseen data well. As this model reached an AUC ($0.80$) similar to the one a less-experienced radiologist can aim for ($0.81$), it could be used as a second diagnosis. These improvements are a step forward in a field where the nonavailability of data is a real obstacle that prevents deep learning-based cancer classification systems from making a major breakthrough. 
 
