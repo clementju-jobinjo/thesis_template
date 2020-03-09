@@ -522,7 +522,7 @@ The way these three sets are split mostly depends on the number of samples avail
 
 \subsection{Weight initialization}
 \label{weight_initialization}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Jobin}}Before training a neural network, the weights have to be initialized in order to proceed to the first forward propagation. The initialization of the neural network weights is crucial since it will determine how quickly the network converges to an optimum. The idea behind weight initialization is to generate an initialization that "prevents layer activation outputs from exploding or vanishing during the course of a forward pass through a deep neural network. If either occurs, loss gradients will either be too large or too small to flow backwards beneficially, and the network will take longer to converge, if it is even able to do so at all"~\cite{27}.
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Jobin}}Before training a neural network, the weights have to be initialized in order to proceed to the first forward propagation. The initialization of the neural network weights is crucial since it will determine how quickly the network converges to an optimum. According to James Dellinger, the idea behind weight initialization is to generate an initialization that "prevents layer activation outputs from exploding or vanishing during the course of a forward pass through a deep neural network. If either occurs, loss gradients will either be too large or too small to flow backwards beneficially, and the network will take longer to converge, if it is even able to do so at all"~\cite{27}.
 
 The simplest and least efficient technique to initialize neural network weights is to randomly generate them. The major problem of this technique comes from the fact that some initializations can lead to extremely small or big values, which lead to value near 0 or 1 for most activation functions. Consequently, the slope of the gradient changes slowly and the learning process takes a lot of time.\\
 To prevent this effect when the tanh activation function is used, "Xavier initialization" multiplies the random initialization by the fraction:
@@ -563,7 +563,7 @@ To perform a convolution, numerical input data and a "filter" are required. A fi
 \end{gathered}
 \end{equation}
 
-\noindent The output of the entire convolution shows negative values in the outside parts and large positive values in the center. This means that the $3x3$ filter detected a vertical line in the center of the input image. 
+\noindent The output of the entire convolution shows negative values in the outside parts and large positive values in the center. This means that the $3x3$ filter detected a vertical line in the center of the input image. Like other parameters, filters are learned while training. 
 
 \begin{figure}[!h]
 \centering
@@ -590,7 +590,7 @@ To perform a convolution, numerical input data and a "filter" are required. A fi
 
 
 \section{Transfer learning}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Jobin}}According to Jason Brownlee, "transfer learning is a machine learning method where a model developed for a task is reused as the starting point for a model on a second task"~\cite{30}. The model dedicated to the second task uses some or all parts of the first model (i.e. keeps the same weights and architecture or a part of them) and is then retrained on data available for this task. The first model can either be implemented from scratch if enough data is available or it can simply be downloaded from institutions that release large pretrained models for similar tasks. There are three major benefits~\cite{30}:
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Jobin}}According to Jason Brownlee, "transfer learning is a machine learning method where a model developed for a task is reused as the starting point for a model on a second task"~\cite{30}. The model dedicated to the second task uses some or all parts of the first model (i.e. keeps the same weights and architecture or a part of them) and is then retrained on data available for this task. The first model can either be implemented from scratch if enough data is available or downloaded from institutions that release large pretrained models for similar tasks. Transfer learning provides three major benefits~\cite{30}:
 \begin{itemize}
 \item Higher start: The initial skill (before refining the model) on the source model is higher than it otherwise would be.
 \item Higher slope: The rate of skill improvement during training of the source model is steeper than it otherwise would be.
