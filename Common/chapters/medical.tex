@@ -117,7 +117,7 @@ where~$c$ is the window center,~$w$ window width, ~$P$ the pixel input value, ~$
 
 \section{NIfTI file format}
 \subsection{Origin}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Jobin}}The Neuroimaging Informatics Technology Initiative (NIfTI) file format is the successor of the ANALYZE file format. The main problem of the latter was that it was lacking information about orientation in space. Therefore, the interpretation of stored data could be problematic and inconsistent. For instance, there was a real confusion to determine the left and right sides of brain images. Hence, the NIfTI file format was defined to overcome this major issue.
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Jobin}}The Neuroimaging Informatics Technology Initiative (NIfTI) file format is the successor of the ANALYZE file format. The main problem of the latter was a lack of information about orientation in space. Therefore, the interpretation of stored data could be problematic and inconsistent. For instance, there was a real confusion to determine the left and right sides of brain images. Hence, the NIfTI file format was defined to overcome this major issue.
 
 
 \subsection{Data format}
@@ -138,7 +138,7 @@ where~$c$ is the window center,~$w$ window width, ~$P$ the pixel input value, ~$
 
 
 \subsection{DICOM}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}Visualizing DICOM files is pretty straightforward since each file represents a single two-dimensional image. However, a lot of pixel transformations and normalizations have to be applied to obtain the desired result (see Section \ref{sec:dicom_data_manipulation}), which may be a source of errors. Our tool allows to display a single DICOM file as well as a sequence of files if the function is fed with a directory. Users can then scroll through the Z-axis, displaying the next or previous slice.  Figure \ref{fig:visualize_lung_dcm} shows the visualization of a lung at three different Z-axis coordinates. This allows the user to have a complete overview of the body part he wants to analyze.
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}Visualizing DICOM files is pretty straightforward since each file represents a single two-dimensional image. However, a lot of pixel transformations and normalizations have to be applied to obtain the desired result (see Section \ref{sec:dicom_data_manipulation}), which may be a source of errors. Our tool allows to display a single DICOM file as well as a sequence of files if the function is fed with a directory. Users can then scroll through the z-axis, displaying the next or previous slice.  Figure \ref{fig:visualize_lung_dcm} shows the visualization of a lung at three different z-axis coordinates. This allows the user to have a complete overview of the body part he wants to analyze.
 
 \begin{figure}[!h]
 \centering
@@ -160,7 +160,7 @@ where~$c$ is the window center,~$w$ window width, ~$P$ the pixel input value, ~$
 
 
 \subsection{RAW}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}Medical RAW files are three-dimensional, which means that a single file contains a volume, i.e. a succession of 2D slices. Scrolling with the mouse goes through slices over a specific axis. Like the NIfTI file format, the user can profit from the three-dimensionality by displaying the body part under three different perspectives. This tool was particularly useful since no free software capable of handling these files was available. Photography-related programs such as Photoshop can open RAW pictures but not these three-dimensional ones. 
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}Medical RAW files are three-dimensional, which means that a single file contains a volume, i.e. a succession of 2D slices. Scrolling with the mouse goes through slices over a specific axis. Like the NIfTI file format, the user can profit from the three-dimensionality by displaying the body part under three different perspectives. This tool is particularly useful as no free software capable of handling these files is available. Photography-related programs such as Photoshop can open RAW pictures but not these three-dimensional ones. 
 
 \begin{figure}[!h]
 \centering
@@ -171,7 +171,7 @@ where~$c$ is the window center,~$w$ window width, ~$P$ the pixel input value, ~$
 
 
 \section{Conversion to PNG}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}In addition to the visualization tools, libraries allowing to convert medical files into PNG files were developed. The main one is called "anydatasettopng" and is the one to use to convert any file format to PNG as it makes use of the others. Given a root directory, it scans the latter and its subdirectories to find all DICOM, NIfTI and RAW/MHD files. Then, each file is converted to PNG and saved into the same directory as the one it came from. This library allows to keep an easily accessible visual representation of medical files without having to rely on a specific piece of software to display them. Finally, it also played the role of a debugging tool since the conversion techniques are the same as the ones used further in this work. 
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}In addition to the visualization tools, scripts allowing to convert medical files into PNG files were developed. The main one is called "anydatasettopng" and is the one to use to convert any file format to PNG as it makes use of the others. Given a root directory, it scans the latter and its subdirectories to find all DICOM, NIfTI and RAW/MHD files. Then, each file is converted to PNG and saved into the same directory as the one it came from. This script allows to keep an easily accessible visual representation of medical files without having to rely on a specific piece of software to display them. Finally, it also played the role of a debugging tool since the conversion techniques are the same as the ones used further in this work. 
 
 
 \subsection{8-bit conversion}
