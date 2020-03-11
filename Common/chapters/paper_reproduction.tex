@@ -233,7 +233,7 @@ In this experiment, Tensorboard is mainly used to plot Matplotlib figures of the
 
 
 \subsubsection{Experimental setup}
-
+\label{sec:paper_reproduction_experimental_setup}
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Jobin}}Keeping the exact same hyperparameters as the original paper led the experiment to disappointing results. Consequently, new hyperparameters had to be found. A grid search approach driven by the AUC obtained on the test set (the one built for the experiment, not the one of the challenge) was chosen. In practical terms, this consisted in trying multiple combinations of hyperparameters and keeping the one that produced the best AUC on this test set. At the end of this process, it appeared that the best model was obtained when the data was organized in batches of 32 samples, with an initial learning rate of $1*10^{-7}$, a learning rate scheduler on plateau using a factor of 100 with a patience of 2 (the learning rate is divided by 100 when the validation AUC decreases for two consecutive epochs) and a dropout rate of 0.2. Note that the model was initialized picking the best one among 200 models generated from a roulette maximizing the AUC. This model was implemented with PyTorch using the Adam optimizer to update its weights and was trained on an Nvidia GeForce GTX Titan X graphics card during approximately 3 hours.\\
 
 \subsection{Training verification}
