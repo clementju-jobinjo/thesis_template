@@ -352,7 +352,7 @@ KOMA-script documentation for details.}]{fancyhdr}
 		\addchap*{\abstractname}%
 		{\chapteralign\normalsize\abstractauthorfont \href{mailto:julienclement22@gmail.com}{Julien Cl{\'e}ment}, \href{mailto:joh.job13@gmail.com}{Johan Jobin} \par}% Author name
 		\vspace{\baselineskip}
-		{\chapteralign\parbox{.7\linewidth}{\chapteralign\normalsize\itshape\abstracttitlefont Prostate Cancer Classification: A Freeze/Unfreeze Transfer Learning Approach Using Multiple Body Parts
+		{\chapteralign\parbox{.7\linewidth}{\chapteralign\normalsize\itshape\abstracttitlefont Prostate Cancer Classification: A Transfer Learning Approach to Integrate Information From Diverse Body Parts
 }\par}% Thesis title
 		\bigskip\noindent\ignorespaces
 	}%
