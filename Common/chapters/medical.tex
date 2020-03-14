@@ -26,7 +26,7 @@ Healthy cells replication is limited to a certain amount, which is not the case 
 
 
 \subsection{Seriousness}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}Most cancers can be staged thanks to the TNM system. The T corresponds to the tumor size and its location; the N corresponds to whether or not the tumor has spread to draining lymph nodes; the M corresponds to the presence or absence of metastases in other parts of the body~\cite{21}. These pieces of information are used to classify cancer between four (I to IV) or sometimes five (0 to IV) different stages, reflecting the progression and the seriousness of the illness~\cite{22}. The earlier they are detected, the higher the chances of recovery are. This aspect makes cancer detection critical since every misjudgment can threaten someone's life. 
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}Most cancers can be staged thanks to the TNM system. The T corresponds to the tumor size and its location; the N corresponds to whether or not the tumor has spread to draining lymph nodes; the M corresponds to the presence or absence of metastases in other parts of the body~\cite{21}. These pieces of information are used to classify cancer between four (I to IV) or sometimes five (0 to IV) different stages, reflecting the progression and the seriousness of the illness~\cite{22}. The earlier they are detected, the higher the chances of recovery are. This aspect makes cancer detection critical as every misjudgment can threaten someone's life. 
 
 
 \section{Types of medical imaging}
@@ -53,7 +53,7 @@ Unlike MRI, CT is based on X-rays instead of magnetic fields, but still provides
 \subsection{Data format}
 \setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}DICOM files can be viewed as containers of attributes, also called tags. The values of the pixels themselves are stored under the "Pixel Data" tag. Every single DICOM file usually represents a 2-dimensional image, which will form a 3-dimensional volume when put all together.
 
-Other useful information such as the patient name and ID is directly stored within the DICOM files. This approach aims at linking each image to a specific person and event in order not to mix them up. Each DICOM file can be seen as part of a bigger dataset. 
+Other useful information such as the patient's name and ID is directly stored within DICOM files. This approach aims at linking each image to a specific person and event in order not to mix them up. Each DICOM file can be seen as part of a bigger dataset. 
 
 
 \subsection{Processing images}
@@ -111,7 +111,7 @@ If they are missing, a simple conversion is sufficient. The parameters used to c
 \textrm{else } y = (\frac{P - (c - 0.5)}{w-1}) + 0.5) * (y_{max} - y_{min}) + y_{min}
 \end{equation}
 
-where~$c$ is the window center,~$w$ window width, ~$P$ the pixel input value, ~$y$ the pixel output value, ~$y_{min}$ the minimal value of the output range (usually 0), ~$y_{max}$ the maximal value of the output range (usually 255). Equations \ref{eq:dicom1}, \ref{eq:dicom2} and \ref{eq:dicom3} ensure that the pixel values are correctly distributed within the output range. 
+where~$c$ is the window center,~$w$ window width, ~$P$ the pixel input value, \mbox{$y$ the} pixel output value, ~$y_{min}$ the minimal value of the output range (usually 0), ~$y_{max}$ the maximal value of the output range (usually 255). Equations \ref{eq:dicom1}, \ref{eq:dicom2} and \ref{eq:dicom3} ensure that the pixel values are correctly distributed within the output range. 
 \end{enumerate}
 
 
@@ -121,7 +121,7 @@ where~$c$ is the window center,~$w$ window width, ~$P$ the pixel input value, ~$
 
 
 \subsection{Data format}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Jobin}}Unlike the ANALYZE format that used two files to store the metadata and the actual data, the NIfTI file format stores them in one single “.nii” file, but keeps this split between the real data and the header for compatibility. This has the advantage to facilitate the use of the data and avoid storing the data without the metadata. The NIfTI format can also be compressed/decompressed on the fly using the “deflate” algorithm. A. M. Winkler affirms that this is particularly useful as "it is very common for images to have large areas of solid background, or files describing masks and regions of interest containing just a few unique values that appear repeated many time"~\cite{52}.
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Jobin}}Unlike the ANALYZE format that used two files to store the metadata and the actual data, the NIfTI file format stores them in one single “.nii” file, but keeps this split between the real data and the header for compatibility. This has the advantage to facilitate the use of the data and avoid storing the data without the metadata. The NIfTI format can also be compressed/decompressed on the fly using the “deflate” algorithm. A. M. Winkler affirms that this is particularly useful as "it is very common for images to have large areas of solid background, or files describing masks and regions of interest containing just a few unique values that appear repeated many times"~\cite{52}.
 
 
 \subsection{Overview of the header structure}
@@ -138,7 +138,7 @@ where~$c$ is the window center,~$w$ window width, ~$P$ the pixel input value, ~$
 
 
 \subsection{DICOM}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}Visualizing DICOM files is pretty straightforward since each file represents a single two-dimensional image. However, a lot of pixel transformations and normalizations have to be applied to obtain the desired result (see Section \ref{sec:dicom_data_manipulation}), which may be a source of errors. Our tool allows to display a single DICOM file as well as a sequence of files if the function is fed with a directory. Users can then scroll through the z-axis, displaying the next or previous slice.  Figure \ref{fig:visualize_lung_dcm} shows the visualization of a lung at three different z-axis coordinates. This allows the user to have a complete overview of the body part he wants to analyze.
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}Visualizing DICOM files is pretty straightforward since each file represents a single two-dimensional image. However, a lot of pixel transformations and normalizations have to be applied to obtain the desired result (see Section \ref{sec:dicom_data_manipulation}), which may be a source of errors. Our tool allows to display a single DICOM file as well as a sequence of files if the function is fed with a directory. Users can then scroll through the z-axis, displaying the next or previous slice.  Figure \ref{fig:visualize_lung_dcm} shows the visualization of a lung CT scan at three different z-axis coordinates. This allows the user to have a complete overview of the body part he wants to analyze.
 
 \begin{figure}[!h]
 \centering
