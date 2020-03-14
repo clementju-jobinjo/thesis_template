@@ -453,7 +453,7 @@ Regarding the full training, the curves contain quite some noise with an already
 
 
 \subsection{Visualization of the impact of the various datasets on the target task}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}Figure \ref{fig:tl_global_validation_auc} shows the evolution of the AUC on the validation set of PROSTATEx. As expected, the first training on PROSTATEx generated the same curve as on Figure \ref{fig:tl_ds1_full}. The latter looks steeper because of the difference in the x-axis scale.
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}\mbox{Figure \ref{fig:tl_global_validation_auc}} shows the evolution of the AUC on the validation set of PROSTATEx. As expected, the first training on PROSTATEx generated the same curve as on \mbox{Figure \ref{fig:tl_ds1_full}}. The latter looks steeper because of the difference in the x-axis scale.
 
 Moreover, the frozen training on the second dataset (as well as the other frozen trainings) shows a flat line. Reason for that is that the feature extractor and the decision maker do not change here. In fact, the former is frozen and the latter is always the same. As the decision maker is the one coming from the best model of the first training according to the validation AUC, the flat line is as high as the best validation AUC value reached during the first training. Furthermore, the full training curves show that brain cancer features are actually helpful. If they were not, the metrics would not have increased as fast and would not have reached higher values than the ones reached at DS1 Full.
 
