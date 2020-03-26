@@ -144,7 +144,7 @@ Like PROSTATEx (see Section \ref{sec:dataProcessingVerification}), images with r
 
 \section{Transfer learning implementation}
 \subsection{Layer freezing}
-\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}After each dataset switch, the model is first trained with freezed layers. The freezed layers are those considered as feature extractor, i.e. the first layers of the model. The exact point where the model is split is right after the convolutions. To perform this freezing, multiple steps are required:
+\setlength{\marginparwidth}{3cm}\leavevmode \marginnote{\textbf{Cl{\'e}ment}}After each dataset switch, the model is first trained with frozen layers. The frozen layers are those considered as feature extractor, i.e. the first layers of the model. The exact point where the model is split is right after the convolutions. To perform this freezing, multiple steps are required:
 \begin{enumerate}
 	\item Reset the last layers. To achieve this, an instance of the model is created by loading the state dictionary of the previous one, before replacing the module containing the last layers with a new instance (i.e. a new initialization). 
 	\item Iterate over the batch normalization layers and freeze them. Step 3 is not sufficient to freeze batch normalization layers. In an implementation based on PyTorch, this can be achieved by calling \textit{module.eval()} on each module containing such layers (after the \textit{model.train()} call). 
